@@ -24,12 +24,14 @@
 
 package som.vmobjects;
 
+import com.oracle.truffle.api.interop.TruffleObject;
+
 import som.interpreter.Frame;
 import som.interpreter.Interpreter;
 import som.vm.Universe;
 
 
-public abstract class SAbstractObject {
+public abstract class SAbstractObject implements TruffleObject {
 
   public abstract SClass getSOMClass(Universe universe);
 
