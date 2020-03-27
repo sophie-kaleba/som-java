@@ -158,7 +158,7 @@ GRAAL_JAVA_9_FLAGS = [
        TRUFFLE_DIR + '/truffle/mxbuild/modules/com.oracle.truffle.truffle_api.jar',
   '--upgrade-module-path=' + TRUFFLE_DIR + '/compiler/mxbuild/modules/jdk.internal.vm.compiler.jar']
 
-SOM_ARGS = ['som.vm.Universe', '-cp Smalltalk']
+SOM_ARGS = ['som.Launcher', '-cp Smalltalk']
 
 # == Compiler Settings
 TWEAK_INLINING = ['-Dgraal.TruffleCompilationThreshold=191',
