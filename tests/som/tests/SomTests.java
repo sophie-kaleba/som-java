@@ -30,6 +30,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
+import som.GraalSOMLanguage;
 import som.compiler.ProgramDefinitionError;
 import som.vm.Universe;
 
@@ -81,7 +82,9 @@ public class SomTests {
     String[] args = {"-cp", "Smalltalk", "TestSuite/TestHarness.som", testName};
 
     // Create Universe
-    Universe u = new Universe(true);
+    //Universe u = new Universe(true);
+    //TODO - see if relevant
+    Universe u = GraalSOMLanguage.getCurrentContext();
 
     // Start interpretation
     u.interpret(args);
