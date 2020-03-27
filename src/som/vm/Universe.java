@@ -34,6 +34,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.StringTokenizer;
 
+import com.oracle.truffle.api.TruffleLanguage;
+import com.oracle.truffle.api.object.Layout;
+
+import som.GraalSOMLanguage;
 import som.compiler.Disassembler;
 import som.compiler.ProgramDefinitionError;
 import som.compiler.SourcecodeCompiler;
@@ -53,21 +57,34 @@ import som.vmobjects.SString;
 import som.vmobjects.SSymbol;
 
 
-public class Universe {
+public final class Universe {
 
-  public static void main(final String[] arguments) {
-    // Create Universe
-    Universe u = new Universe();
+  static final Layout LAYOUT = Layout.createLayout();
 
-    // Start interpretation
-    try {
-      u.interpret(arguments);
-    } catch (ProgramDefinitionError e) {
-      u.errorExit(e.toString());
-    }
+  private final TruffleLanguage.Env env;
+  private final GraalSOMLanguage language;
+  public SAbstractObject systemObject;
 
-    // Exit with error code 0
-    u.exit(0);
+  public Universe(final TruffleLanguage.Env env, final GraalSOMLanguage language) {
+    this.env = env;
+    this.language = language;
+    this.interpreter = new Interpreter(this);
+    this.symbolTable = new HashMap<String, SSymbol>();
+    this.avoidExit = false;
+    current = this;
+    this.lastExitCode = 0;
+    this.systemObject = null;
+  }
+
+  /**
+   * Return the current Truffle environment.
+   */
+  public TruffleLanguage.Env getEnv() {
+    return env;
+  }
+
+  public static Universe getCurrent() {
+    return GraalSOMLanguage.getCurrentContext();
   }
 
   public SAbstractObject interpret(String[] arguments) throws ProgramDefinitionError {
@@ -83,23 +100,6 @@ public class Universe {
     fileSeparator = System.getProperty("file.separator");
   }
 
-  public Universe() {
-    this.interpreter = new Interpreter(this);
-    this.symbolTable = new HashMap<String, SSymbol>();
-    this.avoidExit = false;
-    this.lastExitCode = 0;
-
-    current = this;
-  }
-
-  public Universe(final boolean avoidExit) {
-    this.interpreter = new Interpreter(this);
-    this.symbolTable = new HashMap<String, SSymbol>();
-    this.avoidExit = avoidExit;
-    this.lastExitCode = 0;
-
-    current = this;
-  }
 
   public static Universe current() {
     return current;
@@ -127,7 +127,7 @@ public class Universe {
     exit(1);
   }
 
-  private String[] handleArguments(String[] arguments) {
+  public String[] handleArguments(String[] arguments) {
     boolean gotClasspath = false;
     String[] remainingArgs = new String[arguments.length];
     int cnt = 0;
@@ -180,7 +180,7 @@ public class Universe {
   private String[] getPathClassExt(final String arg) {
     // Create a new tokenizer to split up the string of dirs
     StringTokenizer tokenizer = new StringTokenizer(arg,
-        fileSeparator, true);
+            fileSeparator, true);
 
     String cp = "";
 
@@ -210,7 +210,7 @@ public class Universe {
   public void setupClassPath(final String cp) {
     // Create a new tokenizer to split up the string of directories
     StringTokenizer tokenizer = new StringTokenizer(cp,
-        pathSeparator);
+            pathSeparator);
 
     // Get the default class path of the appropriate size
     classPath = setupDefaultClassPath(tokenizer.countTokens());
@@ -249,7 +249,7 @@ public class Universe {
     println("                                                         ");
     println("where options include:                                   ");
     println("    -cp <directories separated by " + pathSeparator
-        + ">");
+            + ">");
     println("                  set search path for application classes");
     println("    -d            enable disassembling");
 
@@ -267,14 +267,14 @@ public class Universe {
    * @throws ProgramDefinitionError
    */
   public SAbstractObject interpret(final String className,
-      final String selector) throws ProgramDefinitionError {
+                                   final String selector) throws ProgramDefinitionError {
     initializeObjectSystem();
 
     SClass clazz = loadClass(symbolFor(className));
 
     // Lookup the initialize invokable on the system class
     SMethod initialize =
-        (SMethod) clazz.getSOMClass(this).lookupInvokable(symbolFor(selector));
+            (SMethod) clazz.getSOMClass(this).lookupInvokable(symbolFor(selector));
 
     if (initialize == null) {
       throw new RuntimeException("Lookup of " + className + ">>#" + selector + " failed");
@@ -301,20 +301,20 @@ public class Universe {
     SArray argumentsArray = newArray(arguments);
 
     return interpretMethod(systemObject, initialize,
-        argumentsArray);
+            argumentsArray);
   }
 
   private SMethod createBootstrapMethod() {
     // Create a fake bootstrap method to simplify later frame traversal
     SMethod bootstrapMethod =
-        newMethod(symbolFor("bootstrap"), 1, 0, newInteger(0), newInteger(2), null);
+            newMethod(symbolFor("bootstrap"), 1, 0, newInteger(0), newInteger(2), null);
     bootstrapMethod.setBytecode(0, HALT);
     bootstrapMethod.setHolder(systemClass);
     return bootstrapMethod;
   }
 
-  private SAbstractObject interpretMethod(final SAbstractObject receiver,
-      final SInvokable invokable, final SArray arguments) throws ProgramDefinitionError {
+  public SAbstractObject interpretMethod(final SAbstractObject receiver,
+                                         final SInvokable invokable, final SArray arguments) throws ProgramDefinitionError {
     SMethod bootstrapMethod = createBootstrapMethod();
 
     // Create a fake bootstrap frame with the system object on the stack
@@ -332,7 +332,7 @@ public class Universe {
     return interpreter.start();
   }
 
-  private SAbstractObject initializeObjectSystem() throws ProgramDefinitionError {
+  public SAbstractObject initializeObjectSystem() throws ProgramDefinitionError {
     // Allocate the nil object
     nilObject = new SObject(null);
 
@@ -409,6 +409,7 @@ public class Universe {
 
     setGlobal(trueSymbol, trueClass);
     setGlobal(falseSymbol, falseClass);
+    this.systemObject = systemObject;
     return systemObject;
   }
 
@@ -455,7 +456,7 @@ public class Universe {
   }
 
   public SBlock newBlock(final SMethod method, final Frame context, final int arguments)
-      throws ProgramDefinitionError {
+          throws ProgramDefinitionError {
     // Allocate a new block and set its class to be the block class
     SBlock result = new SBlock(method, context, getBlockClass(arguments));
     return result;
@@ -471,14 +472,14 @@ public class Universe {
   }
 
   public Frame newFrame(final Frame previousFrame, final SMethod method,
-      final Frame context) {
+                        final Frame context) {
 
     // Compute the maximum number of stack locations (including arguments,
     // locals and extra buffer to support doesNotUnderstand) and set the number
     // of indexable fields accordingly
     long length = method.getNumberOfArguments()
-        + method.getNumberOfLocals().getEmbeddedInteger()
-        + method.getMaximumNumberOfStackElements().getEmbeddedInteger() + 2;
+            + method.getNumberOfLocals().getEmbeddedInteger()
+            + method.getMaximumNumberOfStackElements().getEmbeddedInteger() + 2;
 
     Frame result = new Frame(nilObject, previousFrame, context, method, length);
 
@@ -491,18 +492,18 @@ public class Universe {
   }
 
   public SMethod newMethod(final SSymbol signature, final int numberOfBytecodes,
-      final int numberOfLiterals, final SInteger numberOfLocals,
-      final SInteger maxNumStackElements, final List<SAbstractObject> literals) {
+                           final int numberOfLiterals, final SInteger numberOfLocals,
+                           final SInteger maxNumStackElements, final List<SAbstractObject> literals) {
     // Allocate a new method and set its class to be the method class
     SMethod result = new SMethod(nilObject, signature, numberOfBytecodes,
-        numberOfLocals, maxNumStackElements, numberOfLiterals, literals);
+            numberOfLocals, maxNumStackElements, numberOfLiterals, literals);
     return result;
   }
 
   public SObject newInstance(final SClass instanceClass) {
     // Allocate a new instance and set its class to be the given class
     SObject result = new SObject(instanceClass.getNumberOfInstanceFields(),
-        nilObject);
+            nilObject);
     result.setClass(instanceClass);
 
     // Return the freshly allocated instance
@@ -568,7 +569,7 @@ public class Universe {
   }
 
   public void initializeSystemClass(final SClass systemClass, final SClass superClass,
-      final String name) {
+                                    final String name) {
     // Initialize the superclass hierarchy
     if (superClass != null) {
       systemClass.setSuperClass(superClass);
@@ -623,7 +624,7 @@ public class Universe {
     // Compute the name of the block class with the given number of
     // arguments
     SSymbol name = symbolFor("Block"
-        + Integer.toString(numberOfArguments));
+            + Integer.toString(numberOfArguments));
 
     // Lookup the specific block class in the dictionary of globals and
     // return it
@@ -636,7 +637,7 @@ public class Universe {
 
     // Add the appropriate value primitive to the block class
     result.addInstancePrimitive(SBlock.getEvaluationPrimitive(numberOfArguments,
-        this));
+            this));
 
     // Insert the block class into the dictionary of globals
     setGlobal(name, result);
@@ -675,13 +676,13 @@ public class Universe {
   }
 
   private SClass loadClass(final SSymbol name, final SClass systemClass)
-      throws ProgramDefinitionError {
+          throws ProgramDefinitionError {
     // Try loading the class from all different paths
     for (String cpEntry : classPath) {
       try {
         // Load the class from a file and return the loaded class
         SClass result = SourcecodeCompiler.compileClass(cpEntry,
-            name.getEmbeddedString(), systemClass, this);
+                name.getEmbeddedString(), systemClass, this);
         if (dumpBytecodes) {
           Disassembler.dump(result.getSOMClass());
           Disassembler.dump(result);
@@ -773,7 +774,7 @@ public class Universe {
   public SClass falseClass;
 
   private final HashMap<SSymbol, SAbstractObject> globals =
-      new HashMap<SSymbol, SAbstractObject>();
+          new HashMap<SSymbol, SAbstractObject>();
   private String[]                                classPath;
   private boolean                                 dumpBytecodes;
 
