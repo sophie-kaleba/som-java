@@ -29,9 +29,14 @@ import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.oracle.truffle.api.CompilerDirectives;
+import com.oracle.truffle.api.interop.InteropLibrary;
+import com.oracle.truffle.api.interop.UnsupportedMessageException;
+import com.oracle.truffle.api.library.ExportLibrary;
+import com.oracle.truffle.api.library.ExportMessage;
 import som.vm.Universe;
 
-
+@ExportLibrary(InteropLibrary.class)
 public final class SInteger extends SNumber {
 
   /**
@@ -286,4 +291,60 @@ public final class SInteger extends SNumber {
 
     return asSBoolean(result, universe);
   }
+
+
+  /**
+   * INTEROP
+   */
+  @ExportMessage
+  boolean isNumber() {
+    return fitsInLong();
+  }
+
+  @ExportMessage
+  @CompilerDirectives.TruffleBoundary
+  boolean fitsInByte() {
+    return false;
+  }
+
+  @ExportMessage
+  @CompilerDirectives.TruffleBoundary
+  boolean fitsInShort() {
+    return false;
+  }
+
+  @ExportMessage
+  @CompilerDirectives.TruffleBoundary
+  boolean fitsInFloat() {
+    return fitsInInt();
+  }
+
+  @ExportMessage
+  @CompilerDirectives.TruffleBoundary
+  boolean fitsInLong() {
+    return true;
+  }
+
+  @ExportMessage
+  @CompilerDirectives.TruffleBoundary
+  boolean fitsInInt() {
+    return false;
+  }
+
+  @ExportMessage
+  @CompilerDirectives.TruffleBoundary
+  boolean fitsInDouble() {
+    return fitsInLong() ;
+  }
+
+
+
+   @ExportMessage byte asByte() throws UnsupportedMessageException { return (byte) 0; }
+    @ExportMessage short asShort() throws UnsupportedMessageException { return (short) 0; }
+    @ExportMessage int asInt() throws UnsupportedMessageException { return 0; }
+    @ExportMessage long asLong() throws UnsupportedMessageException { return this.embeddedInteger; }
+    @ExportMessage float asFloat() throws UnsupportedMessageException { return 0.0F; }
+    @ExportMessage double asDouble() throws UnsupportedMessageException { return this.embeddedInteger; }
+
+
 }
