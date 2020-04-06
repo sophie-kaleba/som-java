@@ -28,6 +28,7 @@ package som.vm;
 
 import static som.interpreter.Bytecodes.HALT;
 
+import java.io.File;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.util.HashMap;
@@ -63,7 +64,10 @@ public final class Universe {
 
   private final TruffleLanguage.Env env;
   private final GraalSOMLanguage language;
-  public SAbstractObject systemObject;
+  private final String testClass;
+  private final String testClasspath;
+  public SAbstractObject objectSystem;
+  private final String testSelector;
 
   public Universe(final TruffleLanguage.Env env, final GraalSOMLanguage language) {
     this.env = env;
@@ -73,7 +77,10 @@ public final class Universe {
     this.avoidExit = false;
     current = this;
     this.lastExitCode = 0;
-    this.systemObject = null;
+    this.objectSystem = null;
+    this.testSelector = env.getOptions().get(GraalSOMLanguage.TestSelector);
+    this.testClass = env.getOptions().get(GraalSOMLanguage.TestClass);
+    this.testClasspath = env.getOptions().get(GraalSOMLanguage.TestClasspath);
   }
 
   /**
@@ -95,11 +102,23 @@ public final class Universe {
     return initialize(arguments);
   }
 
+
   static { /* static initializer */
     pathSeparator = System.getProperty("path.separator");
     fileSeparator = System.getProperty("file.separator");
   }
 
+  public boolean isForTesting() {
+    return !testSelector.isEmpty();
+  }
+
+  public String testSelector() {
+    return testSelector;
+  }
+
+  public String testClass() {
+    return testClass;
+  }
 
   public static Universe current() {
     return current;
@@ -210,7 +229,7 @@ public final class Universe {
   public void setupClassPath(final String cp) {
     // Create a new tokenizer to split up the string of directories
     StringTokenizer tokenizer = new StringTokenizer(cp,
-            pathSeparator);
+            File.pathSeparator);
 
     // Get the default class path of the appropriate size
     classPath = setupDefaultClassPath(tokenizer.countTokens());
@@ -266,15 +285,18 @@ public final class Universe {
    * @return
    * @throws ProgramDefinitionError
    */
-  public SAbstractObject interpret(final String className,
+  public SAbstractObject interpret(final String[] args,
+                                   final String className,
                                    final String selector) throws ProgramDefinitionError {
+    handleArguments(args);
+
     initializeObjectSystem();
+    setupClassPath(this.testClasspath);
 
     SClass clazz = loadClass(symbolFor(className));
 
     // Lookup the initialize invokable on the system class
-    SMethod initialize =
-            (SMethod) clazz.getSOMClass(this).lookupInvokable(symbolFor(selector));
+    SMethod initialize = (SMethod) clazz.getSOMClass(this).lookupInvokable(symbolFor(selector));
 
     if (initialize == null) {
       throw new RuntimeException("Lookup of " + className + ">>#" + selector + " failed");
@@ -284,7 +306,7 @@ public final class Universe {
   }
 
   private SAbstractObject initialize(final String[] arguments) throws ProgramDefinitionError {
-    SAbstractObject systemObject = initializeObjectSystem();
+    SAbstractObject objectSystem = initializeObjectSystem();
 
     // Start the shell if no filename is given
     if (arguments.length == 0) {
@@ -300,7 +322,7 @@ public final class Universe {
     // Convert the arguments into an array
     SArray argumentsArray = newArray(arguments);
 
-    return interpretMethod(systemObject, initialize,
+    return interpretMethod(objectSystem, initialize,
             argumentsArray);
   }
 
@@ -409,7 +431,7 @@ public final class Universe {
 
     setGlobal(trueSymbol, trueClass);
     setGlobal(falseSymbol, falseClass);
-    this.systemObject = systemObject;
+    this.objectSystem = systemObject;
     return systemObject;
   }
 
