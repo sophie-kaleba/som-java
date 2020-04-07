@@ -29,11 +29,11 @@ import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.oracle.truffle.api.CompilerDirectives;
 import com.oracle.truffle.api.interop.InteropLibrary;
 import com.oracle.truffle.api.interop.UnsupportedMessageException;
 import com.oracle.truffle.api.library.ExportLibrary;
 import com.oracle.truffle.api.library.ExportMessage;
+
 import som.vm.Universe;
 
 @ExportLibrary(InteropLibrary.class)
@@ -295,56 +295,92 @@ public final class SInteger extends SNumber {
 
   /**
    * INTEROP
+   * Return Long only
    */
-  @ExportMessage
-  boolean isNumber() {
-    return fitsInLong();
-  }
 
   @ExportMessage
-  @CompilerDirectives.TruffleBoundary
+  boolean isNumber() {
+    return true;
+  }
+
+
+  @ExportMessage
   boolean fitsInByte() {
     return false;
   }
 
   @ExportMessage
-  @CompilerDirectives.TruffleBoundary
   boolean fitsInShort() {
     return false;
   }
 
   @ExportMessage
-  @CompilerDirectives.TruffleBoundary
   boolean fitsInFloat() {
-    return fitsInInt();
+    return false;
   }
 
   @ExportMessage
-  @CompilerDirectives.TruffleBoundary
   boolean fitsInLong() {
     return true;
   }
 
   @ExportMessage
-  @CompilerDirectives.TruffleBoundary
   boolean fitsInInt() {
     return false;
   }
 
   @ExportMessage
-  @CompilerDirectives.TruffleBoundary
   boolean fitsInDouble() {
-    return fitsInLong() ;
+    return false;
   }
 
+  @ExportMessage byte asByte() throws UnsupportedMessageException {
+    if (fitsInByte()) {
+      return (byte) this.embeddedInteger;
+    } else {
+      throw UnsupportedMessageException.create();
+    }
+  }
 
+  @ExportMessage short asShort() throws UnsupportedMessageException {
+    if (fitsInShort()) {
+      return (short) this.embeddedInteger;
+    } else {
+      throw UnsupportedMessageException.create();
+    }
+  }
 
-   @ExportMessage byte asByte() throws UnsupportedMessageException { return (byte) 0; }
-    @ExportMessage short asShort() throws UnsupportedMessageException { return (short) 0; }
-    @ExportMessage int asInt() throws UnsupportedMessageException { return 0; }
-    @ExportMessage long asLong() throws UnsupportedMessageException { return this.embeddedInteger; }
-    @ExportMessage float asFloat() throws UnsupportedMessageException { return 0.0F; }
-    @ExportMessage double asDouble() throws UnsupportedMessageException { return this.embeddedInteger; }
+  @ExportMessage int asInt() throws UnsupportedMessageException {
+    if (fitsInInt()) {
+      return (int) this.embeddedInteger;
+    } else {
+      throw UnsupportedMessageException.create();
+    }
+  }
+
+  @ExportMessage long asLong() throws UnsupportedMessageException {
+    if (fitsInLong()) {
+      return this.embeddedInteger;
+    } else {
+      throw UnsupportedMessageException.create();
+    }
+  }
+
+  @ExportMessage float asFloat() throws UnsupportedMessageException {
+    if (fitsInFloat()) {
+      return this.embeddedInteger;
+    } else {
+      throw UnsupportedMessageException.create();
+    }
+  }
+
+  @ExportMessage double asDouble() throws UnsupportedMessageException {
+    if (fitsInDouble()) {
+      return this.embeddedInteger;
+    } else {
+      throw UnsupportedMessageException.create();
+    }
+  }
 
 
 }
