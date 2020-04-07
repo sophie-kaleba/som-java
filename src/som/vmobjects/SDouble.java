@@ -24,9 +24,14 @@
 
 package som.vmobjects;
 
+import com.oracle.truffle.api.interop.InteropLibrary;
+import com.oracle.truffle.api.interop.UnsupportedMessageException;
+import com.oracle.truffle.api.library.ExportLibrary;
+import com.oracle.truffle.api.library.ExportMessage;
+
 import som.vm.Universe;
 
-
+@ExportLibrary(InteropLibrary.class)
 public final class SDouble extends SNumber {
 
   private final double embeddedDouble;
@@ -133,5 +138,93 @@ public final class SDouble extends SNumber {
   public SObject primLessThan(final SNumber right, final Universe universe) {
     double r = coerceToDouble(right, universe);
     return asSBoolean(embeddedDouble < r, universe);
+  }
+
+  /**
+   * INTEROP
+   * Return Long only
+   */
+
+  @ExportMessage
+  boolean isNumber() {
+    return true;
+  }
+
+  @ExportMessage
+  boolean fitsInByte() {
+    return false;
+  }
+
+  @ExportMessage
+  boolean fitsInShort() {
+    return false;
+  }
+
+  @ExportMessage
+  boolean fitsInFloat() {
+    return false;
+  }
+
+  @ExportMessage
+  boolean fitsInLong() {
+    return false;
+  }
+
+  @ExportMessage
+  boolean fitsInInt() {
+    return false;
+  }
+
+  @ExportMessage
+  boolean fitsInDouble() {
+    return true;
+  }
+
+  @ExportMessage byte asByte() throws UnsupportedMessageException {
+    if (fitsInByte()) {
+      return (byte) this.embeddedDouble;
+    } else {
+      throw UnsupportedMessageException.create();
+    }
+  }
+
+  @ExportMessage short asShort() throws UnsupportedMessageException {
+    if (fitsInShort()) {
+      return (short) this.embeddedDouble;
+    } else {
+      throw UnsupportedMessageException.create();
+    }
+  }
+
+  @ExportMessage int asInt() throws UnsupportedMessageException {
+    if (fitsInInt()) {
+      return (int) this.embeddedDouble;
+    } else {
+      throw UnsupportedMessageException.create();
+    }
+  }
+
+  @ExportMessage long asLong() throws UnsupportedMessageException {
+    if (fitsInLong()) {
+      return (long) this.embeddedDouble;
+    } else {
+      throw UnsupportedMessageException.create();
+    }
+  }
+
+  @ExportMessage float asFloat() throws UnsupportedMessageException {
+    if (fitsInFloat()) {
+      return (float) this.embeddedDouble;
+    } else {
+      throw UnsupportedMessageException.create();
+    }
+  }
+
+  @ExportMessage double asDouble() throws UnsupportedMessageException {
+    if (fitsInDouble()) {
+      return this.embeddedDouble;
+    } else {
+      throw UnsupportedMessageException.create();
+    }
   }
 }

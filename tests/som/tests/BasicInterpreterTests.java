@@ -37,7 +37,6 @@ import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
 import som.vmobjects.SClass;
-import som.vmobjects.SDouble;
 
 
 @RunWith(Parameterized.class)
@@ -108,7 +107,7 @@ public class BasicInterpreterTests {
 
         {"BlockInlining", "testToDoNestDoNestIfTrue", 2, Long.class},
 
-        {"NonLocalVars", "testWriteDifferentTypes", 3.75, SDouble.class},
+        {"NonLocalVars", "testWriteDifferentTypes", 3.75, Double.class},
 
         {"ObjectCreation", "test", 1000000, Long.class},
 
@@ -146,10 +145,14 @@ public class BasicInterpreterTests {
       return;
     }
 
-    if (resultType == SDouble.class) {
-      double expected = (double) expectedResult;
-      double actual = ((SDouble) actualResult).getEmbeddedDouble();
-      assertEquals(expected, actual, 1e-15);
+    if (resultType == Double.class) {
+      if (actualResult instanceof Double) {
+        double expected = (double) expectedResult;
+        double actual = (double) actualResult;
+        assertEquals(expected, actual, 1e-15);
+      } else {
+        fail("Expected double result, but got: " + actualResult.toString());
+      }
       return;
     }
 
