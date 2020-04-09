@@ -23,16 +23,18 @@ package som.tests;
 
 import static org.junit.Assert.assertEquals;
 
+import java.io.File;
 import java.util.Arrays;
 
+import org.graalvm.polyglot.Context;
+import org.graalvm.polyglot.PolyglotException;
+import org.graalvm.polyglot.Source;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
-import som.GraalSOMLanguage;
 import som.compiler.ProgramDefinitionError;
-import som.vm.Universe;
 
 
 @RunWith(Parameterized.class)
@@ -71,25 +73,37 @@ public class SomTests {
     });
   }
 
-  private final String testName;
+  private final String testSelector;
 
-  public SomTests(final String testName) {
-    this.testName = testName;
+  public SomTests(final String testSelector) {
+    this.testSelector = testSelector;
   }
 
   @Test
   public void testSomeTest() throws ProgramDefinitionError {
-    String[] args = {"-cp", "Smalltalk", "TestSuite/TestHarness.som", testName};
+      String[] args = new String[] {
+              "-cp",
+              "Smalltalk",
+              "TestSuite/TestHarness.som", testSelector };
 
-    // Create Universe
-    //Universe u = new Universe(true);
-    //TODO - see if relevant
-    Universe u = GraalSOMLanguage.getCurrentContext();
+      //TODO - get rid of the source hack
+      String file = "core-lib/Examples/Echo.som";
+      Source source = Source.newBuilder("GS", new File(file)).internal(true).buildLiteral();
+      int returnCode;
 
-    // Start interpretation
-    u.interpret(args);
+      Context.Builder builder = Context.newBuilder("GS").in(System.in).out(System.out).allowAllAccess(true);
+      //TODO - deleting following line make execution fails, but we don't use the arguments (extraneous with testClasspath)
+      builder.arguments("GS", args);
+      Context context = builder.build();
 
-    assertEquals(0, u.lastExitCode());
+      try {
+          context.eval(source);
+          returnCode = 0;
+      }
+      catch (PolyglotException ex) {
+        returnCode = 1;
+      }
+      assertEquals(0, returnCode);
   }
 
 }
