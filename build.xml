@@ -380,7 +380,7 @@
 
     <target name="unit-tests" depends="compile" description="Execute tests">
         <junit haltonerror="false" haltonfailure="false" failureproperty="test.failed"
-               outputtoformatters="true" showoutput="yes" printsummary="on">
+               outputtoformatters="true">
             <jvmarg value="-ea" />
             <jvmarg value="-esa" />
             <classpath refid="project.classpath" />
@@ -401,15 +401,10 @@
         <fail message="Basic tests failed." if="test.failed" />
     </target>
 
-
     <target name="som-test" depends="compile" description="Test som script">
         <travis target="som-test" start="SOM Test" />
 
         <exec executable="./som" failonerror="true">
-            <!--<arg value="-G" />
-            <arg value="-cp" />
-            <arg value="Smalltalk" /> 
-            <arg value="TestSuite/EmptyTest.som" />-->
             <arg value="TestSuite/TestHarness.som" />
 
         </exec>
@@ -417,6 +412,6 @@
         <travis target="som-test" />
     </target>
 
-    <target name="tests" depends="som-test" />
+    <target name="tests" depends="som-test, unit-tests" />
 
 </project>
