@@ -157,16 +157,21 @@ public class BasicInterpreterTests {
     }
 
     if (resultType == SClass.class) {
-      String expected = (String) expectedResult;
-      String actual = ((SClass) actualResult).getName().getEmbeddedString();
-      assertEquals(expected, actual);
+      if (actualResult instanceof String) {
+        String expected = (String) expectedResult;
+        String actual = (String) actualResult;
+        assertEquals(expected, actual);
+      } else {
+        fail("Expected class result, but got: " + actualResult.toString());
+      }
       return;
     }
 
     if (resultType == String.class) {
       if (actualResult instanceof String) {
-      String actual = (String) actualResult;
-      assertEquals(expectedResult, actual);
+        String expected = (String) expectedResult;
+        String actual = (String) actualResult;
+        assertEquals(expected, actual);
       } else {
         fail("Expected string result, but got: " + actualResult.toString());
       }
