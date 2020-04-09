@@ -39,14 +39,10 @@ public class Launcher  {
             e.printStackTrace();
             return 1;
         }
-        System.out.println("== running on " + context.getEngine());
 
         // Try to evaluate the source code
         try {
             Value result = context.eval(source);
-            if (!result.isNull()) {
-                System.out.println(result.toString());
-            }
             return 0;
         } catch (PolyglotException ex) {
             if (ex.isInternalError()) {
