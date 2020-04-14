@@ -43,6 +43,9 @@
     <property name="lib.dir"     location="libs" />
     <property name="unit.dir"    value="tests/som" />
     <property name="corelib.dir" location="core-lib" />
+    <property name="build.dir"   value="build"/>
+    <property name="classes.dir" value="${build.dir}/classes"/>
+
     <property name="graal.dir"   location="${lib.dir}/truffle/compiler" />
     <property name="truffle.dir" location="${lib.dir}/truffle/truffle" />
     <property name="sdk.dir"     location="${lib.dir}/truffle/sdk" />
@@ -53,32 +56,14 @@
     <property name="tools.build" location="${tools.dir}/mxbuild/dists/jdk1.8" />
     <property name="svm.build"   location="${svm.dir}/mxbuild/dists/jdk1.8" />
     <property name="truffle.build" location="${truffle.dir}/mxbuild/dists/jdk1.8" />
-    <property name="checkstyle.version" value="8.28" />
-    <property name="jacoco.version"     value="0.8.5" />
+
+    <property name="checkstyle.version" value="8.11" />
     <property name="jvmci.home"  location="${lib.dir}/jvmci${home.ext}" />
     <property name="junit.version" value="4.12" />
-    <property name="build.dir"   value="build"/>
-    <property name="classes.dir" value="${build.dir}/classes"/>
 
     <property name="mx.cmd" value="../../mx/mx" />
 
     <property environment="env"/>
-
-<!--    <property name="src.dir"     value="src"/>-->
-<!--    <property name="test.dir"    value="tests"/>-->
-<!--    <property name="lib.dir"     value="libs" />-->
-<!--    <property name="build.dir"   value="build"/>-->
-<!--    <property name="classes.dir" value="${build.dir}/classes"/>-->
-
-
-    <property name="checkstyle.version" value="8.14" />
-
-<!--    <path id="project.classpath">-->
-<!--        <pathelement location="${classes.dir}" />-->
-<!--        <pathelement location="${test.dir}" />-->
-<!--        <pathelement location="${lib.dir}/junit-${junit.version}.jar" />-->
-<!--        <pathelement location="${lib.dir}/hamcrest-core-1.3.jar" />-->
-<!--    </path>-->
 
     <path id="boot.cp">
         <pathelement location="${sdk.build}/graal-sdk.jar" />
@@ -91,7 +76,6 @@
         <pathelement location="${tools.build}/truffle-profiler.jar" />
     </path>
 
-<!--    //TODO-change-->
     <path id="project.classpath">
         <path refid="boot.cp"/>
         <path refid="common.cp"/>
@@ -239,43 +223,6 @@
         <travis target="eclipseformat-check" />
     </target>
 
-<!--    <target name="clean">-->
-<!--        <delete dir="${build.dir}"/>-->
-<!--    </target>-->
-
-<!--    <target name="eclipseformat">-->
-<!--      <pathconvert pathsep=" " property="javafiles">-->
-<!--        <fileset dir="${src.dir}">-->
-<!--          <include name="**/*.java"/>-->
-<!--        </fileset>-->
-<!--        <fileset dir="${test.dir}">-->
-<!--          <include name="**/*.java"/>-->
-<!--        </fileset>-->
-<!--      </pathconvert>-->
-<!--      <exec executable="${env.ECLIPSE_EXE}" dir="${basedir}">-->
-<!--          <arg value="-nosplash"/>-->
-<!--          <arg value="-application"/>-->
-<!--          <arg value="-consolelog"/>-->
-<!--          <arg value="-data"/>-->
-<!--          <arg value="${basedir}"/>-->
-<!--          <arg value="-vm"/>-->
-<!--          <arg value="${env.JAVA_HOME}/bin/java"/>-->
-<!--          <arg value="org.eclipse.jdt.core.JavaCodeFormatter"/>-->
-<!--          <arg value="-config"/>-->
-<!--          <arg value="${basedir}/.settings/org.eclipse.jdt.core.prefs"/>-->
-<!--          <arg line="${javafiles}"/>-->
-<!--      </exec>-->
-<!--      <exec executable="git" dir="${basedir}" failonerror="true">-->
-<!--          <arg value="status" />-->
-<!--          <arg value="*.java" />-->
-<!--      </exec>-->
-<!--      <exec executable="git" dir="${basedir}" failonerror="true">-->
-<!--          <arg value="diff-index" />-->
-<!--          <arg value="&#45;&#45;quiet" />-->
-<!--          <arg value="HEAD" />-->
-<!--      </exec>-->
-<!--    </target>-->
-
     <target name="checkstyle-jar">
         <travis target="checkstyle-jar" start="Get Checkstyle Jar" />
         <get src="https://github.com/checkstyle/checkstyle/releases/download/checkstyle-${checkstyle.version}/checkstyle-${checkstyle.version}-all.jar"
@@ -284,24 +231,16 @@
         <travis target="checkstyle-jar" />
     </target>
 
-    <target name="jacoco-lib" description="Get JaCoCo dependency">
-        <travis target="jacoco-lib" start="Get JaCoCo" />
-        <get src="http://search.maven.org/remotecontent?filepath=org/jacoco/jacoco/${jacoco.version}/jacoco-${jacoco.version}.zip"
-             usetimestamp="true"
-             dest="${lib.dir}/jacoco-${jacoco.version}.zip" />
-        <unzip src="${lib.dir}/jacoco-${jacoco.version}.zip" dest="${lib.dir}/jacoco"/>
-        <taskdef uri="antlib:org.jacoco.ant"
-                 resource="org/jacoco/ant/antlib.xml"
-                 classpath="${lib.dir}/jacoco/lib/jacocoant.jar" />
-        <travis target="jacoco-lib" />
-    </target>
-
-    <target name="codacy-coverage-lib" description="Report Coverage to Codacy">
-        <travis target="codacy-lib" start="Get Codacy Lib" />
-        <get src="https://oss.sonatype.org/service/local/repositories/releases/content/com/codacy/codacy-coverage-reporter/2.0.2/codacy-coverage-reporter-2.0.2-assembly.jar"
-             usetimestamp="true"
-             dest="${lib.dir}/codacy-coverage-reporter.jar" />
-        <travis target="codacy-lib" />
+    <target name="checkstyle" depends="checkstyle-jar" description="Check Code with Checkstyle">
+        <travis target="checkstyle" start="Run Checkstyle" />
+        <taskdef resource="com/puppycrawl/tools/checkstyle/ant/checkstyle-ant-task.properties" classpath="${lib.dir}/checkstyle-${checkstyle.version}-all.jar" />
+        <checkstyle config=".checkstyle_checks.xml">
+            <fileset dir="${src.dir}" includes="**/*.java"/>
+            <fileset dir="${unit.dir}" includes="**/*.java"/>
+            <fileset dir="${corelib.dir}" includes="**/*.java"/>
+            <formatter type="plain"/>
+        </checkstyle>
+        <travis target="checkstyle" />
     </target>
 
     <target name="java8-on-java9" description="Support Java 9 or later" if="${is.atLeastJava9}">
@@ -328,21 +267,6 @@
             <arg value="intellijinit"/>
         </exec>
     </target>
-
-<!--    <target name="checkstyle-jar">-->
-<!--        <mkdir dir="${lib.dir}" />-->
-<!--        <get src="https://github.com/checkstyle/checkstyle/releases/download/checkstyle-${checkstyle.version}/checkstyle-${checkstyle.version}-all.jar"-->
-<!--             usetimestamp="true"-->
-<!--             dest="${lib.dir}/checkstyle-${checkstyle.version}-all.jar" />-->
-<!--    </target>-->
-    
-<!--    <target name="checkstyle" depends="checkstyle-jar" description="Check Code with Checkstyle">-->
-<!--        <taskdef resource="com/puppycrawl/tools/checkstyle/ant/checkstyle-ant-task.properties" classpath="${lib.dir}/checkstyle-${checkstyle.version}-all.jar" />-->
-<!--        <checkstyle config=".checkstyle_checks.xml">-->
-<!--          <fileset dir="src" includes="**/*.java"/>-->
-<!--          <formatter type="plain"/>-->
-<!--        </checkstyle>-->
-<!--    </target>-->
 
     <target name="compile-graalSOM" depends="libs" description="Compile GraalSOM">
         <travis target="compile" start="compile" />
@@ -396,7 +320,7 @@
             <classpath refid="project.classpath" />
             <jvmarg value="-ea" />
             <jvmarg value="-esa" />
-            <arg line="-cp Smalltalk TestSuite/TestHarness.som  --ignore-inefficacies" />
+            <arg line="-cp Smalltalk TestSuite/TestHarness.som " />
         </java>
         <fail message="Basic tests failed." if="test.failed" />
     </target>
