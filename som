@@ -11,9 +11,6 @@ JVMCI_BIN   = os.getenv('JVMCI_BIN',  None)
 GRAAL_HOME  = os.getenv('GRAAL_HOME',  None)
 GRAAL_FLAGS = os.getenv('GRAAL_FLAGS', None)
 
-# GRAAL_LOCATIONS = ['~/.local/graal-core/',
-#                    BASE_DIR + '/../graal/graal-jvmci-8']
-
 ##
 ## Defining Argument Parsing
 ##
@@ -89,7 +86,6 @@ parser.add_argument('-D', help="define a Java property",
 
 parser.add_argument('args', nargs=argparse.REMAINDER,
                     help='arguments passed to GraalSOM')
-# args, unknown_args = parser.parse_known_args()
 
 if len(sys.argv) < 2:
     parser.print_help()
@@ -240,8 +236,7 @@ if not args.interpreter and args.perf_warnings:
     flags += ['-Dgraal.TruffleCompilationExceptionsAreFatal=true',
               '-Dgraal.TraceTrufflePerformanceWarnings=true',
               '-Dgraal.TraceTruffleCompilation=true',
-              '-Dgraal.TraceTruffleCompilationDetails=true',
-              '-Dgraal.TraceTruffleExpansionSource=true']
+              '-Dgraal.TraceTruffleCompilationDetails=true']
 if not args.fail_missing_opts:
     flags += ['-DfailOnMissingOptimization=true']
 if not args.interpreter and args.trace_invalidation:
@@ -275,9 +270,6 @@ if args.java_properties:
 
 if args.java_args:
     JAVA_ARGS += ['-' + property for property in args.java_args]
-
-#flags += ['-Dsom.tools=' + BASE_DIR + '/tools']
-#flags += ['-Dsom.baseDir=' + BASE_DIR]
 
 all_args = JAVA_ARGS + ['-classpath', CLASSPATH] + [BOOT_CLASSPATH] + flags + SOM_ARGS + args.args
 
