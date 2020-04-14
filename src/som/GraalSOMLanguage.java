@@ -80,19 +80,19 @@ public final class GraalSOMLanguage extends TruffleLanguage<Universe> {
 
     @Override
     protected CallTarget parse(final ParsingRequest request) throws Exception {
-        Universe context = getCurrentContext();
+        Universe universe = getCurrentContext();
         return Truffle.getRuntime().createCallTarget(new RootNode(this) {
 
             @Override
             public Object execute(final VirtualFrame frame) {
                 try {
-                    if (context.isForTesting()) {
-                        return context.interpret(args, context.testClass(), context.testSelector());
+                    if (universe.isForTesting()) {
+                        return universe.interpret(args, universe.testClass(), universe.testSelector());
                     }
-                    else return context.interpret(args);
+                    else return universe.interpret(args);
                     //TODO - leave the object system initialisation in the initializeContext method, along the lines of...
-//                    SInvokable initialize = context.systemClass.lookupInvokable(context.symbolFor("initialize:"));
-//                    return context.interpretMethod(context.systemObject, initialize, context.newArray(args) );
+//                    SInvokable initialize = universe.systemClass.lookupInvokable(universe.symbolFor("initialize:"));
+//                    return universe.interpretMethod(universe.systemObject, initialize, universe.newArray(args) );
                 }
                 catch (ProgramDefinitionError e) {
                     GraalSOMLanguage.getCurrentContext().errorExit(e.getMessage());
