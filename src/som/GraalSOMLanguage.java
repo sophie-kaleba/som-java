@@ -35,9 +35,9 @@ public final class GraalSOMLanguage extends TruffleLanguage<Universe> {
     public static final String MIME_TYPE = "application/x-graal-som";
     public static String[] args;
 
-    @Option(help = "Help Text.", category = OptionCategory.USER) public static final OptionKey<String> TestSelector = new OptionKey<>("");
-    @Option(help = "Help Text.", category = OptionCategory.USER) public static final OptionKey<String> TestClass = new OptionKey<>("");
-    @Option(help = "Help Text.", category = OptionCategory.USER) public static final OptionKey<String> TestClasspath = new OptionKey<>("");
+    @Option(help = "For Testing purpose only - Selector of the test ran (see BasicInterpreterTests>>testSomeTest)", category = OptionCategory.USER) public static final OptionKey<String> TestSelector = new OptionKey<>("");
+    @Option(help = "For Testing purpose only - Class of the test ran (see BasicInterpreterTests>>testSomeTest)", category = OptionCategory.USER) public static final OptionKey<String> TestClass = new OptionKey<>("");
+    @Option(help = "For Testing purpose only - Required classpath to execute a given TestClass>>TestSelector (see BasicInterpreterTests>>testSomeTest)", category = OptionCategory.USER) public static final OptionKey<String> TestClasspath = new OptionKey<>("");
 
     public GraalSOMLanguage() {
     }
