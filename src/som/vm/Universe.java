@@ -60,8 +60,6 @@ import som.vmobjects.SSymbol;
 
 public final class Universe {
 
-  static final Layout LAYOUT = Layout.createLayout();
-
   private final TruffleLanguage.Env env;
   private final GraalSOMLanguage language;
   private final String testClass;
