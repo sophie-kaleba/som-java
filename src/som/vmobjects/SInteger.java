@@ -36,7 +36,6 @@ import com.oracle.truffle.api.library.ExportMessage;
 
 import som.vm.Universe;
 
-@ExportLibrary(InteropLibrary.class)
 public final class SInteger extends SNumber {
 
   /**
@@ -298,89 +297,16 @@ public final class SInteger extends SNumber {
    * Return Long only
    */
 
-  @ExportMessage
-  boolean isNumber() {
-    return true;
-  }
-
-
-  @ExportMessage
-  boolean fitsInByte() {
-    return false;
-  }
-
-  @ExportMessage
-  boolean fitsInShort() {
-    return false;
-  }
-
-  @ExportMessage
-  boolean fitsInFloat() {
-    return false;
-  }
-
+  @Override
   @ExportMessage
   boolean fitsInLong() {
     return true;
   }
 
+  @Override
   @ExportMessage
-  boolean fitsInInt() {
-    return false;
-  }
-
-  @ExportMessage
-  boolean fitsInDouble() {
-    return false;
-  }
-
-  @ExportMessage byte asByte() throws UnsupportedMessageException {
-    if (fitsInByte()) {
-      return (byte) this.embeddedInteger;
-    } else {
-      throw UnsupportedMessageException.create();
-    }
-  }
-
-  @ExportMessage short asShort() throws UnsupportedMessageException {
-    if (fitsInShort()) {
-      return (short) this.embeddedInteger;
-    } else {
-      throw UnsupportedMessageException.create();
-    }
-  }
-
-  @ExportMessage int asInt() throws UnsupportedMessageException {
-    if (fitsInInt()) {
-      return (int) this.embeddedInteger;
-    } else {
-      throw UnsupportedMessageException.create();
-    }
-  }
-
-  @ExportMessage long asLong() throws UnsupportedMessageException {
-    if (fitsInLong()) {
+  long asLong()  {
       return this.embeddedInteger;
-    } else {
-      throw UnsupportedMessageException.create();
-    }
   }
-
-  @ExportMessage float asFloat() throws UnsupportedMessageException {
-    if (fitsInFloat()) {
-      return this.embeddedInteger;
-    } else {
-      throw UnsupportedMessageException.create();
-    }
-  }
-
-  @ExportMessage double asDouble() throws UnsupportedMessageException {
-    if (fitsInDouble()) {
-      return this.embeddedInteger;
-    } else {
-      throw UnsupportedMessageException.create();
-    }
-  }
-
 
 }

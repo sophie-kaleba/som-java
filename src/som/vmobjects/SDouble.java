@@ -142,89 +142,18 @@ public final class SDouble extends SNumber {
 
   /**
    * INTEROP
-   * Return Long only
+   * Return Double only
    */
 
-  @ExportMessage
-  boolean isNumber() {
-    return true;
-  }
-
-  @ExportMessage
-  boolean fitsInByte() {
-    return false;
-  }
-
-  @ExportMessage
-  boolean fitsInShort() {
-    return false;
-  }
-
-  @ExportMessage
-  boolean fitsInFloat() {
-    return false;
-  }
-
-  @ExportMessage
-  boolean fitsInLong() {
-    return false;
-  }
-
-  @ExportMessage
-  boolean fitsInInt() {
-    return false;
-  }
-
+  @Override
   @ExportMessage
   boolean fitsInDouble() {
     return true;
   }
 
-  @ExportMessage byte asByte() throws UnsupportedMessageException {
-    if (fitsInByte()) {
-      return (byte) this.embeddedDouble;
-    } else {
-      throw UnsupportedMessageException.create();
-    }
-  }
-
-  @ExportMessage short asShort() throws UnsupportedMessageException {
-    if (fitsInShort()) {
-      return (short) this.embeddedDouble;
-    } else {
-      throw UnsupportedMessageException.create();
-    }
-  }
-
-  @ExportMessage int asInt() throws UnsupportedMessageException {
-    if (fitsInInt()) {
-      return (int) this.embeddedDouble;
-    } else {
-      throw UnsupportedMessageException.create();
-    }
-  }
-
-  @ExportMessage long asLong() throws UnsupportedMessageException {
-    if (fitsInLong()) {
-      return (long) this.embeddedDouble;
-    } else {
-      throw UnsupportedMessageException.create();
-    }
-  }
-
-  @ExportMessage float asFloat() throws UnsupportedMessageException {
-    if (fitsInFloat()) {
-      return (float) this.embeddedDouble;
-    } else {
-      throw UnsupportedMessageException.create();
-    }
-  }
-
-  @ExportMessage double asDouble() throws UnsupportedMessageException {
-    if (fitsInDouble()) {
+  @Override
+  @ExportMessage
+  double asDouble()  {
       return this.embeddedDouble;
-    } else {
-      throw UnsupportedMessageException.create();
-    }
   }
 }
