@@ -24,18 +24,12 @@
 
 package som.vmobjects;
 
-import java.lang.reflect.Constructor;
-import java.util.HashMap;
-
-import com.oracle.truffle.api.interop.InteropLibrary;
-import com.oracle.truffle.api.interop.UnsupportedMessageException;
-import com.oracle.truffle.api.library.ExportLibrary;
-import com.oracle.truffle.api.library.ExportMessage;
-
 import som.primitives.Primitives;
 import som.vm.Universe;
 
-@ExportLibrary(InteropLibrary.class)
+import java.lang.reflect.Constructor;
+import java.util.HashMap;
+
 public class SClass extends SObject {
 
   private final Universe universe;
@@ -307,18 +301,5 @@ public class SClass extends SObject {
 
   // Static field indices and number of class fields
   static final int numberOfClassFields = numberOfObjectFields;
-
-  /**
-   * INTEROP
-   * A cast of a SClass to a java String will return the name of the class 
-   */
-  @ExportMessage
-  public boolean isString() {
-    return true;
-  }
-
-  @ExportMessage final String asString() throws UnsupportedMessageException {
-    return this.getName().getEmbeddedString();
-   }
 
 }

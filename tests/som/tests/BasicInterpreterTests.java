@@ -26,6 +26,7 @@ import static org.junit.Assert.fail;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.util.Arrays;
 
 import org.graalvm.polyglot.Context;
@@ -133,6 +134,21 @@ public class BasicInterpreterTests {
     this.resultType = resultType;
   }
 
+  public static Object readValue(final Value val) {
+    Field f;
+    try {
+      f = val.getClass().getDeclaredField("receiver");
+    } catch (NoSuchFieldException | SecurityException e) {
+      throw new RuntimeException(e);
+    }
+    f.setAccessible(true);
+    try {
+      return f.get(val);
+    } catch (IllegalArgumentException | IllegalAccessException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
   protected void assertEqualsSOMValue(final Object expectedResult, final Object actualResult) {
     if (resultType == Long.class) {
       if (actualResult instanceof Long) {
@@ -157,13 +173,9 @@ public class BasicInterpreterTests {
     }
 
     if (resultType == SClass.class) {
-      if (actualResult instanceof String) {
         String expected = (String) expectedResult;
-        String actual = (String) actualResult;
+        String actual = ((SClass) readValue((Value) actualResult)).getName().getEmbeddedString();
         assertEquals(expected, actual);
-      } else {
-        fail("Expected class result, but got: " + actualResult.toString());
-      }
       return;
     }
 
