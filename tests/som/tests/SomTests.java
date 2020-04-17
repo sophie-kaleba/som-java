@@ -34,6 +34,8 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
+import som.GraalSOMLanguage;
+import som.Launcher;
 import som.compiler.ProgramDefinitionError;
 
 
@@ -81,24 +83,19 @@ public class SomTests {
 
   @Test
   public void testSomeTest() throws ProgramDefinitionError {
+      int returnCode = 0;
       String[] args = new String[] {
               "-cp",
               "Smalltalk",
               "TestSuite/TestHarness.som", testSelector };
+      Source source = Launcher.START;
 
-      //TODO - get rid of the source hack
-      String file = "core-lib/Examples/Echo.som";
-      Source source = Source.newBuilder("GS", new File(file)).internal(true).buildLiteral();
-      int returnCode;
-
-      Context.Builder builder = Context.newBuilder("GS").in(System.in).out(System.out).allowAllAccess(true);
-      //TODO - deleting following line make execution fails, but we don't use the arguments (extraneous with testClasspath)
-      builder.arguments("GS", args);
+      Context.Builder builder = Context.newBuilder(GraalSOMLanguage.ID).in(System.in).out(System.out).allowAllAccess(true);
+      builder.arguments(GraalSOMLanguage.ID, args);
       Context context = builder.build();
 
       try {
           context.eval(source);
-          returnCode = 0;
       }
       catch (PolyglotException ex) {
         returnCode = 1;

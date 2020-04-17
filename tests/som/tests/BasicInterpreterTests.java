@@ -37,6 +37,8 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
+import som.GraalSOMLanguage;
+import som.Launcher;
 import som.vmobjects.SClass;
 
 
@@ -194,18 +196,10 @@ public class BasicInterpreterTests {
 
   @Test
   public void testBasicInterpreterBehavior() throws IOException {
-    String[] args = new String[] {
-            "-cp",
-            "Smalltalk"};
     String testClasspath = "Smalltalk:TestSuite/BasicInterpreterTests/";
+    Source source = Launcher.START;
 
-    //TODO - get rid of the source hack
-    String file = "core-lib/Examples/Echo.som";
-    Source source = Source.newBuilder("GS", new File(file)).internal(true).buildLiteral();
-
-    Context.Builder builder = Context.newBuilder("GS").in(System.in).out(System.out).allowAllAccess(true);
-    //TODO - deleting following line make execution fails, but we don't use the arguments (extraneous with testClasspath)
-    builder.arguments("GS", args);
+    Context.Builder builder = Context.newBuilder(GraalSOMLanguage.ID).in(System.in).out(System.out).allowAllAccess(true);
     builder.option("GS.TestClasspath", testClasspath);
     builder.option("GS.TestSelector", testSelector);
     builder.option("GS.TestClass", testClass);
