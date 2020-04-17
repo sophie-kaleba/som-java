@@ -283,13 +283,10 @@ public final class Universe {
    * @return
    * @throws ProgramDefinitionError
    */
-  public SAbstractObject interpret(final String[] args,
-                                   final String className,
+  public SAbstractObject interpret(final String className,
                                    final String selector) throws ProgramDefinitionError {
-    handleArguments(args);
-
-    initializeObjectSystem();
     setupClassPath(this.testClasspath);
+    initializeObjectSystem();
 
     SClass clazz = loadClass(symbolFor(className));
 
