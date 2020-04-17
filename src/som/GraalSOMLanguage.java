@@ -10,12 +10,15 @@ import com.oracle.truffle.api.instrumentation.ProvidedTags;
 import com.oracle.truffle.api.instrumentation.StandardTags;
 import com.oracle.truffle.api.nodes.RootNode;
 
+import com.oracle.truffle.api.source.Source;
 import org.graalvm.options.OptionCategory;
 import org.graalvm.options.OptionDescriptors;
 import org.graalvm.options.OptionKey;
 import som.compiler.ProgramDefinitionError;
 import som.vm.Universe;
 import som.vmobjects.SAbstractObject;
+
+import java.io.UncheckedIOException;
 
 @TruffleLanguage.Registration(id = GraalSOMLanguage.ID,
         name = "GraalSOM",
@@ -34,10 +37,16 @@ public final class GraalSOMLanguage extends TruffleLanguage<Universe> {
     public static final String ID = "GS";
     public static final String MIME_TYPE = "application/x-graal-som";
     public static String[] args;
+    public static final String START_SOURCE    = "START";
 
-    @Option(help = "For Testing purpose only - Selector of the test ran (see BasicInterpreterTests>>testSomeTest)", category = OptionCategory.USER) public static final OptionKey<String> TestSelector = new OptionKey<>("");
-    @Option(help = "For Testing purpose only - Class of the test ran (see BasicInterpreterTests>>testSomeTest)", category = OptionCategory.USER) public static final OptionKey<String> TestClass = new OptionKey<>("");
-    @Option(help = "For Testing purpose only - Required classpath to execute a given TestClass>>TestSelector (see BasicInterpreterTests>>testSomeTest)", category = OptionCategory.USER) public static final OptionKey<String> TestClasspath = new OptionKey<>("");
+    @Option(help = "For Testing purpose only - Selector of the test ran (see BasicInterpreterTests>>testSomeTest)", category = OptionCategory.USER)
+    public static final OptionKey<String> TestSelector = new OptionKey<>("");
+
+    @Option(help = "For Testing purpose only - Class of the test ran (see BasicInterpreterTests>>testSomeTest)", category = OptionCategory.USER)
+    public static final OptionKey<String> TestClass = new OptionKey<>("");
+
+    @Option(help = "For Testing purpose only - Required classpath to execute a given TestClass>>TestSelector (see BasicInterpreterTests>>testSomeTest)", category = OptionCategory.USER)
+    public static final OptionKey<String> TestClasspath = new OptionKey<>("");
 
     public GraalSOMLanguage() {
     }
@@ -45,21 +54,6 @@ public final class GraalSOMLanguage extends TruffleLanguage<Universe> {
     @Override
     protected Universe createContext(final Env env) {
         return new Universe(env, this);
-    }
-
-    @Override
-    protected void initializeContext(final Universe context) {
-        Env currentEnv = context.getEnv();
-        args = currentEnv.getApplicationArguments();
-        //TODO - on the long run, it would be better to rely on source file
-        // the arguments may not be accessed from here if this approach is used
-        // they should be pre processed in the Launcher
-//        args = context.handleArguments(args);
-//        try {
-//            context.initializeObjectSystem();
-//        } catch (ProgramDefinitionError e) {
-//            e.printStackTrace();
-//        }
     }
 
     @Override
@@ -80,25 +74,37 @@ public final class GraalSOMLanguage extends TruffleLanguage<Universe> {
 
     @Override
     protected CallTarget parse(final ParsingRequest request) throws Exception {
+        Source code = request.getSource();
         Universe universe = getCurrentContext();
-        return Truffle.getRuntime().createCallTarget(new RootNode(this) {
+        args = universe.getEnv().getApplicationArguments();
 
-            @Override
-            public Object execute(final VirtualFrame frame) {
-                try {
-                    if (universe.isForTesting()) {
-                        return universe.interpret(args, universe.testClass(), universe.testSelector());
-                    }
-                    else return universe.interpret(args);
-                    //TODO - leave the object system initialisation in the initializeContext method, along the lines of...
-//                    SInvokable initialize = universe.systemClass.lookupInvokable(universe.symbolFor("initialize:"));
-//                    return universe.interpretMethod(universe.systemObject, initialize, universe.newArray(args) );
+        if (code.getCharacters().equals(START_SOURCE) && code.getName().equals(START_SOURCE)) {
+            return Truffle.getRuntime().createCallTarget(new StartInterpretation(this, universe));
+        }
+        throw new Exception("An unknowm marker has been provided");
+    }
+
+    private static class StartInterpretation extends RootNode {
+
+        private final Universe universe;
+
+        protected StartInterpretation(final GraalSOMLanguage lang, final Universe universe) {
+            super(lang, null);
+            this.universe = universe;
+        }
+
+        @Override
+        public Object execute(final VirtualFrame frame) {
+            try {
+                if (universe.isForTesting()) {
+                    return universe.interpret(universe.testClass(), universe.testSelector());
                 }
-                catch (ProgramDefinitionError e) {
-                    GraalSOMLanguage.getCurrentContext().errorExit(e.getMessage());
-                    return 1;
-                }
+                else return universe.interpret(args);
             }
-        });
+            catch (ProgramDefinitionError e) {
+                GraalSOMLanguage.getCurrentContext().errorExit(e.getMessage());
+                return 1;
+            }
+        }
     }
 }
