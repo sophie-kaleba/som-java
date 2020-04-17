@@ -12,17 +12,11 @@ import org.graalvm.polyglot.Value;
 
 public class Launcher  {
 
-    private static final String GraalSOM = "GS";
+    /** This source is a marker to start execution based on the arguments provided. */
+    public static final Source START = createMarkerSource(GraalSOMLanguage.START_SOURCE);
 
     public static void main(final String[] arguments) throws IOException {
-      String file = null;
-      Source source;
-
-      //TODO - this isn't right - ignored at the moment
-      file = "core-lib/Examples/Echo.som";
-      source = Source.newBuilder(GraalSOM, new File(file)).internal(true).buildLiteral();
-
-      System.exit(executeSource(source, arguments));
+      System.exit(executeSource(START, arguments));
     }
 
     private static int executeSource(final Source source, final String[] arguments) throws IOException {
@@ -30,15 +24,8 @@ public class Launcher  {
         PrintStream err = System.err;
 
         Context.Builder builder = Context.newBuilder();
-        builder.arguments(GraalSOM, arguments);
-
-        // Try to build the context in which we will execute the source code
-        try {
-            context = builder.build();
-        } catch (Exception e) {
-            e.printStackTrace();
-            return 1;
-        }
+        builder.arguments(GraalSOMLanguage.ID, arguments);
+        context = builder.build();
 
         // Try to evaluate the source code
         try {
@@ -57,31 +44,12 @@ public class Launcher  {
         }
     }
 
-    //TODO - adapt if from original som-java project
-    private static boolean parseOption(final Map<String, String> options, final String arg) {
-        if (arg.length() <= 2 || !arg.startsWith("--")) {
-            return false;
+    private static Source createMarkerSource(final String marker) {
+        try {
+            return Source.newBuilder(GraalSOMLanguage.ID, marker, marker).internal(true).build();
+        } catch (IOException e) {
+            // should never happen
+            throw new RuntimeException(e);
         }
-        int eqIdx = arg.indexOf('=');
-        String key;
-        String value;
-        if (eqIdx < 0) {
-            key = arg.substring(2);
-            value = null;
-        } else {
-            key = arg.substring(2, eqIdx);
-            value = arg.substring(eqIdx + 1);
-        }
-
-        if (value == null) {
-            value = "true";
-        }
-        int index = key.indexOf('.');
-        String group = key;
-        if (index >= 0) {
-            group = group.substring(0, index);
-        }
-        options.put(key, value);
-        return true;
     }
 }
