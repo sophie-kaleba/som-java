@@ -9,7 +9,6 @@ import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.instrumentation.ProvidedTags;
 import com.oracle.truffle.api.instrumentation.StandardTags;
 import com.oracle.truffle.api.nodes.RootNode;
-
 import com.oracle.truffle.api.source.Source;
 import org.graalvm.options.OptionCategory;
 import org.graalvm.options.OptionDescriptors;
@@ -17,8 +16,6 @@ import org.graalvm.options.OptionKey;
 import som.compiler.ProgramDefinitionError;
 import som.vm.Universe;
 import som.vmobjects.SAbstractObject;
-
-import java.io.UncheckedIOException;
 
 @TruffleLanguage.Registration(id = GraalSOMLanguage.ID,
         name = "GraalSOM",
@@ -65,7 +62,6 @@ public final class GraalSOMLanguage extends TruffleLanguage<Universe> {
     @Override
     protected boolean isObjectOfLanguage(final Object object) {
         return object instanceof SAbstractObject;
-        //TODO - should throw an exception
     }
 
     public static Universe getCurrentContext() {
