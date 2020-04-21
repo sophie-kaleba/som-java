@@ -43,7 +43,6 @@ import static som.interpreter.Bytecodes.SEND;
 import static som.interpreter.Bytecodes.SUPER_SEND;
 import static som.interpreter.Bytecodes.getBytecodeLength;
 
-import com.oracle.truffle.api.CompilerAsserts;
 import com.oracle.truffle.api.Truffle;
 import com.oracle.truffle.api.nodes.ExplodeLoop;
 import com.oracle.truffle.api.nodes.IndirectCallNode;
@@ -259,8 +258,6 @@ public class Interpreter {
 
       // Update the bytecode index of the frame
       getFrame().setBytecodeIndex(nextBytecodeIndex);
-
-      CompilerAsserts.partialEvaluationConstant(bytecode);
 
       // Handle the current bytecode
       switch (bytecode) {
