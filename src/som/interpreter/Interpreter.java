@@ -25,6 +25,29 @@
 
 package som.interpreter;
 
+import static som.interpreter.Bytecodes.DUP;
+import static som.interpreter.Bytecodes.HALT;
+import static som.interpreter.Bytecodes.POP;
+import static som.interpreter.Bytecodes.POP_ARGUMENT;
+import static som.interpreter.Bytecodes.POP_FIELD;
+import static som.interpreter.Bytecodes.POP_LOCAL;
+import static som.interpreter.Bytecodes.PUSH_ARGUMENT;
+import static som.interpreter.Bytecodes.PUSH_BLOCK;
+import static som.interpreter.Bytecodes.PUSH_CONSTANT;
+import static som.interpreter.Bytecodes.PUSH_FIELD;
+import static som.interpreter.Bytecodes.PUSH_GLOBAL;
+import static som.interpreter.Bytecodes.PUSH_LOCAL;
+import static som.interpreter.Bytecodes.RETURN_LOCAL;
+import static som.interpreter.Bytecodes.RETURN_NON_LOCAL;
+import static som.interpreter.Bytecodes.SEND;
+import static som.interpreter.Bytecodes.SUPER_SEND;
+import static som.interpreter.Bytecodes.getBytecodeLength;
+
+import com.oracle.truffle.api.CompilerAsserts;
+import com.oracle.truffle.api.Truffle;
+import com.oracle.truffle.api.nodes.ExplodeLoop;
+import com.oracle.truffle.api.nodes.IndirectCallNode;
+
 import som.compiler.ProgramDefinitionError;
 import som.vm.Universe;
 import som.vmobjects.SAbstractObject;
@@ -34,8 +57,6 @@ import som.vmobjects.SInvokable;
 import som.vmobjects.SMethod;
 import som.vmobjects.SObject;
 import som.vmobjects.SSymbol;
-
-import static som.interpreter.Bytecodes.*;
 
 
 public class Interpreter {
@@ -216,15 +237,19 @@ public class Interpreter {
     send(signature, receiver.getSOMClass(universe), bytecodeIndex);
   }
 
+  @ExplodeLoop(kind = ExplodeLoop.LoopExplosionKind.MERGE_EXPLODE)
   public SAbstractObject start() throws ProgramDefinitionError {
+
     // Iterate through the bytecodes
     while (true) {
+
+      SMethod currentMethod = getMethod();
 
       // Get the current bytecode index
       int bytecodeIndex = getFrame().getBytecodeIndex();
 
       // Get the current bytecode
-      byte bytecode = getMethod().getBytecode(bytecodeIndex);
+      byte bytecode = currentMethod.getBytecode(bytecodeIndex);
 
       // Get the length of the current bytecode
       int bytecodeLength = getBytecodeLength(bytecode);
@@ -234,6 +259,8 @@ public class Interpreter {
 
       // Update the bytecode index of the frame
       getFrame().setBytecodeIndex(nextBytecodeIndex);
+
+      CompilerAsserts.partialEvaluationConstant(bytecode);
 
       // Handle the current bytecode
       switch (bytecode) {
@@ -423,4 +450,9 @@ public class Interpreter {
   }
 
   private Frame frame;
+  private final IndirectCallNode indirectCallNode = Truffle.getRuntime().createIndirectCallNode();
+
+  public IndirectCallNode getIndirectCallNode() {
+    return indirectCallNode;
+  }
 }
