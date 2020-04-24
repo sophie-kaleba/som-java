@@ -327,7 +327,7 @@
         <fail message="Basic tests failed." if="test.failed" />
     </target>
 
-    <target name="som-test" depends="compile" description="Test som script">
+    <target name="som-tests" depends="compile" description="Test som script">
         <travis target="som-test" start="SOM Test" />
 
         <exec executable="./som" failonerror="true">
@@ -338,6 +338,6 @@
         <travis target="som-test" />
     </target>
 
-    <target name="tests" depends="som-test, unit-tests" />
+    <target name="tests" depends="som-tests,unit-tests" />
 
 </project>
