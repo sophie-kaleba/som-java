@@ -24,21 +24,32 @@
 
 package som.vmobjects;
 
+import static som.interpreter.Bytecodes.HALT;
+
 import java.util.List;
+
+import com.oracle.truffle.api.CallTarget;
+import com.oracle.truffle.api.Truffle;
+import com.oracle.truffle.api.TruffleLanguage;
+import com.oracle.truffle.api.nodes.IndirectCallNode;
 
 import som.interpreter.Frame;
 import som.interpreter.Interpreter;
+import som.interpreter.Method;
 import som.vm.Universe;
 
 
 public class SMethod extends SAbstractObject implements SInvokable {
 
-  public SMethod(SObject nilObject, SSymbol signature, int numberOfBytecodes,
-      SInteger numberOfLocals, SInteger maxNumStackElements,
-      int numberOfLiterals, List<SAbstractObject> literals) {
+  private Universe universe = Universe.current();
+
+  public SMethod(final SObject nilObject, final SSymbol signature, final int numberOfBytecodes,
+                 final SInteger numberOfLocals, final SInteger maxNumStackElements,
+                 final int numberOfLiterals, final List<SAbstractObject> literals, final TruffleLanguage language) {
     this.signature = signature;
     this.numberOfLocals = numberOfLocals;
-    this.bytecodes = new byte[numberOfBytecodes];
+    this.method = new Method(language, numberOfBytecodes, this);
+    this.callTarget = Truffle.getRuntime().createCallTarget(method);
     inlineCacheClass = new SClass[numberOfBytecodes];
     inlineCacheInvokable = new SInvokable[numberOfBytecodes];
     maximumNumberOfStackElements = maxNumStackElements;
@@ -81,7 +92,7 @@ public class SMethod extends SAbstractObject implements SInvokable {
   }
 
   @Override
-  public void setHolder(SClass value) {
+  public void setHolder(final SClass value) {
     holder = value;
 
     // Make sure all nested invokables have the same holder
@@ -92,7 +103,7 @@ public class SMethod extends SAbstractObject implements SInvokable {
     }
   }
 
-  public SAbstractObject getConstant(int bytecodeIndex) {
+  public SAbstractObject getConstant(final int bytecodeIndex) {
     // Get the constant associated to a given bytecode index
     return literals[getBytecode(bytecodeIndex + 1)];
   }
@@ -104,17 +115,17 @@ public class SMethod extends SAbstractObject implements SInvokable {
 
   public int getNumberOfBytecodes() {
     // Get the number of bytecodes in this method
-    return bytecodes.length;
+    return method.getNumberOfBytecodes();
   }
 
-  public byte getBytecode(int index) {
+  public byte getBytecode(final int index) {
     // Get the bytecode at the given index
-    return bytecodes[index];
+    return method.getBytecode(index);
   }
 
-  public void setBytecode(int index, byte value) {
+  public void setBytecode(final int index, final byte value) {
     // Set the bytecode at the given index to the given value
-    bytecodes[index] = value;
+    method.setBytecode(index,value);
   }
 
   @Override
@@ -122,6 +133,12 @@ public class SMethod extends SAbstractObject implements SInvokable {
     // Allocate and push a new frame on the interpreter stack
     Frame newFrame = interpreter.pushNewFrame(this);
     newFrame.copyArgumentsFrom(frame);
+    IndirectCallNode indirectCallNode = interpreter.getIndirectCallNode();
+    indirectCallNode.call(callTarget, interpreter);
+
+    SMethod bootstrapMethod = universe.createBootstrapMethod();
+    Frame bootstrapFrame = interpreter.pushNewFrame(bootstrapMethod);
+    bootstrapFrame.push(universe.objectSystem);
   }
 
   @Override
@@ -130,26 +147,27 @@ public class SMethod extends SAbstractObject implements SInvokable {
         + getSignature().toString() + ")";
   }
 
-  public SClass getInlineCacheClass(int bytecodeIndex) {
+  public SClass getInlineCacheClass(final int bytecodeIndex) {
     return inlineCacheClass[bytecodeIndex];
   }
 
-  public SInvokable getInlineCacheInvokable(int bytecodeIndex) {
+  public SInvokable getInlineCacheInvokable(final int bytecodeIndex) {
     return inlineCacheInvokable[bytecodeIndex];
   }
 
-  public void setInlineCache(int bytecodeIndex, SClass receiverClass, SInvokable invokable) {
+  public void setInlineCache(final int bytecodeIndex, final SClass receiverClass, final SInvokable invokable) {
     inlineCacheClass[bytecodeIndex] = receiverClass;
     inlineCacheInvokable[bytecodeIndex] = invokable;
   }
 
   @Override
-  public SClass getSOMClass(Universe universe) {
+  public SClass getSOMClass(final Universe universe) {
     return universe.methodClass;
   }
 
   // Private variable holding byte array of bytecodes
-  private final byte[]       bytecodes;
+  private final Method method;
+  private final CallTarget callTarget;
   private final SClass[]     inlineCacheClass;
   private final SInvokable[] inlineCacheInvokable;
 
