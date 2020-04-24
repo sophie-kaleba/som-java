@@ -35,6 +35,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.StringTokenizer;
 
+import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
 import com.oracle.truffle.api.TruffleLanguage;
 
 import som.GraalSOMLanguage;
@@ -142,6 +143,7 @@ public final class Universe {
     exit(1);
   }
 
+  @TruffleBoundary
   public String[] handleArguments(String[] arguments) {
     boolean gotClasspath = false;
     String[] remainingArgs = new String[arguments.length];
@@ -320,7 +322,7 @@ public final class Universe {
         argumentsArray);
   }
 
-  private SMethod createBootstrapMethod() {
+  public SMethod createBootstrapMethod() {
     // Create a fake bootstrap method to simplify later frame traversal
     SMethod bootstrapMethod =
         newMethod(symbolFor("bootstrap"), 1, 0, newInteger(0), newInteger(2), null);
@@ -342,12 +344,12 @@ public final class Universe {
     }
 
     // Invoke the initialize invokable
+    // TODO - temporary hack before proper optimisation
     invokable.invoke(bootstrapFrame, interpreter);
-
-    // Start the interpreter
-    return interpreter.start();
+    return bootstrapFrame.getStackElement(0);
   }
 
+  @TruffleBoundary
   public SAbstractObject initializeObjectSystem() throws ProgramDefinitionError {
     // Allocate the nil object
     nilObject = new SObject(null);
@@ -429,6 +431,7 @@ public final class Universe {
     return systemObject;
   }
 
+  @TruffleBoundary
   public SSymbol symbolFor(final String string) {
     // Lookup the symbol in the symbol table
     SSymbol result = symbolTable.get(string);
@@ -512,7 +515,7 @@ public final class Universe {
       final SInteger maxNumStackElements, final List<SAbstractObject> literals) {
     // Allocate a new method and set its class to be the method class
     SMethod result = new SMethod(nilObject, signature, numberOfBytecodes,
-        numberOfLocals, maxNumStackElements, numberOfLiterals, literals);
+            numberOfLocals, maxNumStackElements, numberOfLiterals, literals, language);
     return result;
   }
 
@@ -561,6 +564,7 @@ public final class Universe {
     return result;
   }
 
+  @TruffleBoundary
   private SSymbol newSymbol(final String string) {
     // Allocate a new symbol and set its class to be the symbol class
     SSymbol result = new SSymbol(string);
@@ -610,6 +614,7 @@ public final class Universe {
     setGlobal(systemClass.getName(), systemClass);
   }
 
+  @TruffleBoundary
   public SAbstractObject getGlobal(final SSymbol name) {
     // Return the global with the given name if it's in the dictionary of
     // globals
@@ -636,6 +641,7 @@ public final class Universe {
     return blockClass;
   }
 
+  @TruffleBoundary
   public SClass getBlockClass(final int numberOfArguments) throws ProgramDefinitionError {
     // Compute the name of the block class with the given number of
     // arguments
