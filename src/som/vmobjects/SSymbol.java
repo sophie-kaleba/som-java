@@ -31,6 +31,7 @@ import com.oracle.truffle.api.library.ExportMessage;
 
 import som.vm.Universe;
 
+
 @ExportLibrary(InteropLibrary.class)
 public class SSymbol extends SString {
 
@@ -88,7 +89,7 @@ public class SSymbol extends SString {
   private final int numberOfSignatureArguments;
 
   /**
-   * INTEROP
+   * INTEROP.
    */
 
   @ExportMessage
@@ -96,7 +97,9 @@ public class SSymbol extends SString {
     return true;
   }
 
-  @ExportMessage final String asString() throws UnsupportedMessageException
-    { return this.getEmbeddedString(); }
+  @ExportMessage
+  final String asString() throws UnsupportedMessageException {
+    return this.getEmbeddedString();
+  }
 
 }

@@ -57,7 +57,7 @@
     <property name="svm.build"   location="${svm.dir}/mxbuild/dists/jdk1.8" />
     <property name="truffle.build" location="${truffle.dir}/mxbuild/dists/jdk1.8" />
 
-    <property name="checkstyle.version" value="8.11" />
+    <property name="checkstyle.version" value="8.31" />
     <property name="jvmci.home"  location="${lib.dir}/jvmci${home.ext}" />
     <property name="junit.version" value="4.12" />
 

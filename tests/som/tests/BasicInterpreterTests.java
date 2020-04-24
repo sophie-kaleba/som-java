@@ -24,7 +24,6 @@ package som.tests;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
-import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.Arrays;
@@ -175,9 +174,9 @@ public class BasicInterpreterTests {
     }
 
     if (resultType == SClass.class) {
-        String expected = (String) expectedResult;
-        String actual = ((SClass) readValue((Value) actualResult)).getName().getEmbeddedString();
-        assertEquals(expected, actual);
+      String expected = (String) expectedResult;
+      String actual = ((SClass) readValue((Value) actualResult)).getName().getEmbeddedString();
+      assertEquals(expected, actual);
       return;
     }
 
@@ -199,7 +198,8 @@ public class BasicInterpreterTests {
     String testClasspath = "Smalltalk:TestSuite/BasicInterpreterTests/";
     Source source = Launcher.START;
 
-    Context.Builder builder = Context.newBuilder(GraalSOMLanguage.ID).in(System.in).out(System.out).allowAllAccess(true);
+    Context.Builder builder = Context.newBuilder(GraalSOMLanguage.ID).in(System.in)
+                                     .out(System.out).allowAllAccess(true);
     builder.option("GS.TestClasspath", testClasspath);
     builder.option("GS.TestSelector", testSelector);
     builder.option("GS.TestClass", testClass);
@@ -208,7 +208,7 @@ public class BasicInterpreterTests {
     try {
       Value actualResult = context.eval(source);
       assertEqualsSOMValue(expectedResult,
-              actualResult == null ? null : actualResult.as(Object.class));
+          actualResult == null ? null : actualResult.as(Object.class));
     } finally {
       context.close();
     }

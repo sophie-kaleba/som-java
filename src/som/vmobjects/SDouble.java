@@ -25,11 +25,11 @@
 package som.vmobjects;
 
 import com.oracle.truffle.api.interop.InteropLibrary;
-import com.oracle.truffle.api.interop.UnsupportedMessageException;
 import com.oracle.truffle.api.library.ExportLibrary;
 import com.oracle.truffle.api.library.ExportMessage;
 
 import som.vm.Universe;
+
 
 @ExportLibrary(InteropLibrary.class)
 public final class SDouble extends SNumber {
@@ -141,8 +141,8 @@ public final class SDouble extends SNumber {
   }
 
   /**
-   * INTEROP
-   * Return Double only
+   * INTEROP.
+   * Return Double only.
    */
 
   @Override
@@ -153,7 +153,7 @@ public final class SDouble extends SNumber {
 
   @Override
   @ExportMessage
-  double asDouble()  {
-      return this.embeddedDouble;
+  double asDouble() {
+    return this.embeddedDouble;
   }
 }

@@ -23,7 +23,6 @@ package som.tests;
 
 import static org.junit.Assert.assertEquals;
 
-import java.io.File;
 import java.util.Arrays;
 
 import org.graalvm.polyglot.Context;
@@ -83,24 +82,24 @@ public class SomTests {
 
   @Test
   public void testSomeTest() throws ProgramDefinitionError {
-      int returnCode = 0;
-      String[] args = new String[] {
-              "-cp",
-              "Smalltalk",
-              "TestSuite/TestHarness.som", testSelector };
-      Source source = Launcher.START;
+    int returnCode = 0;
+    String[] args = new String[] {
+        "-cp",
+        "Smalltalk",
+        "TestSuite/TestHarness.som", testSelector};
+    Source source = Launcher.START;
 
-      Context.Builder builder = Context.newBuilder(GraalSOMLanguage.ID).in(System.in).out(System.out).allowAllAccess(true);
-      builder.arguments(GraalSOMLanguage.ID, args);
-      Context context = builder.build();
+    Context.Builder builder = Context.newBuilder(GraalSOMLanguage.ID).in(System.in)
+                                     .out(System.out).allowAllAccess(true);
+    builder.arguments(GraalSOMLanguage.ID, args);
+    Context context = builder.build();
 
-      try {
-          context.eval(source);
-      }
-      catch (PolyglotException ex) {
-        returnCode = 1;
-      }
-      assertEquals(0, returnCode);
+    try {
+      context.eval(source);
+    } catch (PolyglotException ex) {
+      returnCode = 1;
+    }
+    assertEquals(0, returnCode);
   }
 
 }
