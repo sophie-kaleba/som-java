@@ -309,7 +309,8 @@ public final class Universe {
       Shell shell = new Shell(this, interpreter);
       SMethod bootstrapMethod = createBootstrapMethod();
       shell.setBootstrapMethod(bootstrapMethod);
-      return shell.start();
+      Frame bootstrapFrame = this.newFrame(null, bootstrapMethod, null);
+      return shell.start(bootstrapFrame);
     }
 
     // Lookup the initialize invokable on the system class
@@ -336,7 +337,7 @@ public final class Universe {
     SMethod bootstrapMethod = createBootstrapMethod();
 
     // Create a fake bootstrap frame with the system object on the stack
-    Frame bootstrapFrame = interpreter.pushNewFrame(bootstrapMethod);
+    Frame bootstrapFrame = this.newFrame(null, bootstrapMethod, null);
     bootstrapFrame.push(receiver);
 
     if (arguments != null) {
@@ -344,7 +345,7 @@ public final class Universe {
     }
 
     // Invoke the initialize invokable
-    // TODO - temporary hack before proper optimisation
+    // TODO - May be cleaner to make invoke return an SAbstractObject
     invokable.invoke(bootstrapFrame, interpreter);
     return bootstrapFrame.getStackElement(0);
   }
@@ -529,6 +530,7 @@ public final class Universe {
     return result;
   }
 
+  @TruffleBoundary
   public SInteger newInteger(final long value) {
     SInteger result = SInteger.getInteger(value);
     return result;
