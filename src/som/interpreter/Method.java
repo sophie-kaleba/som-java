@@ -3,7 +3,9 @@ package som.interpreter;
 import com.oracle.truffle.api.CompilerDirectives;
 import com.oracle.truffle.api.TruffleLanguage;
 import com.oracle.truffle.api.frame.VirtualFrame;
+
 import som.compiler.ProgramDefinitionError;
+import som.vmobjects.SAbstractObject;
 import som.vmobjects.SMethod;
 
 public final class Method extends Invokable {
@@ -19,16 +21,25 @@ public final class Method extends Invokable {
     }
 
     @Override
-    public Object execute(final VirtualFrame frame) {
+    public Object execute(final VirtualFrame frame) throws ReturnException {
         Interpreter interpreter = (Interpreter) frame.getArguments()[0];
+        Frame newFrame = (Frame) frame.getArguments()[1];
 
-        try {
-            return interpreter.start();
-        } catch (ProgramDefinitionError programDefinitionError) {
-            programDefinitionError.printStackTrace();
+            try {
+                SAbstractObject result = interpreter.start(newFrame);
+                return result;
+            } catch (ReturnException e) {
+                if (e.hasReachedTarget(newFrame)) {
+                    SAbstractObject result = e.getResult();
+                    return result;
+                }
+                throw e;
+            } catch (ProgramDefinitionError programDefinitionError) {
+                programDefinitionError.printStackTrace();
+            }
+            return null;
         }
-        return null;
-    }
+
 
     public int getNumberOfBytecodes() {
         // Get the number of bytecodes in this method
