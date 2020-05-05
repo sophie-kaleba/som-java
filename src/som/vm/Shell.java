@@ -28,6 +28,8 @@ package som.vm;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 
+import com.oracle.truffle.api.Truffle;
+import com.oracle.truffle.api.TruffleRuntime;
 import som.interpreter.Frame;
 import som.interpreter.Interpreter;
 import som.vmobjects.SAbstractObject;
@@ -52,7 +54,7 @@ public class Shell {
     bootstrapMethod = method;
   }
 
-  public SAbstractObject start() {
+  public SAbstractObject start(Frame frame) {
 
     BufferedReader in;
     String stmt;
@@ -69,8 +71,8 @@ public class Shell {
 
     Universe.println("SOM Shell. Type \"quit\" to exit.\n");
 
-    // Create a fake bootstrap frame
-    currentFrame = interpreter.pushNewFrame(bootstrapMethod);
+    // fetch the bootstrap frame
+    currentFrame = frame;
 
     // Remember the first bytecode index, e.g. index of the HALT instruction
     bytecodeIndex = currentFrame.getBytecodeIndex();
@@ -94,7 +96,7 @@ public class Shell {
 
         // If success
         if (myClass != null) {
-          currentFrame = interpreter.getFrame();
+          currentFrame = frame;
 
           // Go back, so we will evaluate the bootstrap frames halt
           // instruction again
@@ -115,14 +117,14 @@ public class Shell {
           initialize.invoke(currentFrame, interpreter);
 
           // Start the interpreter
-          interpreter.start();
+          interpreter.start(currentFrame);
 
           // Save the result of the run method
           it = currentFrame.pop();
         }
       } catch (Exception e) {
         Universe.errorPrintln("Caught exception: " + e.getMessage());
-        Universe.errorPrintln("" + interpreter.getFrame().getPreviousFrame());
+        Universe.errorPrintln("" + frame.getPreviousFrame());
       }
     }
   }

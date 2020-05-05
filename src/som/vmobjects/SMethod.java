@@ -24,8 +24,6 @@
 
 package som.vmobjects;
 
-import static som.interpreter.Bytecodes.HALT;
-
 import java.util.List;
 
 import com.oracle.truffle.api.CallTarget;
@@ -45,7 +43,7 @@ public class SMethod extends SAbstractObject implements SInvokable {
 
   public SMethod(final SObject nilObject, final SSymbol signature, final int numberOfBytecodes,
                  final SInteger numberOfLocals, final SInteger maxNumStackElements,
-                 final int numberOfLiterals, final List<SAbstractObject> literals, final TruffleLanguage language) {
+                 final int numberOfLiterals, final List<SAbstractObject> literals, final TruffleLanguage<?> language) {
     this.signature = signature;
     this.numberOfLocals = numberOfLocals;
     this.method = new Method(language, numberOfBytecodes, this);
@@ -130,15 +128,14 @@ public class SMethod extends SAbstractObject implements SInvokable {
 
   @Override
   public void invoke(final Frame frame, final Interpreter interpreter) {
-    // Allocate and push a new frame on the interpreter stack
-    Frame newFrame = interpreter.pushNewFrame(this);
+    Frame newFrame = interpreter.newFrame(frame, this, null);
     newFrame.copyArgumentsFrom(frame);
-    IndirectCallNode indirectCallNode = interpreter.getIndirectCallNode();
-    indirectCallNode.call(callTarget, interpreter);
 
-    SMethod bootstrapMethod = universe.createBootstrapMethod();
-    Frame bootstrapFrame = interpreter.pushNewFrame(bootstrapMethod);
-    bootstrapFrame.push(universe.objectSystem);
+    IndirectCallNode indirectCallNode = interpreter.getIndirectCallNode();
+    SAbstractObject result = (SAbstractObject) indirectCallNode.call(callTarget, interpreter, newFrame);
+
+    frame.popArgumentsAndPushResult(result, this);
+    newFrame.clearPreviousFrame();
   }
 
   @Override
@@ -163,6 +160,10 @@ public class SMethod extends SAbstractObject implements SInvokable {
   @Override
   public SClass getSOMClass(final Universe universe) {
     return universe.methodClass;
+  }
+
+  public CallTarget getCallTarget() {
+    return this.callTarget;
   }
 
   // Private variable holding byte array of bytecodes

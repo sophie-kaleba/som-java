@@ -24,6 +24,7 @@
 
 package som.vmobjects;
 
+import com.oracle.truffle.api.nodes.IndirectCallNode;
 import som.interpreter.Frame;
 import som.interpreter.Interpreter;
 import som.vm.Universe;
@@ -72,8 +73,14 @@ public class SBlock extends SAbstractObject {
 
       // Push a new frame and set its context to be the one specified in
       // the block
-      Frame newFrame = interpreter.pushNewFrame(self.getMethod(), context);
+      Frame newFrame = interpreter.newFrame(frame, self.getMethod(), context);
       newFrame.copyArgumentsFrom(frame);
+
+      IndirectCallNode indirectCallNode = interpreter.getIndirectCallNode();
+      SAbstractObject result = (SAbstractObject) indirectCallNode.call(self.getMethod().getCallTarget(), interpreter, newFrame);
+
+      frame.popArgumentsAndPushResult(result, self.getMethod());
+      newFrame.clearPreviousFrame();
     }
 
     private static java.lang.String computeSignatureString(int numberOfArguments) {
