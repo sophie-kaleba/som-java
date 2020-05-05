@@ -227,6 +227,19 @@ public class Frame {
     }
   }
 
+  public void popArgumentsAndPushResult(final SAbstractObject result, SMethod method) {
+    // compute the number of arguments
+    int numberOfArguments = method.getNumberOfArguments();
+
+    // Pop the arguments
+    for (int i = 0; i < numberOfArguments; i++) {
+      this.pop();
+    }
+
+    // Push the result
+    this.push(result);
+  }
+
   // Private variables holding the stack pointer and the bytecode index
   private int stackPointer;
   private int bytecodeIndex;
