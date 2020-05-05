@@ -50,6 +50,8 @@ public class BasicInterpreterTests {
     return Arrays.asList(new Object[][] {
         // {"Self", "assignSuper", 42, ProgramDefinitionError.class},
 
+        {"BinaryOperation", "test", 11, Long.class},
+
         {"MethodCall", "test", 42, Long.class},
         {"MethodCall", "test2", 42, Long.class},
 
