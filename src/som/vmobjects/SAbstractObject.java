@@ -43,31 +43,29 @@ public abstract class SAbstractObject implements TruffleObject {
   public abstract SClass getSOMClass(Universe universe);
 
   public void send(final String selectorString, final SAbstractObject[] arguments,
-      final Universe universe, final Interpreter interpreter) {
+      final Universe universe, final Interpreter interpreter, Frame frame) {
     // Turn the selector string into a selector
     SSymbol selector = universe.symbolFor(selectorString);
 
     // Push the receiver onto the stack
-    interpreter.getFrame().push(this);
+    frame.push(this);
 
     // Push the arguments onto the stack
     for (SAbstractObject arg : arguments) {
-      interpreter.getFrame().push(arg);
+      frame.push(arg);
     }
 
     // Lookup the invokable
     SInvokable invokable = getSOMClass(universe).lookupInvokable(selector);
 
     // Invoke the invokable
-    invokable.invoke(interpreter.getFrame(), interpreter);
+    invokable.invoke(frame, interpreter);
   }
 
   public void sendDoesNotUnderstand(final SSymbol selector,
-      final Universe universe, final Interpreter interpreter) {
+      final Universe universe, final Interpreter interpreter, Frame frame) {
     // Compute the number of arguments
     int numberOfArguments = selector.getNumberOfSignatureArguments();
-
-    Frame frame = interpreter.getFrame();
 
     // Allocate an array with enough room to hold all arguments
     // except for the receiver, which is passed implicitly, as receiver of #dnu.
@@ -81,19 +79,19 @@ public abstract class SAbstractObject implements TruffleObject {
     frame.pop(); // pop receiver
 
     SAbstractObject[] args = {selector, argumentsArray};
-    send("doesNotUnderstand:arguments:", args, universe, interpreter);
+    send("doesNotUnderstand:arguments:", args, universe, interpreter, frame);
   }
 
   public void sendUnknownGlobal(final SSymbol globalName,
-      final Universe universe, final Interpreter interpreter) {
+      final Universe universe, final Interpreter interpreter, Frame frame) {
     SAbstractObject[] arguments = {globalName};
-    send("unknownGlobal:", arguments, universe, interpreter);
+    send("unknownGlobal:", arguments, universe, interpreter, frame);
   }
 
   public void sendEscapedBlock(final SBlock block, final Universe universe,
-      final Interpreter interpreter) {
+      final Interpreter interpreter, Frame frame) {
     SAbstractObject[] arguments = {block};
-    send("escapedBlock:", arguments, universe, interpreter);
+    send("escapedBlock:", arguments, universe, interpreter, frame);
   }
 
   @Override
