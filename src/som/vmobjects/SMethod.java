@@ -123,7 +123,7 @@ public class SMethod extends SAbstractObject implements SInvokable {
 
   public void setBytecode(final int index, final byte value) {
     // Set the bytecode at the given index to the given value
-    method.setBytecode(index,value);
+    method.setBytecode(index, value);
   }
 
   @Override

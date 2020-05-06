@@ -56,7 +56,7 @@ public final class Method extends Invokable {
         bytecodes[index] = value;
     }
 
-    public byte[] getBytecodes () {
+    public byte[] getBytecodes() {
         return this.bytecodes;
     }
 
