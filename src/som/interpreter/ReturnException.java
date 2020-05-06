@@ -17,7 +17,7 @@ public class ReturnException extends RuntimeException {
         return result;
     }
 
-    public Frame getTarget() {return this.outerContext;}
+    public Frame getTarget() { return this.outerContext; }
 
     public boolean hasReachedTarget(Frame current) {
         return current == outerContext;
