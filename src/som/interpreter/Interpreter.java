@@ -63,6 +63,7 @@ import som.vmobjects.SSymbol;
 public class Interpreter {
 
   private final Universe universe;
+  @CompilerDirectives.CompilationFinal int currentBytecodeIndex = 0;
 
   public Interpreter(final Universe universe) {
     this.universe = universe;
@@ -220,36 +221,31 @@ public class Interpreter {
     send(signature, receiver.getSOMClass(universe), bytecodeIndex, frame, method);
   }
 
-  @ExplodeLoop(kind = ExplodeLoop.LoopExplosionKind.MERGE_EXPLODE)
-  public SAbstractObject start(final Frame frame, final SMethod method, int bcIndex) throws ReturnException, ProgramDefinitionError {
+  void setCurrentBytecodeIndex(int bytecodeIndex) {
+    CompilerDirectives.transferToInterpreterAndInvalidate();
+    this.currentBytecodeIndex = bytecodeIndex;
+  }
 
-    //int bcIndex = 0;
+  @ExplodeLoop(kind = ExplodeLoop.LoopExplosionKind.MERGE_EXPLODE)
+  public SAbstractObject start(final Frame frame, final SMethod method) throws ReturnException, ProgramDefinitionError {
+
+    int bytecodeIndex = 0;
     // Iterate through the bytecodes
     while (true) {
 
-      //SMethod currentMethod = getMethod(frame);
-      final int currentBc = bcIndex;
-
-      // Get the current bytecode index
-      //int bytecodeIndex = frame.getBytecodeIndex();
+      CompilerAsserts.partialEvaluationConstant(method);
+      //TODO - next is necessary to get rid of the switch
+      // as it is, will end up in a AOB exception, as we pass along the state of interpreter between calls
+      //CompilerAsserts.partialEvaluationConstant(currentBytecodeIndex);
 
       // Get the current bytecode
-      byte bytecode = method.getBytecode(bcIndex);
+      byte bytecode = method.getBytecode(currentBytecodeIndex);
 
       // Get the length of the current bytecode
       int bytecodeLength = getBytecodeLength(bytecode);
 
       // Compute the next bytecode index
-      //int nextBytecodeIndex = bcIndex + bytecodeLength;
-
-      // Update the bytecode index of the frame
-      //frame.setBytecodeIndex(nextBytecodeIndex);
-      bcIndex = currentBc + bytecodeLength;
-      //CompilerAsserts.partialEvaluationConstant(bytecodeIndex);
-      CompilerAsserts.partialEvaluationConstant(method);
-      //CompilerAsserts.partialEvaluationConstant(currentBc);
-      CompilerDirectives.isPartialEvaluationConstant(currentBc);
-      CompilerDirectives.isPartialEvaluationConstant(method);
+      bytecodeIndex = currentBytecodeIndex + bytecodeLength;
 
       // Handle the current bytecode
       switch (bytecode) {
@@ -265,32 +261,32 @@ public class Interpreter {
         }
 
         case PUSH_LOCAL: {
-          doPushLocal(currentBc, frame, method);
+          doPushLocal(currentBytecodeIndex, frame, method);
           break;
         }
 
         case PUSH_ARGUMENT: {
-          doPushArgument(currentBc, frame, method);
+          doPushArgument(currentBytecodeIndex, frame, method);
           break;
         }
 
         case PUSH_FIELD: {
-          doPushField(currentBc, frame, method);
+          doPushField(currentBytecodeIndex, frame, method);
           break;
         }
 
         case PUSH_BLOCK: {
-          doPushBlock(currentBc, frame, method);
+          doPushBlock(currentBytecodeIndex, frame, method);
           break;
         }
 
         case PUSH_CONSTANT: {
-          doPushConstant(currentBc, frame, method);
+          doPushConstant(currentBytecodeIndex, frame, method);
           break;
         }
 
         case PUSH_GLOBAL: {
-          doPushGlobal(currentBc, frame, method);
+          doPushGlobal(currentBytecodeIndex, frame, method);
           break;
         }
 
@@ -300,27 +296,27 @@ public class Interpreter {
         }
 
         case POP_LOCAL: {
-          doPopLocal(currentBc, frame, method);
+          doPopLocal(currentBytecodeIndex, frame, method);
           break;
         }
 
         case POP_ARGUMENT: {
-          doPopArgument(currentBc, frame, method);
+          doPopArgument(currentBytecodeIndex, frame, method);
           break;
         }
 
         case POP_FIELD: {
-          doPopField(currentBc, frame, method);
+          doPopField(currentBytecodeIndex, frame, method);
           break;
         }
 
         case SEND: {
-          doSend(currentBc, frame, method);
+          doSend(currentBytecodeIndex, frame, method);
           break;
         }
 
         case SUPER_SEND: {
-          doSuperSend(currentBc, frame, method);
+          doSuperSend(currentBytecodeIndex, frame, method);
           break;
         }
 
@@ -336,7 +332,9 @@ public class Interpreter {
           Universe.errorPrintln("Nasty bug in interpreter");
           break;
       }
-
+      // Update the bytecode index
+      // To which extent updating it here would enable PE for the switch...?
+      this.setCurrentBytecodeIndex(bytecodeIndex);
     }
   }
 
@@ -355,7 +353,6 @@ public class Interpreter {
     // First try the inline cache
     SInvokable invokable;
 
-    //SMethod m = getMethod(frame);
     SClass cachedClass = method.getInlineCacheClass(bytecodeIndex);
     if (cachedClass == receiverClass) {
       invokable = method.getInlineCacheInvokable(bytecodeIndex);
