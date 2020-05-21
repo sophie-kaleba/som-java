@@ -71,12 +71,6 @@ public class Shell {
 
     Universe.println("SOM Shell. Type \"quit\" to exit.\n");
 
-    // fetch the bootstrap frame
-    currentFrame = frame;
-
-    // Remember the first bytecode index, e.g. index of the HALT instruction
-    //bytecodeIndex = currentFrame.getBytecodeIndex();
-
     while (true) {
       try {
         Universe.print("---> ");
@@ -98,10 +92,6 @@ public class Shell {
         if (myClass != null) {
           currentFrame = frame;
 
-          // Go back, so we will evaluate the bootstrap frames halt
-          // instruction again
-          //currentFrame.setBytecodeIndex(bytecodeIndex);
-
           // Create and push a new instance of our class on the stack
           myObject = universe.newInstance(myClass);
           currentFrame.push(myObject);
@@ -117,7 +107,7 @@ public class Shell {
           initialize.invoke(currentFrame, interpreter);
 
           // Start the interpreter
-          interpreter.start(currentFrame, currentFrame.getMethod(), 0);
+          interpreter.start(currentFrame, currentFrame.getMethod());
 
           // Save the result of the run method
           it = currentFrame.pop();

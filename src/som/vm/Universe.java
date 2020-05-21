@@ -505,7 +505,6 @@ public final class Universe {
 
     // Reset the stack pointer and the bytecode index
     result.resetStackPointer();
-    //result.setBytecodeIndex(0);
 
     // Return the freshly allocated frame
     return result;
