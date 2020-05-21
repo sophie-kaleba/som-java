@@ -643,7 +643,9 @@ public class Parser {
     primary(mgenc, superSend);
 
     while (sym == Identifier) {
+       // should limit the superSend true for the first one
       unaryMessage(mgenc, superSend);
+      superSend.set(false);
     }
   }
 

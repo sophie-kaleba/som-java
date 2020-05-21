@@ -24,9 +24,11 @@ public final class Method extends Invokable {
     public Object execute(final VirtualFrame frame) throws ReturnException {
         Interpreter interpreter = (Interpreter) frame.getArguments()[0];
         Frame newFrame = (Frame) frame.getArguments()[1];
+        assert this.method == newFrame.getMethod();
 
+        while (true) {
             try {
-                SAbstractObject result = interpreter.start(newFrame);
+                SAbstractObject result = interpreter.start(newFrame, this.method);
                 return result;
             } catch (ReturnException e) {
                 if (e.hasReachedTarget(newFrame)) {
@@ -37,8 +39,10 @@ public final class Method extends Invokable {
             } catch (ProgramDefinitionError programDefinitionError) {
                 programDefinitionError.printStackTrace();
             }
-            return null;
+            catch (RestartLoopException rle) {
+            }
         }
+    }
 
 
     public int getNumberOfBytecodes() {

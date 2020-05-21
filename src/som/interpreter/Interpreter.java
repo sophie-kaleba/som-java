@@ -43,6 +43,8 @@ import static som.interpreter.Bytecodes.SEND;
 import static som.interpreter.Bytecodes.SUPER_SEND;
 import static som.interpreter.Bytecodes.getBytecodeLength;
 
+import com.oracle.truffle.api.CompilerAsserts;
+import com.oracle.truffle.api.CompilerDirectives;
 import com.oracle.truffle.api.Truffle;
 import com.oracle.truffle.api.nodes.ExplodeLoop;
 import com.oracle.truffle.api.nodes.IndirectCallNode;
@@ -66,36 +68,36 @@ public class Interpreter {
     this.universe = universe;
   }
 
-  private void doDup(Frame frame) {
+  private void doDup(final Frame frame) {
     // Handle the DUP bytecode
     frame.push(frame.getStackElement(0));
   }
 
-  private void doPushLocal(final int bytecodeIndex, Frame frame) {
+  private void doPushLocal(final int bytecodeIndex, final Frame frame, final SMethod method) {
     // Handle the PUSH LOCAL bytecode
     frame.push(
-        frame.getLocal(getMethod(frame).getBytecode(bytecodeIndex + 1),
-            getMethod(frame).getBytecode(bytecodeIndex + 2)));
+        frame.getLocal(method.getBytecode(bytecodeIndex + 1),
+                method.getBytecode(bytecodeIndex + 2)));
   }
 
-  private void doPushArgument(final int bytecodeIndex, Frame frame) {
+  private void doPushArgument(final int bytecodeIndex, final Frame frame, final SMethod method) {
     // Handle the PUSH ARGUMENT bytecode
     frame.push(
-        frame.getArgument(getMethod(frame).getBytecode(bytecodeIndex + 1),
-            getMethod(frame).getBytecode(bytecodeIndex + 2)));
+        frame.getArgument(method.getBytecode(bytecodeIndex + 1),
+                method.getBytecode(bytecodeIndex + 2)));
   }
 
-  private void doPushField(final int bytecodeIndex, Frame frame) {
+  private void doPushField(final int bytecodeIndex, final Frame frame, final SMethod method) {
     // Handle the PUSH FIELD bytecode
-    int fieldIndex = getMethod(frame).getBytecode(bytecodeIndex + 1);
+    int fieldIndex = method.getBytecode(bytecodeIndex + 1);
 
     // Push the field with the computed index onto the stack
     frame.push(((SObject) getSelf(frame)).getField(fieldIndex));
   }
 
-  private void doPushBlock(final int bytecodeIndex, Frame frame) throws ProgramDefinitionError {
+  private void doPushBlock(final int bytecodeIndex, final Frame frame, final SMethod method) throws ProgramDefinitionError {
     // Handle the PUSH BLOCK bytecode
-    SMethod blockMethod = (SMethod) getMethod(frame).getConstant(bytecodeIndex);
+    SMethod blockMethod = (SMethod) method.getConstant(bytecodeIndex);
 
     // Push a new block with the current getFrame() as context onto the
     // stack
@@ -104,14 +106,14 @@ public class Interpreter {
             blockMethod.getNumberOfArguments()));
   }
 
-  private void doPushConstant(final int bytecodeIndex, Frame frame) {
+  private void doPushConstant(final int bytecodeIndex, final Frame frame, final SMethod method) {
     // Handle the PUSH CONSTANT bytecode
-    frame.push(getMethod(frame).getConstant(bytecodeIndex));
+    frame.push(method.getConstant(bytecodeIndex));
   }
 
-  private void doPushGlobal(final int bytecodeIndex, Frame frame) {
+  private void doPushGlobal(final int bytecodeIndex, final Frame frame, final SMethod method) {
     // Handle the PUSH GLOBAL bytecode
-    SSymbol globalName = (SSymbol) getMethod(frame).getConstant(bytecodeIndex);
+    SSymbol globalName = (SSymbol) method.getConstant(bytecodeIndex);
 
     // Get the global from the universe
     SAbstractObject global = universe.getGlobal(globalName);
@@ -125,38 +127,38 @@ public class Interpreter {
     }
   }
 
-  private void doPop(Frame frame) {
+  private void doPop(final Frame frame) {
     // Handle the POP bytecode
     frame.pop();
   }
 
-  private void doPopLocal(final int bytecodeIndex, Frame frame) {
+  private void doPopLocal(final int bytecodeIndex, final Frame frame, final SMethod method) {
     // Handle the POP LOCAL bytecode
-    frame.setLocal(getMethod(frame).getBytecode(bytecodeIndex + 1),
-        getMethod(frame).getBytecode(bytecodeIndex + 2), frame.pop());
+    frame.setLocal(method.getBytecode(bytecodeIndex + 1),
+        method.getBytecode(bytecodeIndex + 2), frame.pop());
   }
 
-  private void doPopArgument(final int bytecodeIndex, Frame frame) {
+  private void doPopArgument(final int bytecodeIndex, final Frame frame, final SMethod method) {
     // Handle the POP ARGUMENT bytecode
-    frame.setArgument(getMethod(frame).getBytecode(bytecodeIndex + 1),
-        getMethod(frame).getBytecode(bytecodeIndex + 2), frame.pop());
+    frame.setArgument(method.getBytecode(bytecodeIndex + 1),
+        method.getBytecode(bytecodeIndex + 2), frame.pop());
   }
 
-  private void doPopField(final int bytecodeIndex, Frame frame) {
+  private void doPopField(final int bytecodeIndex, final Frame frame, final SMethod method) {
     // Handle the POP FIELD bytecode
-    int fieldIndex = getMethod(frame).getBytecode(bytecodeIndex + 1);
+    int fieldIndex = method.getBytecode(bytecodeIndex + 1);
 
     // Set the field with the computed index to the value popped from the stack
     ((SObject) getSelf(frame)).setField(fieldIndex, frame.pop());
   }
 
-  private void doSuperSend(final int bytecodeIndex, Frame frame) {
+  private void doSuperSend(final int bytecodeIndex, final Frame frame, final SMethod method) {
     // Handle the SUPER SEND bytecode
-    SSymbol signature = (SSymbol) getMethod(frame).getConstant(bytecodeIndex);
+    SSymbol signature = (SSymbol) method.getConstant(bytecodeIndex);
 
     // Send the message
     // Lookup the invokable with the given signature
-    SClass holderSuper = (SClass) getMethod(frame).getHolder().getSuperClass();
+    SClass holderSuper = (SClass) method.getHolder().getSuperClass();
     SInvokable invokable = holderSuper.lookupInvokable(signature);
 
     if (invokable != null) {
@@ -173,12 +175,12 @@ public class Interpreter {
     }
   }
 
-  private SAbstractObject doReturnLocal(Frame frame) {
+  private SAbstractObject doReturnLocal(final Frame frame) {
     // Handle the RETURN LOCAL bytecode
     return frame.pop();
   }
 
-  private SAbstractObject doReturnNonLocal(Frame frame) throws ReturnException {
+  private SAbstractObject doReturnNonLocal(final Frame frame) throws ReturnException {
     // Handle the RETURN NON LOCAL bytecode
     SAbstractObject result = frame.pop();
 
@@ -204,9 +206,9 @@ public class Interpreter {
     throw new ReturnException(result, context);
   }
 
-  private void doSend(final int bytecodeIndex, Frame frame) {
+  private void doSend(final int bytecodeIndex, final Frame frame, final SMethod method) {
     // Handle the SEND bytecode
-    SSymbol signature = (SSymbol) getMethod(frame).getConstant(bytecodeIndex);
+    SSymbol signature = (SSymbol) method.getConstant(bytecodeIndex);
 
     // Get the number of arguments from the signature
     int numberOfArguments = signature.getNumberOfSignatureArguments();
@@ -215,31 +217,39 @@ public class Interpreter {
     SAbstractObject receiver = frame.getStackElement(numberOfArguments - 1);
 
     // Send the message
-    send(signature, receiver.getSOMClass(universe), bytecodeIndex, frame);
+    send(signature, receiver.getSOMClass(universe), bytecodeIndex, frame, method);
   }
 
   @ExplodeLoop(kind = ExplodeLoop.LoopExplosionKind.MERGE_EXPLODE)
-  public SAbstractObject start(Frame frame) throws ReturnException, ProgramDefinitionError {
+  public SAbstractObject start(final Frame frame, final SMethod method, int bcIndex) throws ReturnException, ProgramDefinitionError {
 
+    //int bcIndex = 0;
     // Iterate through the bytecodes
     while (true) {
 
-      SMethod currentMethod = getMethod(frame);
+      //SMethod currentMethod = getMethod(frame);
+      final int currentBc = bcIndex;
 
       // Get the current bytecode index
-      int bytecodeIndex = frame.getBytecodeIndex();
+      //int bytecodeIndex = frame.getBytecodeIndex();
 
       // Get the current bytecode
-      byte bytecode = currentMethod.getBytecode(bytecodeIndex);
+      byte bytecode = method.getBytecode(bcIndex);
 
       // Get the length of the current bytecode
       int bytecodeLength = getBytecodeLength(bytecode);
 
       // Compute the next bytecode index
-      int nextBytecodeIndex = bytecodeIndex + bytecodeLength;
+      //int nextBytecodeIndex = bcIndex + bytecodeLength;
 
       // Update the bytecode index of the frame
-      frame.setBytecodeIndex(nextBytecodeIndex);
+      //frame.setBytecodeIndex(nextBytecodeIndex);
+      bcIndex = currentBc + bytecodeLength;
+      //CompilerAsserts.partialEvaluationConstant(bytecodeIndex);
+      CompilerAsserts.partialEvaluationConstant(method);
+      //CompilerAsserts.partialEvaluationConstant(currentBc);
+      CompilerDirectives.isPartialEvaluationConstant(currentBc);
+      CompilerDirectives.isPartialEvaluationConstant(method);
 
       // Handle the current bytecode
       switch (bytecode) {
@@ -255,32 +265,32 @@ public class Interpreter {
         }
 
         case PUSH_LOCAL: {
-          doPushLocal(bytecodeIndex, frame);
+          doPushLocal(currentBc, frame, method);
           break;
         }
 
         case PUSH_ARGUMENT: {
-          doPushArgument(bytecodeIndex, frame);
+          doPushArgument(currentBc, frame, method);
           break;
         }
 
         case PUSH_FIELD: {
-          doPushField(bytecodeIndex, frame);
+          doPushField(currentBc, frame, method);
           break;
         }
 
         case PUSH_BLOCK: {
-          doPushBlock(bytecodeIndex, frame);
+          doPushBlock(currentBc, frame, method);
           break;
         }
 
         case PUSH_CONSTANT: {
-          doPushConstant(bytecodeIndex, frame);
+          doPushConstant(currentBc, frame, method);
           break;
         }
 
         case PUSH_GLOBAL: {
-          doPushGlobal(bytecodeIndex, frame);
+          doPushGlobal(currentBc, frame, method);
           break;
         }
 
@@ -290,27 +300,27 @@ public class Interpreter {
         }
 
         case POP_LOCAL: {
-          doPopLocal(bytecodeIndex, frame);
+          doPopLocal(currentBc, frame, method);
           break;
         }
 
         case POP_ARGUMENT: {
-          doPopArgument(bytecodeIndex, frame);
+          doPopArgument(currentBc, frame, method);
           break;
         }
 
         case POP_FIELD: {
-          doPopField(bytecodeIndex, frame);
+          doPopField(currentBc, frame, method);
           break;
         }
 
         case SEND: {
-          doSend(bytecodeIndex, frame);
+          doSend(currentBc, frame, method);
           break;
         }
 
         case SUPER_SEND: {
-          doSuperSend(bytecodeIndex, frame);
+          doSuperSend(currentBc, frame, method);
           break;
         }
 
@@ -326,43 +336,44 @@ public class Interpreter {
           Universe.errorPrintln("Nasty bug in interpreter");
           break;
       }
+
     }
   }
 
-  public SMethod getMethod(Frame frame) {
+  public SMethod getMethod(final Frame frame) {
     // Get the method from the interpreter
     return frame.getMethod();
   }
 
-  public SAbstractObject getSelf(Frame frame) {
+  public SAbstractObject getSelf(final Frame frame) {
     // Get the self object from the interpreter
     return frame.getOuterContext(universe.nilObject).getArgument(0, 0);
   }
 
   private void send(final SSymbol selector, final SClass receiverClass,
-      final int bytecodeIndex, Frame frame) throws ReturnException {
+      final int bytecodeIndex, Frame frame, final SMethod method) throws ReturnException {
     // First try the inline cache
     SInvokable invokable;
 
-    SMethod m = getMethod(frame);
-    SClass cachedClass = m.getInlineCacheClass(bytecodeIndex);
+    //SMethod m = getMethod(frame);
+    SClass cachedClass = method.getInlineCacheClass(bytecodeIndex);
     if (cachedClass == receiverClass) {
-      invokable = m.getInlineCacheInvokable(bytecodeIndex);
+      invokable = method.getInlineCacheInvokable(bytecodeIndex);
     } else {
       if (cachedClass == null) {
         // Lookup the invokable with the given signature
         invokable = receiverClass.lookupInvokable(selector);
-        m.setInlineCache(bytecodeIndex, receiverClass, invokable);
+        method.setInlineCache(bytecodeIndex, receiverClass, invokable);
       } else {
         // the bytecode index after the send is used by the selector constant, and can be used
         // safely as another cache item
-        cachedClass = m.getInlineCacheClass(bytecodeIndex + 1);
+        cachedClass = method.getInlineCacheClass(bytecodeIndex + 1);
         if (cachedClass == receiverClass) {
-          invokable = m.getInlineCacheInvokable(bytecodeIndex + 1);
+          invokable = method.getInlineCacheInvokable(bytecodeIndex + 1);
         } else {
           invokable = receiverClass.lookupInvokable(selector);
           if (cachedClass == null) {
-            m.setInlineCache(bytecodeIndex + 1, receiverClass, invokable);
+            method.setInlineCache(bytecodeIndex + 1, receiverClass, invokable);
           }
         }
       }
@@ -381,7 +392,7 @@ public class Interpreter {
     }
   }
 
-  public Frame newFrame(Frame prevFrame, SMethod method, Frame context) {
+  public Frame newFrame(Frame prevFrame, final SMethod method, final Frame context) {
     return this.universe.newFrame(prevFrame, method, context);
   }
 

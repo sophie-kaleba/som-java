@@ -149,15 +149,15 @@ public class Frame {
         + (int) getMethod().getNumberOfLocals().getEmbeddedInteger() - 1);
   }
 
-  public int getBytecodeIndex() {
-    // Get the current bytecode index for this frame
-    return bytecodeIndex;
-  }
-
-  public void setBytecodeIndex(final int value) {
-    // Set the current bytecode index for this frame
-    bytecodeIndex = value;
-  }
+//  public int getBytecodeIndex() {
+//    // Get the current bytecode index for this frame
+//    return bytecodeIndex;
+//  }
+//
+//  public void setBytecodeIndex(final int value) {
+//    // Set the current bytecode index for this frame
+//    bytecodeIndex = value;
+//  }
 
   public SAbstractObject getStackElement(final int index) {
     // Get the stack element with the given index
@@ -220,7 +220,8 @@ public class Frame {
   public void printStackTrace(final SAbstractObject nilObject) {
     // Print a stack trace starting in this frame
     Universe.print(getMethod().getHolder().getName().getEmbeddedString());
-    Universe.print(getBytecodeIndex() + "@"
+   // Universe.print(getBytecodeIndex() + "@"
+    Universe.print("@"
         + getMethod().getSignature().getEmbeddedString());
     if (hasPreviousFrame(nilObject)) {
       getPreviousFrame().printStackTrace(nilObject);
@@ -242,7 +243,7 @@ public class Frame {
 
   // Private variables holding the stack pointer and the bytecode index
   private int stackPointer;
-  private int bytecodeIndex;
+ // private int bytecodeIndex;
 
   // the offset at which local variables start
   private int localOffset;

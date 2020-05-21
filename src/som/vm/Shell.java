@@ -75,7 +75,7 @@ public class Shell {
     currentFrame = frame;
 
     // Remember the first bytecode index, e.g. index of the HALT instruction
-    bytecodeIndex = currentFrame.getBytecodeIndex();
+    //bytecodeIndex = currentFrame.getBytecodeIndex();
 
     while (true) {
       try {
@@ -100,7 +100,7 @@ public class Shell {
 
           // Go back, so we will evaluate the bootstrap frames halt
           // instruction again
-          currentFrame.setBytecodeIndex(bytecodeIndex);
+          //currentFrame.setBytecodeIndex(bytecodeIndex);
 
           // Create and push a new instance of our class on the stack
           myObject = universe.newInstance(myClass);
@@ -117,7 +117,7 @@ public class Shell {
           initialize.invoke(currentFrame, interpreter);
 
           // Start the interpreter
-          interpreter.start(currentFrame);
+          interpreter.start(currentFrame, currentFrame.getMethod(), 0);
 
           // Save the result of the run method
           it = currentFrame.pop();
