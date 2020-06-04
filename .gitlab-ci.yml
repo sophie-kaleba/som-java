@@ -1,0 +1,28 @@
+stages:
+  - benchmark
+
+variables:
+  PYTHONUNBUFFERED: "true"
+  JVMCI_VERSION_CHECK: ignore
+  ECLIPSE_EXE: /home/gitlab-runner/.local/eclipse/eclipse
+  JAVA_HOME: /usr/lib/jvm/java-8-openjdk-amd64
+
+before_script:
+  - git submodule update --init
+
+# I'll disable it just for now, I haven't fixed checkstyle in my IDE yet
+# build_and_test_job:
+#   stage: build-and-test
+#   tags: [benchmarks, infinity]
+#   script:
+#     - ant checkstyle
+#     - ant eclipseformat-check
+#     - timeout 5m ant unit-tests som-tests
+
+benchmark_job:
+  stage: benchmark
+  tags: [benchmarks, infinity]
+  allow_failure: true
+  script:
+    - ant compile
+    - rebench --without-nice -S --experiment="CI Benchmark Run Pipeline ID $CI_PIPELINE_ID" --branch="$CI_COMMIT_REF_NAME" -c codespeed.conf GraalSOM
