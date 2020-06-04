@@ -5,6 +5,7 @@ import com.oracle.truffle.api.TruffleLanguage;
 import com.oracle.truffle.api.frame.VirtualFrame;
 
 import som.compiler.ProgramDefinitionError;
+import som.vm.Universe;
 import som.vmobjects.SAbstractObject;
 import som.vmobjects.SMethod;
 
@@ -22,12 +23,13 @@ public final class Method extends Invokable {
 
     @Override
     public Object execute(final VirtualFrame frame) throws ReturnException {
-        Interpreter interpreter = (Interpreter) frame.getArguments()[0];
-        Frame newFrame = (Frame) frame.getArguments()[1];
+        //Interpreter interpreter = (Interpreter) frame.getArguments()[0];
+        final Frame newFrame = (Frame) frame.getArguments()[0];
         assert this.method == newFrame.getMethod();
 
         while (true) {
             try {
+                Interpreter interpreter = new Interpreter(Universe.current());
                 SAbstractObject result = interpreter.start(newFrame, this.method);
                 return result;
             } catch (ReturnException e) {

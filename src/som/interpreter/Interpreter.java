@@ -63,7 +63,7 @@ import som.vmobjects.SSymbol;
 public class Interpreter {
 
   private final Universe universe;
-  @CompilerDirectives.CompilationFinal int currentBytecodeIndex = 0;
+  @CompilerDirectives.CompilationFinal int nextBytecodeIndex = 0;
 
   public Interpreter(final Universe universe) {
     this.universe = universe;
@@ -124,6 +124,8 @@ public class Interpreter {
       frame.push(global);
     } else {
       // Send 'unknownGlobal:' to self
+      // TODO - reconsider
+      CompilerDirectives.transferToInterpreter();
       getSelf(frame).sendUnknownGlobal(globalName, universe, this, frame);
     }
   }
@@ -221,31 +223,35 @@ public class Interpreter {
     send(signature, receiver.getSOMClass(universe), bytecodeIndex, frame, method);
   }
 
-  void setCurrentBytecodeIndex(int bytecodeIndex) {
+  void setNextBytecodeIndex(int bytecodeIndex) {
     CompilerDirectives.transferToInterpreterAndInvalidate();
-    this.currentBytecodeIndex = bytecodeIndex;
+    this.nextBytecodeIndex = bytecodeIndex;
   }
 
   @ExplodeLoop(kind = ExplodeLoop.LoopExplosionKind.MERGE_EXPLODE)
   public SAbstractObject start(final Frame frame, final SMethod method) throws ReturnException, ProgramDefinitionError {
 
     int bytecodeIndex = 0;
+
     // Iterate through the bytecodes
     while (true) {
 
+      CompilerAsserts.partialEvaluationConstant(bytecodeIndex);
+
+      int currentBytecodeIndex = bytecodeIndex;
+
       CompilerAsserts.partialEvaluationConstant(method);
-      //TODO - next is necessary to get rid of the switch
-      // as it is, will end up in a AOB exception, as we pass along the state of interpreter between calls
-      //CompilerAsserts.partialEvaluationConstant(currentBytecodeIndex);
 
       // Get the current bytecode
-      byte bytecode = method.getBytecode(currentBytecodeIndex);
+      byte bytecode = method.getBytecode(bytecodeIndex);
+
+      CompilerAsserts.partialEvaluationConstant(bytecode);
 
       // Get the length of the current bytecode
-      int bytecodeLength = getBytecodeLength(bytecode);
+      // int bytecodeLength = getBytecodeLength(bytecode);
 
       // Compute the next bytecode index
-      bytecodeIndex = currentBytecodeIndex + bytecodeLength;
+      // bytecodeIndex = currentBytecodeIndex + bytecodeLength;
 
       // Handle the current bytecode
       switch (bytecode) {
@@ -257,66 +263,79 @@ public class Interpreter {
 
         case DUP: {
           doDup(frame);
+          bytecodeIndex = currentBytecodeIndex + 1;
           break;
         }
 
         case PUSH_LOCAL: {
           doPushLocal(currentBytecodeIndex, frame, method);
+          bytecodeIndex = currentBytecodeIndex + 3;
           break;
         }
 
         case PUSH_ARGUMENT: {
           doPushArgument(currentBytecodeIndex, frame, method);
+          bytecodeIndex = currentBytecodeIndex + 3;
           break;
         }
 
         case PUSH_FIELD: {
           doPushField(currentBytecodeIndex, frame, method);
+          bytecodeIndex = currentBytecodeIndex + 2;
           break;
         }
 
         case PUSH_BLOCK: {
           doPushBlock(currentBytecodeIndex, frame, method);
+          bytecodeIndex = currentBytecodeIndex + 2;
           break;
         }
 
         case PUSH_CONSTANT: {
           doPushConstant(currentBytecodeIndex, frame, method);
+          bytecodeIndex = currentBytecodeIndex + 2;
           break;
         }
 
         case PUSH_GLOBAL: {
           doPushGlobal(currentBytecodeIndex, frame, method);
+          bytecodeIndex = currentBytecodeIndex + 2;
           break;
         }
 
         case POP: {
           doPop(frame);
+          bytecodeIndex = currentBytecodeIndex + 1;
           break;
         }
 
         case POP_LOCAL: {
           doPopLocal(currentBytecodeIndex, frame, method);
+          bytecodeIndex = currentBytecodeIndex + 3;
           break;
         }
 
         case POP_ARGUMENT: {
           doPopArgument(currentBytecodeIndex, frame, method);
+          bytecodeIndex = currentBytecodeIndex + 3;
           break;
         }
 
         case POP_FIELD: {
           doPopField(currentBytecodeIndex, frame, method);
+          bytecodeIndex = currentBytecodeIndex + 2;
           break;
         }
 
         case SEND: {
           doSend(currentBytecodeIndex, frame, method);
+          bytecodeIndex = currentBytecodeIndex + 2;
           break;
         }
 
         case SUPER_SEND: {
           doSuperSend(currentBytecodeIndex, frame, method);
+          bytecodeIndex = currentBytecodeIndex + 2;
           break;
         }
 
@@ -332,9 +351,6 @@ public class Interpreter {
           Universe.errorPrintln("Nasty bug in interpreter");
           break;
       }
-      // Update the bytecode index
-      // To which extent updating it here would enable PE for the switch...?
-      this.setCurrentBytecodeIndex(bytecodeIndex);
     }
   }
 
@@ -393,9 +409,9 @@ public class Interpreter {
     return this.universe.newFrame(prevFrame, method, context);
   }
 
-  private final IndirectCallNode indirectCallNode = Truffle.getRuntime().createIndirectCallNode();
-
-  public IndirectCallNode getIndirectCallNode() {
-    return indirectCallNode;
-  }
+//  final IndirectCallNode indirectCallNode = Truffle.getRuntime().createIndirectCallNode();
+//
+//  public IndirectCallNode getIndirectCallNode() {
+//    return indirectCallNode;
+//  }
 }

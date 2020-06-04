@@ -25,6 +25,8 @@
 
 package som.interpreter;
 
+import com.oracle.truffle.api.CompilerDirectives;
+
 import java.util.stream.Stream;
 
 
@@ -78,12 +80,18 @@ public class Bytecodes {
     return PADDED_BYTECODE_NAMES[bytecode];
   }
 
-  public static int getBytecodeLength(byte bytecode) {
+  public static final int getBytecodeLength(final byte bytecode) {
+    // Return the length of the given bytecode
+    return BYTECODE_LENGTH[bytecode];
+  }
+
+  public static final int getBytecodeLength2(final byte bytecode) {
     // Return the length of the given bytecode
     return BYTECODE_LENGTH[bytecode];
   }
 
   // Static array holding lengths of each bytecode
+  @CompilerDirectives.CompilationFinal(dimensions = 1)
   private static final int[] BYTECODE_LENGTH = new int[] {
       1, // HALT
       1, // DUP
