@@ -21,7 +21,7 @@ before_script:
 
 benchmark_job:
   stage: benchmark
-  tags: [benchmarks, infinity]
+  tags: [benchmarks]
   allow_failure: true
   script:
     - ant compile
