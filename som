@@ -159,7 +159,7 @@ GRAAL_JAVA_9_FLAGS = [
 SOM_ARGS = ['som.Launcher', '-cp', 'Smalltalk']
 
 if args.benchmarks:
-	SOM_ARGS = ['som.Launcher', '-cp', 'Smalltalk:Examples/Benchmarks/DeltaBlue:Examples/Benchmarks/GCBenchmark:Examples/Benchmarks/GraphSearch:Examples/Benchmarks/Json:Examples/Benchmarks/LanguageFeatures:Examples/Benchmarks/NBody:Examples/Benchmarks/Polymorphism:Examples/Benchmarks/Richards']
+	SOM_ARGS = ['som.Launcher', '-cp', 'Smalltalk:Examples/Benchmarks/DeltaBlue:Examples/Benchmarks/GraphSearch:Examples/Benchmarks/GCBenchmark:Examples/Benchmarks/Json:Examples/Benchmarks/LanguageFeatures:Examples/Benchmarks/NBody:Examples/Benchmarks/Polymorphism:Examples/Benchmarks/Richards']
 
 # == Compiler Settings
 TWEAK_INLINING = ['-Dgraal.TruffleCompilationThreshold=191',
