@@ -25,4 +25,12 @@ benchmark_job:
   allow_failure: true
   script:
     - ant compile
-    - rebench --without-nice -S --experiment="CI Benchmark Run Pipeline ID $CI_PIPELINE_ID" --branch="$CI_COMMIT_REF_NAME" -c codespeed.conf GraalSOM
+    - rebench --without-nice --experiment="CI Benchmark Run Pipeline ID $CI_PIPELINE_ID" --branch="$CI_COMMIT_REF_NAME" -c codespeed.conf GraalSOM
+
+benchmark_job_interp:
+  stage: benchmark
+  tags: [benchmarks]
+  allow_failure: true
+  script:
+    - ant compile
+    - rebench --without-nice --experiment="CI Benchmark Run Pipeline ID $CI_PIPELINE_ID" --branch="$CI_COMMIT_REF_NAME" -c codespeed.conf GraalSOM-interp
