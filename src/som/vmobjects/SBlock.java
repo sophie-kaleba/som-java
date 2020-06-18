@@ -74,11 +74,11 @@ public class SBlock extends SAbstractObject {
 
       // Push a new frame and set its context to be the one specified in
       // the block
-      Frame newFrame = Universe.current().newFrame(frame, self.getMethod(), context);
+      Frame newFrame = interpreter.newFrame(frame, self.getMethod(), context);
       newFrame.copyArgumentsFrom(frame);
-      //IndirectCallNode indirectCallNode = interpreter.getIndirectCallNode();
+      IndirectCallNode indirectCallNode = interpreter.getIndirectCallNode();
 
-      SAbstractObject result = (SAbstractObject) indirectCallNode.call(self.getMethod().getCallTarget(), newFrame);
+      SAbstractObject result = (SAbstractObject) indirectCallNode.call(self.getMethod().getCallTarget(), interpreter, newFrame);
 
       frame.popArgumentsAndPushResult(result, self.getMethod());
       newFrame.clearPreviousFrame();
@@ -101,12 +101,6 @@ public class SBlock extends SAbstractObject {
     }
 
     private final int numberOfArguments;
-
-    final IndirectCallNode indirectCallNode = Truffle.getRuntime().createIndirectCallNode();
-
-    public IndirectCallNode getIndirectCallNode() {
-      return indirectCallNode;
-    }
   }
 
   private final SMethod method;

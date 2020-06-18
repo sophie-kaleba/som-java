@@ -121,9 +121,9 @@ public final class Universe {
     return current;
   }
 
-//  public Interpreter getInterpreter() {
-//    return interpreter;
-//  }
+  public Interpreter getInterpreter() {
+    return interpreter;
+  }
 
   public void exit(final long errorCode) {
     // Exit from the Java system
@@ -307,7 +307,7 @@ public final class Universe {
     // Start the shell if no filename is given
     if (arguments.length == 0) {
       //TODO - awful
-      Shell shell = new Shell(this, new Interpreter(this));
+      Shell shell = new Shell(this, interpreter);
       SMethod bootstrapMethod = createBootstrapMethod();
       shell.setBootstrapMethod(bootstrapMethod);
       Frame bootstrapFrame = this.newFrame(null, bootstrapMethod, null);

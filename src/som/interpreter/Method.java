@@ -23,13 +23,13 @@ public final class Method extends Invokable {
 
     @Override
     public Object execute(final VirtualFrame frame) throws ReturnException {
-        //Interpreter interpreter = (Interpreter) frame.getArguments()[0];
-        final Frame newFrame = (Frame) frame.getArguments()[0];
+        Interpreter interpreter = (Interpreter) frame.getArguments()[0];
+        final Frame newFrame = (Frame) frame.getArguments()[1];
         assert this.method == newFrame.getMethod();
 
         while (true) {
             try {
-                Interpreter interpreter = new Interpreter(Universe.current());
+                //Interpreter interpreter = new Interpreter(Universe.current());
                 SAbstractObject result = interpreter.start(newFrame, this.method);
                 return result;
             } catch (ReturnException e) {

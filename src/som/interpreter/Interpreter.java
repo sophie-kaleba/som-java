@@ -409,9 +409,9 @@ public class Interpreter {
     return this.universe.newFrame(prevFrame, method, context);
   }
 
-//  final IndirectCallNode indirectCallNode = Truffle.getRuntime().createIndirectCallNode();
-//
-//  public IndirectCallNode getIndirectCallNode() {
-//    return indirectCallNode;
-//  }
+  final IndirectCallNode indirectCallNode = Truffle.getRuntime().createIndirectCallNode();
+
+  public IndirectCallNode getIndirectCallNode() {
+    return indirectCallNode;
+  }
 }

@@ -128,11 +128,11 @@ public class SMethod extends SAbstractObject implements SInvokable {
 
   @Override
   public void invoke(final Frame frame, final Interpreter interpreter) {
-    final Frame newFrame = universe.newFrame(frame, this, null);
+    final Frame newFrame = interpreter.newFrame(frame, this, null);
     newFrame.copyArgumentsFrom(frame);
 
-    //IndirectCallNode indirectCallNode = interpreter.getIndirectCallNode();
-    SAbstractObject result = (SAbstractObject) indirectCallNode.call(callTarget, newFrame);
+    IndirectCallNode indirectCallNode = interpreter.getIndirectCallNode();
+    SAbstractObject result = (SAbstractObject) indirectCallNode.call(callTarget, interpreter, newFrame);
 
     frame.popArgumentsAndPushResult(result, this);
     newFrame.clearPreviousFrame();
@@ -180,10 +180,4 @@ public class SMethod extends SAbstractObject implements SInvokable {
   // Meta information
   private final SInteger numberOfLocals;
   private final SInteger maximumNumberOfStackElements;
-
-  final IndirectCallNode indirectCallNode = Truffle.getRuntime().createIndirectCallNode();
-
-  public IndirectCallNode getIndirectCallNode() {
-    return indirectCallNode;
-  }
 }
