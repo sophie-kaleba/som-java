@@ -1,8 +1,9 @@
 package som.interpreter;
 
+import com.oracle.truffle.api.nodes.ControlFlowException;
 import som.vmobjects.SAbstractObject;
 
-public class ReturnException extends RuntimeException {
+public class ReturnException extends ControlFlowException {
 
     private static final long serialVersionUID = 6317360573982456256L;
     private final SAbstractObject result;
