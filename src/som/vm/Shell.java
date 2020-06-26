@@ -104,7 +104,7 @@ public class Shell {
               universe.symbolFor("run:"));
 
           // Invoke the run method
-          initialize.invoke(currentFrame, interpreter);
+          initialize.indirectInvoke(currentFrame, interpreter);
 
           // Start the interpreter
           interpreter.start(currentFrame, currentFrame.getMethod());
