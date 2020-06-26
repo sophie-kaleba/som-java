@@ -59,7 +59,7 @@ public abstract class SAbstractObject implements TruffleObject {
     SInvokable invokable = getSOMClass(universe).lookupInvokable(selector);
 
     // Invoke the invokable
-    invokable.invoke(frame, interpreter);
+    invokable.indirectInvoke(frame, interpreter);
   }
 
   public void sendDoesNotUnderstand(final SSymbol selector,

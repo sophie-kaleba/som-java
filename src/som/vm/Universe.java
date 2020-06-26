@@ -347,7 +347,7 @@ public final class Universe {
 
     // Invoke the initialize invokable
     // TODO - May be cleaner to make invoke return an SAbstractObject
-    invokable.invoke(bootstrapFrame, interpreter);
+    invokable.indirectInvoke(bootstrapFrame, interpreter);
     return bootstrapFrame.getStackElement(0);
   }
 

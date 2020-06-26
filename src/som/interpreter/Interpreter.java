@@ -46,6 +46,7 @@ import static som.interpreter.Bytecodes.getBytecodeLength;
 import com.oracle.truffle.api.CompilerAsserts;
 import com.oracle.truffle.api.CompilerDirectives;
 import com.oracle.truffle.api.Truffle;
+import com.oracle.truffle.api.nodes.DirectCallNode;
 import com.oracle.truffle.api.nodes.ExplodeLoop;
 import com.oracle.truffle.api.nodes.IndirectCallNode;
 
@@ -166,8 +167,9 @@ public class Interpreter {
 
     if (invokable != null) {
       // Invoke the invokable in the current frame
-      invokable.invoke(frame, this);
+      invokable.indirectInvoke(frame, this);
     } else {
+      CompilerDirectives.transferToInterpreterAndInvalidate();
       // Compute the number of arguments
       int numberOfArguments = signature.getNumberOfSignatureArguments();
 
@@ -368,12 +370,20 @@ public class Interpreter {
       final int bytecodeIndex, Frame frame, final SMethod method) throws ReturnException {
     // First try the inline cache
     SInvokable invokable;
+    DirectCallNode invokableDirectCallNode = null;
 
     SClass cachedClass = method.getInlineCacheClass(bytecodeIndex);
     if (cachedClass == receiverClass) {
       invokable = method.getInlineCacheInvokable(bytecodeIndex);
+      invokableDirectCallNode = method.getInlineCacheDirectCallNode(bytecodeIndex);
+      CompilerAsserts.partialEvaluationConstant(invokableDirectCallNode);
+      if (invokable != null) {
+        doCall(frame, invokable, invokableDirectCallNode);
+        return;
+      }
     } else {
       if (cachedClass == null) {
+        CompilerDirectives.transferToInterpreterAndInvalidate();
         // Lookup the invokable with the given signature
         invokable = receiverClass.lookupInvokable(selector);
         method.setInlineCache(bytecodeIndex, receiverClass, invokable);
@@ -383,7 +393,12 @@ public class Interpreter {
         cachedClass = method.getInlineCacheClass(bytecodeIndex + 1);
         if (cachedClass == receiverClass) {
           invokable = method.getInlineCacheInvokable(bytecodeIndex + 1);
+          invokableDirectCallNode = method.getInlineCacheDirectCallNode(bytecodeIndex + 1);
+          CompilerAsserts.partialEvaluationConstant(invokableDirectCallNode);
+          doCall(frame, invokable, invokableDirectCallNode);
+          return ;
         } else {
+          CompilerDirectives.transferToInterpreterAndInvalidate();
           invokable = receiverClass.lookupInvokable(selector);
           if (cachedClass == null) {
             method.setInlineCache(bytecodeIndex + 1, receiverClass, invokable);
@@ -393,15 +408,31 @@ public class Interpreter {
     }
 
     if (invokable != null) {
-      // Invoke the invokable in the current frame
-      invokable.invoke(frame, this);
+      doCall(frame, invokable, invokableDirectCallNode);
     } else {
+      CompilerDirectives.transferToInterpreterAndInvalidate();
       int numberOfArguments = selector.getNumberOfSignatureArguments();
 
       // Compute the receiver
       SAbstractObject receiver = frame.getStackElement(numberOfArguments - 1);
 
       receiver.sendDoesNotUnderstand(selector, universe, this, frame);
+    }
+  }
+
+  public void doCall(Frame frame, SInvokable invokable, DirectCallNode invokableDirectCallNode) {
+    if (invokableDirectCallNode != null) {
+      // Invoke the invokable in the current frame
+      CompilerAsserts.partialEvaluationConstant(invokableDirectCallNode);
+      final Frame newFrame = this.newFrame(frame, (SMethod) invokable, null);
+      newFrame.copyArgumentsFrom(frame);
+      SAbstractObject result = (SAbstractObject) invokableDirectCallNode.call(this, newFrame);
+
+      frame.popArgumentsAndPushResult(result, (SMethod) invokable);
+      newFrame.clearPreviousFrame();
+    }
+    else {
+      invokable.indirectInvoke(frame, this);
     }
   }
 

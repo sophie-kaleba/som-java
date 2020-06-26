@@ -39,7 +39,9 @@ public final class Method extends Invokable {
                 }
                 throw e;
             } catch (ProgramDefinitionError programDefinitionError) {
+                CompilerDirectives.transferToInterpreterAndInvalidate();
                 programDefinitionError.printStackTrace();
+                System.exit(1);
             }
             catch (RestartLoopException rle) {
             }

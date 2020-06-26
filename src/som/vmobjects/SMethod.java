@@ -26,9 +26,8 @@ package som.vmobjects;
 
 import java.util.List;
 
-import com.oracle.truffle.api.CallTarget;
-import com.oracle.truffle.api.Truffle;
-import com.oracle.truffle.api.TruffleLanguage;
+import com.oracle.truffle.api.*;
+import com.oracle.truffle.api.nodes.DirectCallNode;
 import com.oracle.truffle.api.nodes.IndirectCallNode;
 
 import som.interpreter.Frame;
@@ -50,6 +49,7 @@ public class SMethod extends SAbstractObject implements SInvokable {
     this.callTarget = Truffle.getRuntime().createCallTarget(method);
     inlineCacheClass = new SClass[numberOfBytecodes];
     inlineCacheInvokable = new SInvokable[numberOfBytecodes];
+    inlineCacheDirectCallNodes = new DirectCallNode[numberOfBytecodes];
     maximumNumberOfStackElements = maxNumStackElements;
     this.literals = new SAbstractObject[numberOfLiterals];
 
@@ -127,12 +127,21 @@ public class SMethod extends SAbstractObject implements SInvokable {
   }
 
   @Override
-  public void invoke(final Frame frame, final Interpreter interpreter) {
+  public void indirectInvoke(final Frame frame, final Interpreter interpreter) {
     final Frame newFrame = interpreter.newFrame(frame, this, null);
     newFrame.copyArgumentsFrom(frame);
 
     IndirectCallNode indirectCallNode = interpreter.getIndirectCallNode();
     SAbstractObject result = (SAbstractObject) indirectCallNode.call(callTarget, interpreter, newFrame);
+
+    frame.popArgumentsAndPushResult(result, this);
+    newFrame.clearPreviousFrame();
+  }
+
+  public void directInvoke(final Frame frame, final Interpreter interpreter, DirectCallNode directCallNode) {
+    final Frame newFrame = interpreter.newFrame(frame, this, null);
+    newFrame.copyArgumentsFrom(frame);
+    SAbstractObject result = (SAbstractObject) directCallNode.call(interpreter, newFrame);
 
     frame.popArgumentsAndPushResult(result, this);
     newFrame.clearPreviousFrame();
@@ -152,9 +161,23 @@ public class SMethod extends SAbstractObject implements SInvokable {
     return inlineCacheInvokable[bytecodeIndex];
   }
 
+  public DirectCallNode getInlineCacheDirectCallNode(final int bytecodeIndex) {
+    CompilerAsserts.partialEvaluationConstant(bytecodeIndex);
+    return inlineCacheDirectCallNodes[bytecodeIndex];
+  }
+
   public void setInlineCache(final int bytecodeIndex, final SClass receiverClass, final SInvokable invokable) {
+    CompilerDirectives.transferToInterpreterAndInvalidate();
     inlineCacheClass[bytecodeIndex] = receiverClass;
     inlineCacheInvokable[bytecodeIndex] = invokable;
+    if (invokable != null) {
+      if (invokable.isPrimitive()) {
+        inlineCacheDirectCallNodes[bytecodeIndex] = null;
+      }
+      else {
+        inlineCacheDirectCallNodes[bytecodeIndex] = DirectCallNode.create(((SMethod) invokable).getCallTarget());
+      }
+    }
   }
 
   @Override
@@ -169,10 +192,11 @@ public class SMethod extends SAbstractObject implements SInvokable {
   // Private variable holding byte array of bytecodes
   private final Method method;
   private final CallTarget callTarget;
-  private final SClass[]     inlineCacheClass;
-  private final SInvokable[] inlineCacheInvokable;
+  private final @CompilerDirectives.CompilationFinal(dimensions = 1) SClass[]     inlineCacheClass;
+  private final @CompilerDirectives.CompilationFinal(dimensions = 1) SInvokable[] inlineCacheInvokable;
+  private final @CompilerDirectives.CompilationFinal(dimensions = 1) DirectCallNode[] inlineCacheDirectCallNodes;
 
-  private final SAbstractObject[] literals;
+  private final @CompilerDirectives.CompilationFinal(dimensions = 1) SAbstractObject[] literals;
 
   private final SSymbol signature;
   private SClass        holder;

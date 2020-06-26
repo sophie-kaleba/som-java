@@ -25,9 +25,12 @@
 
 package som.vmobjects;
 
+import com.oracle.truffle.api.nodes.DirectCallNode;
 import som.interpreter.Frame;
 import som.interpreter.Interpreter;
 import som.vm.Universe;
+
+import javax.swing.*;
 
 
 public abstract class SPrimitive extends SAbstractObject implements SInvokable {
@@ -59,6 +62,16 @@ public abstract class SPrimitive extends SAbstractObject implements SInvokable {
   public boolean isEmpty() {
     // By default a primitive is not empty
     return false;
+  }
+
+  public abstract void invoke(Frame frame, Interpreter interpreter);
+
+  public void indirectInvoke(Frame frame, Interpreter interpreter) {
+    invoke(frame, interpreter);
+  }
+
+  public void directInvoke(Frame frame, Interpreter interpreter, DirectCallNode callNode) {
+    invoke(frame, interpreter);
   }
 
   @Override
