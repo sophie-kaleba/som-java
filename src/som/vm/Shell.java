@@ -28,8 +28,6 @@ package som.vm;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 
-import com.oracle.truffle.api.Truffle;
-import com.oracle.truffle.api.TruffleRuntime;
 import som.interpreter.Frame;
 import som.interpreter.Interpreter;
 import som.vmobjects.SAbstractObject;
@@ -59,11 +57,9 @@ public class Shell {
     BufferedReader in;
     String stmt;
     int counter;
-    int bytecodeIndex;
     SClass myClass;
     SAbstractObject myObject;
     SAbstractObject it;
-    Frame currentFrame;
 
     counter = 0;
     in = new BufferedReader(new InputStreamReader(System.in));
@@ -90,27 +86,23 @@ public class Shell {
 
         // If success
         if (myClass != null) {
-          currentFrame = frame;
 
           // Create and push a new instance of our class on the stack
           myObject = universe.newInstance(myClass);
-          currentFrame.push(myObject);
+          frame.push(myObject);
 
           // Push the old value of "it" on the stack
-          currentFrame.push(it);
+          frame.push(it);
 
           // Lookup the run: method
           SInvokable initialize = myClass.lookupInvokable(
               universe.symbolFor("run:"));
 
           // Invoke the run method
-          initialize.indirectInvoke(currentFrame, interpreter);
-
-          // Start the interpreter
-          interpreter.start(currentFrame, currentFrame.getMethod());
+          initialize.indirectInvoke(frame, interpreter);
 
           // Save the result of the run method
-          it = currentFrame.pop();
+          it = frame.pop();
         }
       } catch (Exception e) {
         Universe.errorPrintln("Caught exception: " + e.getMessage());

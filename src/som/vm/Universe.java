@@ -60,12 +60,28 @@ import som.vmobjects.SSymbol;
 
 public final class Universe {
 
+  private final HashMap<SSymbol, SAbstractObject> globals =
+      new HashMap<SSymbol, SAbstractObject>();
+
   private final TruffleLanguage.Env env;
   private final GraalSOMLanguage    language;
   private final String              testClass;
   private final String              testClasspath;
   public SAbstractObject            objectSystem;
   private final String              testSelector;
+  private String[]                  classPath;
+  private boolean                   dumpBytecodes;
+
+  public static final String             pathSeparator;
+  public static final String             fileSeparator;
+  private final Interpreter              interpreter;
+  private final HashMap<String, SSymbol> symbolTable;
+
+  // TODO: this is not how it is supposed to be... it is just a hack to cope
+  // with the use of system.exit in SOM to enable testing
+  private final boolean   avoidExit;
+  private int             lastExitCode;
+  private static Universe current;
 
   public Universe(final TruffleLanguage.Env env, final GraalSOMLanguage language) {
     this.env = env;
@@ -306,7 +322,6 @@ public final class Universe {
 
     // Start the shell if no filename is given
     if (arguments.length == 0) {
-      //TODO - awful
       Shell shell = new Shell(this, interpreter);
       SMethod bootstrapMethod = createBootstrapMethod();
       shell.setBootstrapMethod(bootstrapMethod);
@@ -516,7 +531,7 @@ public final class Universe {
       final SInteger maxNumStackElements, final List<SAbstractObject> literals) {
     // Allocate a new method and set its class to be the method class
     SMethod result = new SMethod(nilObject, signature, numberOfBytecodes,
-            numberOfLocals, maxNumStackElements, numberOfLiterals, literals, language);
+        numberOfLocals, maxNumStackElements, numberOfLiterals, literals, language);
     return result;
   }
 
@@ -796,21 +811,4 @@ public final class Universe {
 
   public SClass trueClass;
   public SClass falseClass;
-
-  private final HashMap<SSymbol, SAbstractObject> globals =
-      new HashMap<SSymbol, SAbstractObject>();
-  private String[]                                classPath;
-  private boolean                                 dumpBytecodes;
-
-  public static final String             pathSeparator;
-  public static final String             fileSeparator;
-  private final Interpreter              interpreter;
-  private final HashMap<String, SSymbol> symbolTable;
-
-  // TODO: this is not how it is supposed to be... it is just a hack to cope
-  // with the use of system.exit in SOM to enable testing
-  private final boolean avoidExit;
-  private int           lastExitCode;
-
-  private static Universe current;
 }

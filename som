@@ -89,7 +89,7 @@ parser.add_argument('-D', help="define a Java property",
 parser.add_argument('args', nargs=argparse.REMAINDER,
                     help='arguments passed to GraalSOM')
 
-if len(sys.argv) < 2:
+if len(sys.argv) < 1:
     parser.print_help()
     sys.exit(1)
 
