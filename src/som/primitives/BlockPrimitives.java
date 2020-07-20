@@ -41,7 +41,6 @@ public class BlockPrimitives extends Primitives {
     installInstancePrimitive(new SPrimitive("restart", universe) {
 
       public void invoke(final Frame frame, final Interpreter interpreter) {
-        frame.resetStackPointer();
         throw new RestartLoopException();
       }
     });
