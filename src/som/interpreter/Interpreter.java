@@ -25,23 +25,7 @@
 
 package som.interpreter;
 
-import static som.interpreter.Bytecodes.DUP;
-import static som.interpreter.Bytecodes.HALT;
-import static som.interpreter.Bytecodes.POP;
-import static som.interpreter.Bytecodes.POP_ARGUMENT;
-import static som.interpreter.Bytecodes.POP_FIELD;
-import static som.interpreter.Bytecodes.POP_LOCAL;
-import static som.interpreter.Bytecodes.PUSH_ARGUMENT;
-import static som.interpreter.Bytecodes.PUSH_BLOCK;
-import static som.interpreter.Bytecodes.PUSH_CONSTANT;
-import static som.interpreter.Bytecodes.PUSH_FIELD;
-import static som.interpreter.Bytecodes.PUSH_GLOBAL;
-import static som.interpreter.Bytecodes.PUSH_LOCAL;
-import static som.interpreter.Bytecodes.RETURN_LOCAL;
-import static som.interpreter.Bytecodes.RETURN_NON_LOCAL;
-import static som.interpreter.Bytecodes.SEND;
-import static som.interpreter.Bytecodes.SUPER_SEND;
-import static som.interpreter.Bytecodes.getBytecodeLength;
+import static som.interpreter.Bytecodes.*;
 
 import com.oracle.truffle.api.CompilerAsserts;
 import com.oracle.truffle.api.CompilerDirectives;
@@ -52,19 +36,14 @@ import com.oracle.truffle.api.nodes.IndirectCallNode;
 
 import som.compiler.ProgramDefinitionError;
 import som.vm.Universe;
-import som.vmobjects.SAbstractObject;
-import som.vmobjects.SBlock;
-import som.vmobjects.SClass;
-import som.vmobjects.SInvokable;
-import som.vmobjects.SMethod;
-import som.vmobjects.SObject;
-import som.vmobjects.SSymbol;
+import som.vmobjects.*;
 
 
 public class Interpreter {
 
-  private final Universe universe;
-  @CompilerDirectives.CompilationFinal int nextBytecodeIndex = 0;
+  private final Universe         universe;
+  private final IndirectCallNode indirectCallNode =
+      Truffle.getRuntime().createIndirectCallNode();
 
   public Interpreter(final Universe universe) {
     this.universe = universe;
@@ -79,14 +58,15 @@ public class Interpreter {
     // Handle the PUSH LOCAL bytecode
     frame.push(
         frame.getLocal(method.getBytecode(bytecodeIndex + 1),
-                method.getBytecode(bytecodeIndex + 2)));
+            method.getBytecode(bytecodeIndex + 2)));
   }
 
-  private void doPushArgument(final int bytecodeIndex, final Frame frame, final SMethod method) {
+  private void doPushArgument(final int bytecodeIndex, final Frame frame,
+      final SMethod method) {
     // Handle the PUSH ARGUMENT bytecode
     frame.push(
         frame.getArgument(method.getBytecode(bytecodeIndex + 1),
-                method.getBytecode(bytecodeIndex + 2)));
+            method.getBytecode(bytecodeIndex + 2)));
   }
 
   private void doPushField(final int bytecodeIndex, final Frame frame, final SMethod method) {
@@ -97,7 +77,8 @@ public class Interpreter {
     frame.push(((SObject) getSelf(frame)).getField(fieldIndex));
   }
 
-  private void doPushBlock(final int bytecodeIndex, final Frame frame, final SMethod method) throws ProgramDefinitionError {
+  private void doPushBlock(final int bytecodeIndex, final Frame frame, final SMethod method)
+      throws ProgramDefinitionError {
     // Handle the PUSH BLOCK bytecode
     SMethod blockMethod = (SMethod) method.getConstant(bytecodeIndex);
 
@@ -108,7 +89,8 @@ public class Interpreter {
             blockMethod.getNumberOfArguments()));
   }
 
-  private void doPushConstant(final int bytecodeIndex, final Frame frame, final SMethod method) {
+  private void doPushConstant(final int bytecodeIndex, final Frame frame,
+      final SMethod method) {
     // Handle the PUSH CONSTANT bytecode
     frame.push(method.getConstant(bytecodeIndex));
   }
@@ -142,7 +124,8 @@ public class Interpreter {
         method.getBytecode(bytecodeIndex + 2), frame.pop());
   }
 
-  private void doPopArgument(final int bytecodeIndex, final Frame frame, final SMethod method) {
+  private void doPopArgument(final int bytecodeIndex, final Frame frame,
+      final SMethod method) {
     // Handle the POP ARGUMENT bytecode
     frame.setArgument(method.getBytecode(bytecodeIndex + 1),
         method.getBytecode(bytecodeIndex + 2), frame.pop());
@@ -225,119 +208,94 @@ public class Interpreter {
     send(signature, receiver.getSOMClass(universe), bytecodeIndex, frame, method);
   }
 
-  void setNextBytecodeIndex(int bytecodeIndex) {
-    CompilerDirectives.transferToInterpreterAndInvalidate();
-    this.nextBytecodeIndex = bytecodeIndex;
-  }
-
   @ExplodeLoop(kind = ExplodeLoop.LoopExplosionKind.MERGE_EXPLODE)
-  public SAbstractObject start(final Frame frame, final SMethod method) throws ReturnException, ProgramDefinitionError {
+  public SAbstractObject start(final Frame frame, final SMethod method)
+      throws ReturnException, ProgramDefinitionError {
 
     int bytecodeIndex = 0;
 
-    // Iterate through the bytecodes
     while (true) {
-
-      CompilerAsserts.partialEvaluationConstant(bytecodeIndex);
-
       int currentBytecodeIndex = bytecodeIndex;
-
-      CompilerAsserts.partialEvaluationConstant(method);
-
-      // Get the current bytecode
-      byte bytecode = method.getBytecode(bytecodeIndex);
-
-      CompilerAsserts.partialEvaluationConstant(bytecode);
-
-      // Get the length of the current bytecode
-      // int bytecodeLength = getBytecodeLength(bytecode);
+      byte bytecode = method.getBytecode(currentBytecodeIndex);
 
       // Compute the next bytecode index
-      // bytecodeIndex = currentBytecodeIndex + bytecodeLength;
+      int bytecodeLength = getBytecodeLength(bytecode);
+      bytecodeIndex = currentBytecodeIndex + bytecodeLength;
+
+      CompilerAsserts.partialEvaluationConstant(bytecodeIndex);
+      CompilerAsserts.partialEvaluationConstant(currentBytecodeIndex);
+      CompilerAsserts.partialEvaluationConstant(method);
+      CompilerAsserts.partialEvaluationConstant(bytecode);
 
       // Handle the current bytecode
       switch (bytecode) {
 
         case HALT: {
-          // Handle the HALT bytecode
           return frame.getStackElement(0);
         }
 
         case DUP: {
           doDup(frame);
-          bytecodeIndex = currentBytecodeIndex + 1;
           break;
         }
 
         case PUSH_LOCAL: {
           doPushLocal(currentBytecodeIndex, frame, method);
-          bytecodeIndex = currentBytecodeIndex + 3;
           break;
         }
 
         case PUSH_ARGUMENT: {
           doPushArgument(currentBytecodeIndex, frame, method);
-          bytecodeIndex = currentBytecodeIndex + 3;
           break;
         }
 
         case PUSH_FIELD: {
           doPushField(currentBytecodeIndex, frame, method);
-          bytecodeIndex = currentBytecodeIndex + 2;
           break;
         }
 
         case PUSH_BLOCK: {
           doPushBlock(currentBytecodeIndex, frame, method);
-          bytecodeIndex = currentBytecodeIndex + 2;
           break;
         }
 
         case PUSH_CONSTANT: {
           doPushConstant(currentBytecodeIndex, frame, method);
-          bytecodeIndex = currentBytecodeIndex + 2;
           break;
         }
 
         case PUSH_GLOBAL: {
           doPushGlobal(currentBytecodeIndex, frame, method);
-          bytecodeIndex = currentBytecodeIndex + 2;
           break;
         }
 
         case POP: {
           doPop(frame);
-          bytecodeIndex = currentBytecodeIndex + 1;
           break;
         }
 
         case POP_LOCAL: {
           doPopLocal(currentBytecodeIndex, frame, method);
-          bytecodeIndex = currentBytecodeIndex + 3;
           break;
         }
 
         case POP_ARGUMENT: {
           doPopArgument(currentBytecodeIndex, frame, method);
-          bytecodeIndex = currentBytecodeIndex + 3;
           break;
         }
 
         case POP_FIELD: {
           doPopField(currentBytecodeIndex, frame, method);
-          bytecodeIndex = currentBytecodeIndex + 2;
           break;
         }
 
         case SEND: {
           doSend(currentBytecodeIndex, frame, method);
-          bytecodeIndex = currentBytecodeIndex + 2;
           break;
         }
 
         case SUPER_SEND: {
           doSuperSend(currentBytecodeIndex, frame, method);
-          bytecodeIndex = currentBytecodeIndex + 2;
           break;
         }
 
@@ -367,7 +325,7 @@ public class Interpreter {
   }
 
   private void send(final SSymbol selector, final SClass receiverClass,
-      final int bytecodeIndex, Frame frame, final SMethod method) throws ReturnException {
+      final int bytecodeIndex, Frame frame, final SMethod method) {
     // First try the inline cache
     SInvokable invokable;
     DirectCallNode invokableDirectCallNode = null;
@@ -396,7 +354,7 @@ public class Interpreter {
           invokableDirectCallNode = method.getInlineCacheDirectCallNode(bytecodeIndex + 1);
           CompilerAsserts.partialEvaluationConstant(invokableDirectCallNode);
           doCall(frame, invokable, invokableDirectCallNode);
-          return ;
+          return;
         } else {
           CompilerDirectives.transferToInterpreterAndInvalidate();
           invokable = receiverClass.lookupInvokable(selector);
@@ -420,18 +378,21 @@ public class Interpreter {
     }
   }
 
-  public void doCall(Frame frame, SInvokable invokable, DirectCallNode invokableDirectCallNode) {
+  public void doCall(Frame frame, SInvokable invokable,
+      DirectCallNode invokableDirectCallNode) {
+    // an inline cache has been hit
     if (invokableDirectCallNode != null) {
-      // Invoke the invokable in the current frame
+      // TODO - this check passes but the method is not inlined in the graal graph
+      // needs further investigation
       CompilerAsserts.partialEvaluationConstant(invokableDirectCallNode);
+
       final Frame newFrame = this.newFrame(frame, (SMethod) invokable, null);
       newFrame.copyArgumentsFrom(frame);
       SAbstractObject result = (SAbstractObject) invokableDirectCallNode.call(this, newFrame);
 
       frame.popArgumentsAndPushResult(result, (SMethod) invokable);
       newFrame.clearPreviousFrame();
-    }
-    else {
+    } else {
       invokable.indirectInvoke(frame, this);
     }
   }
@@ -439,8 +400,6 @@ public class Interpreter {
   public Frame newFrame(Frame prevFrame, final SMethod method, final Frame context) {
     return this.universe.newFrame(prevFrame, method, context);
   }
-
-  final IndirectCallNode indirectCallNode = Truffle.getRuntime().createIndirectCallNode();
 
   public IndirectCallNode getIndirectCallNode() {
     return indirectCallNode;
