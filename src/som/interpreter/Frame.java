@@ -46,6 +46,16 @@ import som.vmobjects.SObject;
  */
 public class Frame {
 
+  private int stackPointer;
+
+  // the offset at which local variables start
+  private int localOffset;
+
+  private final SMethod           method;
+  private final Frame             context;
+  private Frame                   previousFrame;
+  private final SAbstractObject[] stack;
+
   public Frame(final SObject nilObject, final Frame previousFrame,
       final Frame context, final SMethod method, final long stackElements) {
     this.previousFrame = previousFrame;
@@ -149,16 +159,6 @@ public class Frame {
         + (int) getMethod().getNumberOfLocals().getEmbeddedInteger() - 1);
   }
 
-  public int getBytecodeIndex() {
-    // Get the current bytecode index for this frame
-    return bytecodeIndex;
-  }
-
-  public void setBytecodeIndex(final int value) {
-    // Set the current bytecode index for this frame
-    bytecodeIndex = value;
-  }
-
   public SAbstractObject getStackElement(final int index) {
     // Get the stack element with the given index
     // (an index of zero yields the top element)
@@ -217,40 +217,13 @@ public class Frame {
     }
   }
 
-  public void printStackTrace(final SAbstractObject nilObject) {
-    // Print a stack trace starting in this frame
-    Universe.print(getMethod().getHolder().getName().getEmbeddedString());
-    //TODO - find a way to get it back
-   // Universe.print(getBytecodeIndex() + "@"
-    Universe.print("@"
-        + getMethod().getSignature().getEmbeddedString());
-    if (hasPreviousFrame(nilObject)) {
-      getPreviousFrame().printStackTrace(nilObject);
-    }
-  }
-
   public void popArgumentsAndPushResult(final SAbstractObject result, SMethod method) {
-    // compute the number of arguments
     int numberOfArguments = method.getNumberOfArguments();
 
-    // Pop the arguments
     for (int i = 0; i < numberOfArguments; i++) {
       this.pop();
     }
 
-    // Push the result
     this.push(result);
   }
-
-  // Private variables holding the stack pointer and the bytecode index
-  private int stackPointer;
-  private int bytecodeIndex;
-
-  // the offset at which local variables start
-  private int localOffset;
-
-  private final SMethod           method;
-  private final Frame             context;
-  private Frame                   previousFrame;
-  private final SAbstractObject[] stack;
 }
