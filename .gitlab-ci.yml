@@ -1,4 +1,5 @@
 stages:
+  - build-and-test
   - benchmark
 
 variables:
@@ -10,14 +11,13 @@ variables:
 before_script:
   - git submodule update --init
 
-# I'll disable it just for now, I haven't fixed checkstyle in my IDE yet
-# build_and_test_job:
-#   stage: build-and-test
-#   tags: [benchmarks, infinity]
-#   script:
-#     - ant checkstyle
-#     - ant eclipseformat-check
-#     - timeout 5m ant unit-tests som-tests
+build_and_test_job:
+  stage: build-and-test
+  tags: [benchmarks]
+  script:
+  - ant checkstyle
+  - ant eclipseformat-check
+  - timeout 5m ant unit-tests som-tests
 
 benchmark_job:
   stage: benchmark
