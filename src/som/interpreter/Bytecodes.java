@@ -80,12 +80,7 @@ public class Bytecodes {
     return PADDED_BYTECODE_NAMES[bytecode];
   }
 
-  public static final int getBytecodeLength(final byte bytecode) {
-    // Return the length of the given bytecode
-    return BYTECODE_LENGTH[bytecode];
-  }
-
-  public static final int getBytecodeLength2(final byte bytecode) {
+  public static int getBytecodeLength(final byte bytecode) {
     // Return the length of the given bytecode
     return BYTECODE_LENGTH[bytecode];
   }
