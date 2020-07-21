@@ -28,7 +28,6 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.StringReader;
 
-import com.oracle.truffle.api.CompilerDirectives;
 import som.vm.Universe;
 import som.vmobjects.SClass;
 
@@ -37,14 +36,12 @@ public class SourcecodeCompiler {
 
   private Parser parser;
 
-  @CompilerDirectives.TruffleBoundary
   public static SClass compileClass(final String path, final String file,
       final SClass systemClass, final Universe universe)
       throws IOException, ProgramDefinitionError {
     return new SourcecodeCompiler().compile(path, file, systemClass, universe);
   }
 
-  @CompilerDirectives.TruffleBoundary
   public static SClass compileClass(final String stmt, final SClass systemClass,
       final Universe universe) throws ProgramDefinitionError {
     return new SourcecodeCompiler().compileClassString(stmt, systemClass,
