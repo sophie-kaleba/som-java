@@ -34,9 +34,11 @@ import com.oracle.truffle.api.nodes.DirectCallNode;
 import com.oracle.truffle.api.nodes.ExplodeLoop;
 import com.oracle.truffle.api.nodes.IndirectCallNode;
 
+import com.oracle.truffle.api.profiles.ValueProfile;
 import som.compiler.ProgramDefinitionError;
 import som.vm.Universe;
 import som.vmobjects.*;
+import sun.awt.SunHints;
 
 
 public class Interpreter {
@@ -185,6 +187,7 @@ public class Interpreter {
       SAbstractObject sender =
           frame.getPreviousFrame().getOuterContext(universe.nilObject).getArgument(0, 0);
 
+      // TODO - check the frame and its stack
       // ... and execute the escapedBlock message instead
       sender.sendEscapedBlock(block, universe, this, frame);
       return frame.pop();
@@ -204,8 +207,44 @@ public class Interpreter {
     // Get the receiver from the stack
     SAbstractObject receiver = frame.getStackElement(numberOfArguments - 1);
 
+    ValueProfile receiverClassValueProfile = method.getValueProfile(bytecodeIndex);
+
     // Send the message
-    send(signature, receiver.getSOMClass(universe), bytecodeIndex, frame, method);
+    if (receiverClassValueProfile == null) {
+      CompilerDirectives.transferToInterpreterAndInvalidate();
+      // if (receiver instanceof SInteger) {
+      //
+      // method.setValueProfile(bytecodeIndex, ((SInteger) receiver).getValueProfile());
+      // // } else if (receiver instanceof SBlock) {
+      // //
+      // // method.setValueProfile(bytecodeIndex, ((SBlock) receiver).getValueProfile());
+      // } else if (receiver instanceof SArray) {
+      //
+      // method.setValueProfile(bytecodeIndex, ((SArray) receiver).getValueProfile());
+      // } else {
+      method.setValueProfile(bytecodeIndex, receiver.getValueProfile());
+      // receiverClassValueProfile = method.setValueProfile(bytecodeIndex);
+      // }
+    }
+
+    // if ((receiver instanceof SInteger)
+    // || (receiver instanceof SArray)) {
+    // ((SInteger) receiver).valueProfile.profile(receiver);
+    receiverClassValueProfile = method.getValueProfile(bytecodeIndex);
+    send(signature,
+        receiverClassValueProfile.profile(receiver).getSOMClass(universe),
+        bytecodeIndex, frame, method);
+    // } else {
+    //
+    // // TODO - the system needs to know that this is not a SAbstractObject
+    // // SAbstractObject profiledReceiver = receiverClassValueProfile.profile(receiver);
+    //
+    // SClass somClassProfiled = receiver.getSOMClassBis(universe,
+    // receiverClassValueProfile);
+    // send(signature, somClassProfiled, bytecodeIndex, frame, method);
+    // // send(signature, profiledReceiver.getSOMClass(universe), bytecodeIndex, frame,
+    // method);
+    // }
   }
 
   @ExplodeLoop(kind = ExplodeLoop.LoopExplosionKind.MERGE_EXPLODE)
@@ -327,48 +366,57 @@ public class Interpreter {
   private void send(final SSymbol selector, final SClass receiverClass,
       final int bytecodeIndex, Frame frame, final SMethod method) {
     // First try the inline cache
-    SInvokable invokable;
-    DirectCallNode invokableDirectCallNode = null;
+    SInvokable invokableWithoutCacheHit = null;
 
     SClass cachedClass = method.getInlineCacheClass(bytecodeIndex);
     if (cachedClass == receiverClass) {
-      invokable = method.getInlineCacheInvokable(bytecodeIndex);
-      invokableDirectCallNode = method.getInlineCacheDirectCallNode(bytecodeIndex);
-      CompilerAsserts.partialEvaluationConstant(invokableDirectCallNode);
+      SInvokable invokable = method.getInlineCacheInvokable(bytecodeIndex);
       if (invokable != null) {
-        doCall(frame, invokable, invokableDirectCallNode);
+        DirectCallNode invokableDirectCallNode =
+            method.getInlineCacheDirectCallNode(bytecodeIndex);
+        CompilerAsserts.partialEvaluationConstant(invokableDirectCallNode);
+        invokable.directInvoke(frame, this, invokableDirectCallNode);
+        // doCall(frame, invokable, invokableDirectCallNode);
         return;
       }
     } else {
       if (cachedClass == null) {
         CompilerDirectives.transferToInterpreterAndInvalidate();
         // Lookup the invokable with the given signature
-        invokable = receiverClass.lookupInvokable(selector);
-        method.setInlineCache(bytecodeIndex, receiverClass, invokable);
+        invokableWithoutCacheHit = receiverClass.lookupInvokable(selector);
+        method.setInlineCache(bytecodeIndex, receiverClass, invokableWithoutCacheHit);
       } else {
         // the bytecode index after the send is used by the selector constant, and can be used
         // safely as another cache item
         cachedClass = method.getInlineCacheClass(bytecodeIndex + 1);
         if (cachedClass == receiverClass) {
-          invokable = method.getInlineCacheInvokable(bytecodeIndex + 1);
-          invokableDirectCallNode = method.getInlineCacheDirectCallNode(bytecodeIndex + 1);
-          CompilerAsserts.partialEvaluationConstant(invokableDirectCallNode);
-          doCall(frame, invokable, invokableDirectCallNode);
-          return;
+          SInvokable invokable = method.getInlineCacheInvokable(bytecodeIndex + 1);
+          if (invokable != null) {
+            DirectCallNode invokableDirectCallNode =
+                method.getInlineCacheDirectCallNode(bytecodeIndex + 1);
+            CompilerAsserts.partialEvaluationConstant(invokableDirectCallNode);
+            invokable.directInvoke(frame, this, invokableDirectCallNode);
+            // doCall(frame, invokable, invokableDirectCallNode);
+            return;
+          }
         } else {
           CompilerDirectives.transferToInterpreterAndInvalidate();
-          invokable = receiverClass.lookupInvokable(selector);
+          invokableWithoutCacheHit = receiverClass.lookupInvokable(selector);
           if (cachedClass == null) {
-            method.setInlineCache(bytecodeIndex + 1, receiverClass, invokable);
+            method.setInlineCache(bytecodeIndex + 1, receiverClass, invokableWithoutCacheHit);
           }
         }
       }
     }
+    CompilerDirectives.transferToInterpreterAndInvalidate();
+    invokeWithoutCacheHit(selector, frame, invokableWithoutCacheHit);
+  }
 
-    if (invokable != null) {
-      doCall(frame, invokable, invokableDirectCallNode);
+  private void invokeWithoutCacheHit(SSymbol selector, Frame frame,
+      SInvokable invokableWithoutCacheHit) {
+    if (invokableWithoutCacheHit != null) {
+      invokableWithoutCacheHit.indirectInvoke(frame, this);
     } else {
-      CompilerDirectives.transferToInterpreterAndInvalidate();
       int numberOfArguments = selector.getNumberOfSignatureArguments();
 
       // Compute the receiver
@@ -378,26 +426,20 @@ public class Interpreter {
     }
   }
 
-  public void doCall(Frame frame, SInvokable invokable,
-      DirectCallNode invokableDirectCallNode) {
-    // an inline cache has been hit
-    if (invokableDirectCallNode != null) {
-      // TODO - this check passes but the method is not inlined in the graal graph
-      // needs further investigation
-      CompilerAsserts.partialEvaluationConstant(invokableDirectCallNode);
+  // public void doCall(Frame frame, SInvokable invokable,
+  // DirectCallNode invokableDirectCallNode) {
+  // // an inline cache has been hit
+  // if (invokableDirectCallNode != null) {
+  // // TODO - this check passes but the method is not inlined in the graal graph
+  // // needs further investigation
+  // invokable.directInvoke(frame, this, invokableDirectCallNode);
+  //
+  // } else {
+  // invokable.indirectInvoke(frame, this);
+  // }
+  // }
 
-      final Frame newFrame = this.newFrame(frame, (SMethod) invokable, null);
-      newFrame.copyArgumentsFrom(frame);
-      SAbstractObject result = (SAbstractObject) invokableDirectCallNode.call(this, newFrame);
-
-      frame.popArgumentsAndPushResult(result, (SMethod) invokable);
-      newFrame.clearPreviousFrame();
-    } else {
-      invokable.indirectInvoke(frame, this);
-    }
-  }
-
-  public Frame newFrame(Frame prevFrame, final SMethod method, final Frame context) {
+  public final Frame newFrame(Frame prevFrame, final SMethod method, final Frame context) {
     return this.universe.newFrame(prevFrame, method, context);
   }
 
