@@ -217,6 +217,16 @@ public class Frame {
     }
   }
 
+  public void printStackTrace(final SAbstractObject nilObject, final int bytecodeIndex) {
+    // Print a stack trace starting in this frame
+    int numberOfArguments = method.getNumberOfArguments();
+    Universe.print(getMethod().getHolder().getName().getEmbeddedString() + ">>");
+    Universe.println(getMethod().getSignature().getEmbeddedString() + " @" + bytecodeIndex);
+    if (hasPreviousFrame(nilObject)) {
+      getPreviousFrame().printStackTrace(nilObject, bytecodeIndex);
+    }
+  }
+
   public void popArgumentsAndPushResult(final SAbstractObject result, SMethod method) {
     int numberOfArguments = method.getNumberOfArguments();
 
