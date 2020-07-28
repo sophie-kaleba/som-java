@@ -24,10 +24,20 @@
 
 package som.vmobjects;
 
+import com.oracle.truffle.api.CompilerDirectives;
+import com.oracle.truffle.api.profiles.ValueProfile;
 import som.vm.Universe;
 
 
 public class SString extends SAbstractObject {
+
+  @CompilerDirectives.CompilationFinal private final ValueProfile valueProfile =
+      ValueProfile.createClassProfile();
+
+  @CompilerDirectives.TruffleBoundary
+  public ValueProfile getValueProfile() {
+    return valueProfile;
+  }
 
   public SString(final String value) {
     string = value;
@@ -45,6 +55,11 @@ public class SString extends SAbstractObject {
   @Override
   public SClass getSOMClass(final Universe universe) {
     return universe.stringClass;
+  }
+
+  @Override
+  public SClass getSOMClassBis(Universe universe, ValueProfile profiledClass) {
+    return profiledClass.profile(universe.stringClass);
   }
 
   // Private variable holding the string associated to this symbol

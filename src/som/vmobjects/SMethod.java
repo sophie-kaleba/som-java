@@ -31,18 +31,29 @@ import com.oracle.truffle.api.CompilerDirectives.CompilationFinal;
 import com.oracle.truffle.api.nodes.DirectCallNode;
 import com.oracle.truffle.api.nodes.IndirectCallNode;
 
+import com.oracle.truffle.api.nodes.Node;
+import com.oracle.truffle.api.profiles.ValueProfile;
 import som.interpreter.Frame;
 import som.interpreter.Interpreter;
 import som.interpreter.Method;
 import som.vm.Universe;
+import sun.awt.SunHints;
 
 
 public class SMethod extends SAbstractObject implements SInvokable {
 
   private final @CompilationFinal(dimensions = 1) SClass[]          inlineCacheClass;
   private final @CompilationFinal(dimensions = 1) SInvokable[]      inlineCacheInvokable;
-  private final @CompilationFinal(dimensions = 1) DirectCallNode[]  inlineCacheDirectCallNodes;
+  final @CompilationFinal(dimensions = 1) DirectCallNode[]          inlineCacheDirectCallNodes;
+  final @CompilationFinal(dimensions = 1) ValueProfile[]            receiverClasses;
   private final @CompilationFinal(dimensions = 1) SAbstractObject[] literals;
+  @CompilerDirectives.CompilationFinal private final ValueProfile   valueProfile =
+      ValueProfile.createClassProfile();
+
+  @CompilerDirectives.TruffleBoundary
+  public final ValueProfile getValueProfile() {
+    return valueProfile;
+  }
 
   private final Method     method;
   private final CallTarget callTarget;
@@ -62,6 +73,7 @@ public class SMethod extends SAbstractObject implements SInvokable {
     inlineCacheClass = new SClass[numberOfBytecodes];
     inlineCacheInvokable = new SInvokable[numberOfBytecodes];
     inlineCacheDirectCallNodes = new DirectCallNode[numberOfBytecodes];
+    receiverClasses = new ValueProfile[numberOfBytecodes];
     maximumNumberOfStackElements = maxNumStackElements;
     this.literals = new SAbstractObject[numberOfLiterals];
 
@@ -153,6 +165,9 @@ public class SMethod extends SAbstractObject implements SInvokable {
 
   public void directInvoke(final Frame frame, final Interpreter interpreter,
       DirectCallNode directCallNode) {
+
+    CompilerAsserts.partialEvaluationConstant(directCallNode);
+
     final Frame newFrame = interpreter.newFrame(frame, this, null);
     newFrame.copyArgumentsFrom(frame);
     SAbstractObject result = (SAbstractObject) directCallNode.call(interpreter, newFrame);
@@ -180,6 +195,22 @@ public class SMethod extends SAbstractObject implements SInvokable {
     return inlineCacheDirectCallNodes[bytecodeIndex];
   }
 
+  public ValueProfile setValueProfile(final int bytecodeIndex) {
+    ValueProfile receiverClass = ValueProfile.createClassProfile();
+    receiverClasses[bytecodeIndex] = receiverClass;
+    return receiverClass;
+  }
+
+  public void setValueProfile(final int bytecodeIndex,
+      final ValueProfile valueProfile) {
+    receiverClasses[bytecodeIndex] = valueProfile;
+    // return valueProfile;
+  }
+
+  public ValueProfile getValueProfile(final int bytecodeIndex) {
+    return receiverClasses[bytecodeIndex];
+  }
+
   public void setInlineCache(final int bytecodeIndex, final SClass receiverClass,
       final SInvokable invokable) {
     CompilerDirectives.transferToInterpreterAndInvalidate();
@@ -198,6 +229,11 @@ public class SMethod extends SAbstractObject implements SInvokable {
   @Override
   public SClass getSOMClass(final Universe universe) {
     return universe.methodClass;
+  }
+
+  @Override
+  public final SClass getSOMClassBis(Universe universe, ValueProfile profiledClass) {
+    return profiledClass.profile(universe.methodClass);
   }
 
   public CallTarget getCallTarget() {

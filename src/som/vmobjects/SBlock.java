@@ -24,8 +24,10 @@
 
 package som.vmobjects;
 
+import com.oracle.truffle.api.CompilerDirectives;
 import com.oracle.truffle.api.Truffle;
 import com.oracle.truffle.api.nodes.IndirectCallNode;
+import com.oracle.truffle.api.profiles.ValueProfile;
 import som.interpreter.Frame;
 import som.interpreter.Interpreter;
 import som.vm.Universe;
@@ -33,10 +35,19 @@ import som.vm.Universe;
 
 public class SBlock extends SAbstractObject {
 
+  private final ValueProfile valueProfile;
+
+  @CompilerDirectives.TruffleBoundary
+  public final ValueProfile getValueProfile() {
+    return valueProfile;
+  }
+
+  @CompilerDirectives.TruffleBoundary
   public SBlock(final SMethod method, final Frame context, final SClass blockClass) {
     this.method = method;
     this.context = context;
     this.blockClass = blockClass;
+    this.valueProfile = ValueProfile.createClassProfile();
   }
 
   public SMethod getMethod() {
@@ -48,7 +59,13 @@ public class SBlock extends SAbstractObject {
   }
 
   @Override
-  public SClass getSOMClass(final Universe universe) {
+  public final SClass getSOMClassBis(final Universe universe,
+      final ValueProfile classProfiled) {
+    return classProfiled.profile(blockClass);
+  }
+
+  @Override
+  public final SClass getSOMClass(final Universe universe) {
     return blockClass;
   }
 
@@ -78,7 +95,9 @@ public class SBlock extends SAbstractObject {
       newFrame.copyArgumentsFrom(frame);
       IndirectCallNode indirectCallNode = interpreter.getIndirectCallNode();
 
-      SAbstractObject result = (SAbstractObject) indirectCallNode.call(self.getMethod().getCallTarget(), interpreter, newFrame);
+      SAbstractObject result =
+          (SAbstractObject) indirectCallNode.call(self.getMethod().getCallTarget(),
+              interpreter, newFrame);
 
       frame.popArgumentsAndPushResult(result, self.getMethod());
       newFrame.clearPreviousFrame();

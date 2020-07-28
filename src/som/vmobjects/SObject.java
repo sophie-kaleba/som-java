@@ -1,9 +1,19 @@
 package som.vmobjects;
 
+import com.oracle.truffle.api.CompilerDirectives;
+import com.oracle.truffle.api.profiles.ValueProfile;
 import som.vm.Universe;
 
 
 public class SObject extends SAbstractObject {
+
+  @CompilerDirectives.CompilationFinal private final ValueProfile valueProfile =
+      ValueProfile.createClassProfile();
+
+  @CompilerDirectives.TruffleBoundary
+  public final ValueProfile getValueProfile() {
+    return valueProfile;
+  }
 
   public SObject(final SObject nilObject) {
     fields = new SAbstractObject[getDefaultNumberOfFields()];
@@ -65,6 +75,11 @@ public class SObject extends SAbstractObject {
   @Override
   public SClass getSOMClass(final Universe universe) {
     return clazz;
+  }
+
+  @Override
+  public final SClass getSOMClassBis(Universe universe, ValueProfile profiledClass) {
+    return profiledClass.profile(clazz);
   }
 
   // Private array of fields

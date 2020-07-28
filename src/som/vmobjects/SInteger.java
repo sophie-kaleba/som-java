@@ -29,12 +29,23 @@ import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.oracle.truffle.api.CompilerDirectives;
 import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
 import com.oracle.truffle.api.library.ExportMessage;
 
+import com.oracle.truffle.api.profiles.ValueProfile;
 import som.vm.Universe;
 
+
 public final class SInteger extends SNumber {
+
+  @CompilerDirectives.CompilationFinal private final ValueProfile valueProfile =
+      ValueProfile.createClassProfile();
+
+  @TruffleBoundary
+  public ValueProfile getValueProfile() {
+    return valueProfile;
+  }
 
   /**
    * Language convention requires integers up to this value to be identical.
@@ -74,6 +85,11 @@ public final class SInteger extends SNumber {
   @Override
   public SClass getSOMClass(final Universe universe) {
     return universe.integerClass;
+  }
+
+  @Override
+  public SClass getSOMClassBis(Universe universe, ValueProfile profiledClass) {
+    return profiledClass.profile(universe.integerClass);
   }
 
   @Override
@@ -290,7 +306,6 @@ public final class SInteger extends SNumber {
     return asSBoolean(result, universe);
   }
 
-
   /**
    * INTEROP.
    * Return Long only.
@@ -304,8 +319,8 @@ public final class SInteger extends SNumber {
 
   @Override
   @ExportMessage
-  long asLong()  {
-      return this.embeddedInteger;
+  long asLong() {
+    return this.embeddedInteger;
   }
 
 }

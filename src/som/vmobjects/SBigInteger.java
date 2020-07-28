@@ -26,10 +26,20 @@ package som.vmobjects;
 
 import java.math.BigInteger;
 
+import com.oracle.truffle.api.CompilerDirectives;
+import com.oracle.truffle.api.profiles.ValueProfile;
 import som.vm.Universe;
 
 
 public final class SBigInteger extends SNumber {
+
+  @CompilerDirectives.CompilationFinal private final ValueProfile valueProfile =
+      ValueProfile.createClassProfile();
+
+  @CompilerDirectives.TruffleBoundary
+  public ValueProfile getValueProfile() {
+    return valueProfile;
+  }
 
   // Private variable holding the embedded big integer
   private final BigInteger embeddedBiginteger;
@@ -46,6 +56,11 @@ public final class SBigInteger extends SNumber {
   @Override
   public SClass getSOMClass(final Universe universe) {
     return universe.integerClass;
+  }
+
+  @Override
+  public SClass getSOMClassBis(Universe universe, ValueProfile profiledClass) {
+    return profiledClass.profile(universe.integerClass);
   }
 
   @Override
