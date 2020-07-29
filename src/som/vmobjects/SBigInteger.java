@@ -53,7 +53,6 @@ public final class SBigInteger extends SNumber {
     return universe.integerClass;
   }
 
-  @CompilerDirectives.TruffleBoundary
   public ValueProfile getValueProfile() {
     return valueProfile;
   }

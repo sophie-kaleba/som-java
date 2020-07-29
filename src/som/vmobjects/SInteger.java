@@ -82,7 +82,6 @@ public final class SInteger extends SNumber {
     return universe.integerClass;
   }
 
-  @TruffleBoundary
   public ValueProfile getValueProfile() {
     return valueProfile;
   }

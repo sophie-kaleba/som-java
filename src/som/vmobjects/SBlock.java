@@ -40,7 +40,6 @@ public class SBlock extends SAbstractObject {
   private final Frame        context;
   private final SClass       blockClass;
 
-  @CompilerDirectives.TruffleBoundary
   public SBlock(final SMethod method, final Frame context, final SClass blockClass) {
     this.method = method;
     this.context = context;
@@ -61,7 +60,6 @@ public class SBlock extends SAbstractObject {
     return blockClass;
   }
 
-  @CompilerDirectives.TruffleBoundary
   public final ValueProfile getValueProfile() {
     return valueProfile;
   }

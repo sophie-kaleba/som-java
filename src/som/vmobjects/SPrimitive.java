@@ -87,7 +87,6 @@ public abstract class SPrimitive extends SAbstractObject implements SInvokable {
     return universe.primitiveClass;
   }
 
-  @CompilerDirectives.TruffleBoundary
   public final ValueProfile getValueProfile() {
     return valueProfile;
   }

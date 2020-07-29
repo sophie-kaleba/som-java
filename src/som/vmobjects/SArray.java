@@ -31,6 +31,7 @@ import som.vm.Universe;
 
 public class SArray extends SAbstractObject {
 
+  private final SAbstractObject[]                                 indexableFields;
   @CompilerDirectives.CompilationFinal private final ValueProfile valueProfile =
       ValueProfile.createClassProfile();
 
@@ -81,11 +82,7 @@ public class SArray extends SAbstractObject {
     return universe.arrayClass;
   }
 
-  @CompilerDirectives.TruffleBoundary
   public final ValueProfile getValueProfile() {
     return valueProfile;
   }
-
-  // Private array of indexable fields
-  private final SAbstractObject[] indexableFields;
 }

@@ -93,7 +93,6 @@ public class SSymbol extends SString {
     return universe.symbolClass;
   }
 
-  @CompilerDirectives.TruffleBoundary
   public final ValueProfile getValueProfile() {
     return valueProfile;
   }

@@ -343,7 +343,6 @@ public class Interpreter {
             method.getInlineCacheDirectCallNode(bytecodeIndex);
         CompilerAsserts.partialEvaluationConstant(invokableDirectCallNode);
         invokable.directInvoke(frame, this, invokableDirectCallNode);
-        // doCall(frame, invokable, invokableDirectCallNode);
         return;
       }
     } else {
@@ -363,7 +362,6 @@ public class Interpreter {
                 method.getInlineCacheDirectCallNode(bytecodeIndex + 1);
             CompilerAsserts.partialEvaluationConstant(invokableDirectCallNode);
             invokable.directInvoke(frame, this, invokableDirectCallNode);
-            // doCall(frame, invokable, invokableDirectCallNode);
             return;
           }
         } else {

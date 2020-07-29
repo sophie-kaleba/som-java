@@ -44,7 +44,7 @@ public class SMethod extends SAbstractObject implements SInvokable {
   private final @CompilationFinal(dimensions = 1) SClass[]          inlineCacheClass;
   private final @CompilationFinal(dimensions = 1) SInvokable[]      inlineCacheInvokable;
   final @CompilationFinal(dimensions = 1) DirectCallNode[]          inlineCacheDirectCallNodes;
-  final @CompilationFinal(dimensions = 1) ValueProfile[]            receiverClasses;
+  final @CompilationFinal(dimensions = 1) ValueProfile[]            receiverClassProfiles;
   private final @CompilationFinal(dimensions = 1) SAbstractObject[] literals;
   private final @CompilationFinal ValueProfile                      valueProfile =
       ValueProfile.createClassProfile();
@@ -67,7 +67,7 @@ public class SMethod extends SAbstractObject implements SInvokable {
     inlineCacheClass = new SClass[numberOfBytecodes];
     inlineCacheInvokable = new SInvokable[numberOfBytecodes];
     inlineCacheDirectCallNodes = new DirectCallNode[numberOfBytecodes];
-    receiverClasses = new ValueProfile[numberOfBytecodes];
+    receiverClassProfiles = new ValueProfile[numberOfBytecodes];
     maximumNumberOfStackElements = maxNumStackElements;
     this.literals = new SAbstractObject[numberOfLiterals];
 
@@ -189,20 +189,13 @@ public class SMethod extends SAbstractObject implements SInvokable {
     return inlineCacheDirectCallNodes[bytecodeIndex];
   }
 
-  public ValueProfile setValueProfile(final int bytecodeIndex) {
-    ValueProfile receiverClass = ValueProfile.createClassProfile();
-    receiverClasses[bytecodeIndex] = receiverClass;
-    return receiverClass;
-  }
-
   public void setValueProfile(final int bytecodeIndex,
       final ValueProfile valueProfile) {
-    receiverClasses[bytecodeIndex] = valueProfile;
-    // return valueProfile;
+    receiverClassProfiles[bytecodeIndex] = valueProfile;
   }
 
   public ValueProfile getValueProfile(final int bytecodeIndex) {
-    return receiverClasses[bytecodeIndex];
+    return receiverClassProfiles[bytecodeIndex];
   }
 
   public void setInlineCache(final int bytecodeIndex, final SClass receiverClass,
@@ -220,7 +213,6 @@ public class SMethod extends SAbstractObject implements SInvokable {
     }
   }
 
-  @TruffleBoundary
   public final ValueProfile getValueProfile() {
     return valueProfile;
   }

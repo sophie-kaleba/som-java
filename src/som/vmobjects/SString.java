@@ -55,7 +55,6 @@ public class SString extends SAbstractObject {
     return universe.stringClass;
   }
 
-  @CompilerDirectives.TruffleBoundary
   public ValueProfile getValueProfile() {
     return valueProfile;
   }

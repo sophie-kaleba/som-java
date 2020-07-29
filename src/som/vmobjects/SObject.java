@@ -76,7 +76,6 @@ public class SObject extends SAbstractObject {
     return clazz;
   }
 
-  @CompilerDirectives.TruffleBoundary
   public final ValueProfile getValueProfile() {
     return valueProfile;
   }

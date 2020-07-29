@@ -44,18 +44,7 @@ import som.compiler.ProgramDefinitionError;
 import som.compiler.SourcecodeCompiler;
 import som.interpreter.Frame;
 import som.interpreter.Interpreter;
-import som.vmobjects.SAbstractObject;
-import som.vmobjects.SArray;
-import som.vmobjects.SBigInteger;
-import som.vmobjects.SBlock;
-import som.vmobjects.SClass;
-import som.vmobjects.SDouble;
-import som.vmobjects.SInteger;
-import som.vmobjects.SInvokable;
-import som.vmobjects.SMethod;
-import som.vmobjects.SObject;
-import som.vmobjects.SString;
-import som.vmobjects.SSymbol;
+import som.vmobjects.*;
 
 
 public final class Universe {
@@ -491,6 +480,7 @@ public final class Universe {
     return result;
   }
 
+  @TruffleBoundary
   public SBlock newBlock(final SMethod method, final Frame context, final int arguments)
       throws ProgramDefinitionError {
     // Allocate a new block and set its class to be the block class

@@ -55,7 +55,6 @@ public final class SDouble extends SNumber {
     return universe.doubleClass;
   }
 
-  @CompilerDirectives.TruffleBoundary
   public ValueProfile getValueProfile() {
     return valueProfile;
   }
@@ -71,7 +70,6 @@ public final class SDouble extends SNumber {
   }
 
   @Override
-  @CompilerDirectives.TruffleBoundary
   public SString primAsString(final Universe universe) {
     return universe.newString(Double.toString(embeddedDouble));
   }
