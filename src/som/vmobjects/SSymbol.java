@@ -37,13 +37,10 @@ import som.vm.Universe;
 @ExportLibrary(InteropLibrary.class)
 public class SSymbol extends SString {
 
+  private final int numberOfSignatureArguments;
+
   @CompilerDirectives.CompilationFinal private final ValueProfile valueProfile =
       ValueProfile.createClassProfile();
-
-  @CompilerDirectives.TruffleBoundary
-  public final ValueProfile getValueProfile() {
-    return valueProfile;
-  }
 
   public SSymbol(final String value) {
     super(value);
@@ -96,12 +93,10 @@ public class SSymbol extends SString {
     return universe.symbolClass;
   }
 
-  @Override
-  public final SClass getSOMClassBis(Universe universe, ValueProfile profiledClass) {
-    return profiledClass.profile(universe.symbolClass);
+  @CompilerDirectives.TruffleBoundary
+  public final ValueProfile getValueProfile() {
+    return valueProfile;
   }
-
-  private final int numberOfSignatureArguments;
 
   /**
    * INTEROP.

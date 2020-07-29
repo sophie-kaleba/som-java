@@ -39,11 +39,6 @@ public final class SDouble extends SNumber {
   @CompilerDirectives.CompilationFinal private final ValueProfile valueProfile =
       ValueProfile.createClassProfile();
 
-  @CompilerDirectives.TruffleBoundary
-  public ValueProfile getValueProfile() {
-    return valueProfile;
-  }
-
   private final double embeddedDouble;
 
   public SDouble(final double value) {
@@ -55,15 +50,14 @@ public final class SDouble extends SNumber {
     return embeddedDouble;
   }
 
-  public SClass getSOMClassBis(final Universe universe,
-      final ValueProfile classProfiled) {
-    return classProfiled.profile(universe.doubleClass);
-    // return universe.arrayClass;
-  }
-
   @Override
   public SClass getSOMClass(final Universe universe) {
     return universe.doubleClass;
+  }
+
+  @CompilerDirectives.TruffleBoundary
+  public ValueProfile getValueProfile() {
+    return valueProfile;
   }
 
   private double coerceToDouble(final SNumber o, final Universe universe) {
@@ -77,6 +71,7 @@ public final class SDouble extends SNumber {
   }
 
   @Override
+  @CompilerDirectives.TruffleBoundary
   public SString primAsString(final Universe universe) {
     return universe.newString(Double.toString(embeddedDouble));
   }

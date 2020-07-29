@@ -198,53 +198,20 @@ public class Interpreter {
   }
 
   private void doSend(final int bytecodeIndex, final Frame frame, final SMethod method) {
-    // Handle the SEND bytecode
     SSymbol signature = (SSymbol) method.getConstant(bytecodeIndex);
-
-    // Get the number of arguments from the signature
     int numberOfArguments = signature.getNumberOfSignatureArguments();
-
-    // Get the receiver from the stack
     SAbstractObject receiver = frame.getStackElement(numberOfArguments - 1);
 
     ValueProfile receiverClassValueProfile = method.getValueProfile(bytecodeIndex);
-
-    // Send the message
     if (receiverClassValueProfile == null) {
       CompilerDirectives.transferToInterpreterAndInvalidate();
-      // if (receiver instanceof SInteger) {
-      //
-      // method.setValueProfile(bytecodeIndex, ((SInteger) receiver).getValueProfile());
-      // // } else if (receiver instanceof SBlock) {
-      // //
-      // // method.setValueProfile(bytecodeIndex, ((SBlock) receiver).getValueProfile());
-      // } else if (receiver instanceof SArray) {
-      //
-      // method.setValueProfile(bytecodeIndex, ((SArray) receiver).getValueProfile());
-      // } else {
-      method.setValueProfile(bytecodeIndex, receiver.getValueProfile());
-      // receiverClassValueProfile = method.setValueProfile(bytecodeIndex);
-      // }
+      receiverClassValueProfile = receiver.getValueProfile();
+      method.setValueProfile(bytecodeIndex, receiverClassValueProfile);
     }
 
-    // if ((receiver instanceof SInteger)
-    // || (receiver instanceof SArray)) {
-    // ((SInteger) receiver).valueProfile.profile(receiver);
-    receiverClassValueProfile = method.getValueProfile(bytecodeIndex);
     send(signature,
         receiverClassValueProfile.profile(receiver).getSOMClass(universe),
         bytecodeIndex, frame, method);
-    // } else {
-    //
-    // // TODO - the system needs to know that this is not a SAbstractObject
-    // // SAbstractObject profiledReceiver = receiverClassValueProfile.profile(receiver);
-    //
-    // SClass somClassProfiled = receiver.getSOMClassBis(universe,
-    // receiverClassValueProfile);
-    // send(signature, somClassProfiled, bytecodeIndex, frame, method);
-    // // send(signature, profiledReceiver.getSOMClass(universe), bytecodeIndex, frame,
-    // method);
-    // }
   }
 
   @ExplodeLoop(kind = ExplodeLoop.LoopExplosionKind.MERGE_EXPLODE)
@@ -425,19 +392,6 @@ public class Interpreter {
       receiver.sendDoesNotUnderstand(selector, universe, this, frame);
     }
   }
-
-  // public void doCall(Frame frame, SInvokable invokable,
-  // DirectCallNode invokableDirectCallNode) {
-  // // an inline cache has been hit
-  // if (invokableDirectCallNode != null) {
-  // // TODO - this check passes but the method is not inlined in the graal graph
-  // // needs further investigation
-  // invokable.directInvoke(frame, this, invokableDirectCallNode);
-  //
-  // } else {
-  // invokable.indirectInvoke(frame, this);
-  // }
-  // }
 
   public final Frame newFrame(Frame prevFrame, final SMethod method, final Frame context) {
     return this.universe.newFrame(prevFrame, method, context);

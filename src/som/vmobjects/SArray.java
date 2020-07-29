@@ -27,18 +27,12 @@ package som.vmobjects;
 import com.oracle.truffle.api.CompilerDirectives;
 import com.oracle.truffle.api.profiles.ValueProfile;
 import som.vm.Universe;
-import sun.awt.SunHints;
 
 
 public class SArray extends SAbstractObject {
 
   @CompilerDirectives.CompilationFinal private final ValueProfile valueProfile =
       ValueProfile.createClassProfile();
-
-  @CompilerDirectives.TruffleBoundary
-  public final ValueProfile getValueProfile() {
-    return valueProfile;
-  }
 
   public SArray(final SObject nilObject, long numElements) {
     indexableFields = new SAbstractObject[(int) numElements];
@@ -83,15 +77,13 @@ public class SArray extends SAbstractObject {
   }
 
   @Override
-  public final SClass getSOMClassBis(final Universe universe,
-      final ValueProfile classProfiled) {
-    return classProfiled.profile(universe.arrayClass);
-    // return universe.arrayClass;
-  }
-
-  @Override
   public final SClass getSOMClass(final Universe universe) {
     return universe.arrayClass;
+  }
+
+  @CompilerDirectives.TruffleBoundary
+  public final ValueProfile getValueProfile() {
+    return valueProfile;
   }
 
   // Private array of indexable fields

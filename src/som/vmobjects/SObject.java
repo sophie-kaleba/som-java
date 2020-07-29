@@ -7,13 +7,12 @@ import som.vm.Universe;
 
 public class SObject extends SAbstractObject {
 
+  private final SAbstractObject[] fields;
+  private SClass                  clazz;
+  static final int                numberOfObjectFields = 0;
+
   @CompilerDirectives.CompilationFinal private final ValueProfile valueProfile =
       ValueProfile.createClassProfile();
-
-  @CompilerDirectives.TruffleBoundary
-  public final ValueProfile getValueProfile() {
-    return valueProfile;
-  }
 
   public SObject(final SObject nilObject) {
     fields = new SAbstractObject[getDefaultNumberOfFields()];
@@ -77,15 +76,8 @@ public class SObject extends SAbstractObject {
     return clazz;
   }
 
-  @Override
-  public final SClass getSOMClassBis(Universe universe, ValueProfile profiledClass) {
-    return profiledClass.profile(clazz);
+  @CompilerDirectives.TruffleBoundary
+  public final ValueProfile getValueProfile() {
+    return valueProfile;
   }
-
-  // Private array of fields
-  private final SAbstractObject[] fields;
-  private SClass                  clazz;
-
-  // Static field indices and number of object fields
-  static final int numberOfObjectFields = 0;
 }

@@ -28,16 +28,15 @@ import java.util.List;
 
 import com.oracle.truffle.api.*;
 import com.oracle.truffle.api.CompilerDirectives.CompilationFinal;
+import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
 import com.oracle.truffle.api.nodes.DirectCallNode;
 import com.oracle.truffle.api.nodes.IndirectCallNode;
-
-import com.oracle.truffle.api.nodes.Node;
 import com.oracle.truffle.api.profiles.ValueProfile;
+
 import som.interpreter.Frame;
 import som.interpreter.Interpreter;
 import som.interpreter.Method;
 import som.vm.Universe;
-import sun.awt.SunHints;
 
 
 public class SMethod extends SAbstractObject implements SInvokable {
@@ -47,13 +46,8 @@ public class SMethod extends SAbstractObject implements SInvokable {
   final @CompilationFinal(dimensions = 1) DirectCallNode[]          inlineCacheDirectCallNodes;
   final @CompilationFinal(dimensions = 1) ValueProfile[]            receiverClasses;
   private final @CompilationFinal(dimensions = 1) SAbstractObject[] literals;
-  @CompilerDirectives.CompilationFinal private final ValueProfile   valueProfile =
+  private final @CompilationFinal ValueProfile                      valueProfile =
       ValueProfile.createClassProfile();
-
-  @CompilerDirectives.TruffleBoundary
-  public final ValueProfile getValueProfile() {
-    return valueProfile;
-  }
 
   private final Method     method;
   private final CallTarget callTarget;
@@ -226,14 +220,14 @@ public class SMethod extends SAbstractObject implements SInvokable {
     }
   }
 
-  @Override
-  public SClass getSOMClass(final Universe universe) {
-    return universe.methodClass;
+  @TruffleBoundary
+  public final ValueProfile getValueProfile() {
+    return valueProfile;
   }
 
   @Override
-  public final SClass getSOMClassBis(Universe universe, ValueProfile profiledClass) {
-    return profiledClass.profile(universe.methodClass);
+  public SClass getSOMClass(final Universe universe) {
+    return universe.methodClass;
   }
 
   public CallTarget getCallTarget() {

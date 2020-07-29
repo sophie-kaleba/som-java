@@ -31,13 +31,11 @@ import som.vm.Universe;
 
 public class SString extends SAbstractObject {
 
+  // Private variable holding the string associated to this symbol
+  private final String string;
+
   @CompilerDirectives.CompilationFinal private final ValueProfile valueProfile =
       ValueProfile.createClassProfile();
-
-  @CompilerDirectives.TruffleBoundary
-  public ValueProfile getValueProfile() {
-    return valueProfile;
-  }
 
   public SString(final String value) {
     string = value;
@@ -57,11 +55,9 @@ public class SString extends SAbstractObject {
     return universe.stringClass;
   }
 
-  @Override
-  public SClass getSOMClassBis(Universe universe, ValueProfile profiledClass) {
-    return profiledClass.profile(universe.stringClass);
+  @CompilerDirectives.TruffleBoundary
+  public ValueProfile getValueProfile() {
+    return valueProfile;
   }
 
-  // Private variable holding the string associated to this symbol
-  private final String string;
 }

@@ -36,11 +36,6 @@ public final class SBigInteger extends SNumber {
   @CompilerDirectives.CompilationFinal private final ValueProfile valueProfile =
       ValueProfile.createClassProfile();
 
-  @CompilerDirectives.TruffleBoundary
-  public ValueProfile getValueProfile() {
-    return valueProfile;
-  }
-
   // Private variable holding the embedded big integer
   private final BigInteger embeddedBiginteger;
 
@@ -58,9 +53,9 @@ public final class SBigInteger extends SNumber {
     return universe.integerClass;
   }
 
-  @Override
-  public SClass getSOMClassBis(Universe universe, ValueProfile profiledClass) {
-    return profiledClass.profile(universe.integerClass);
+  @CompilerDirectives.TruffleBoundary
+  public ValueProfile getValueProfile() {
+    return valueProfile;
   }
 
   @Override

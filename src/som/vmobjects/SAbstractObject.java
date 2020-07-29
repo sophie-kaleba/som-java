@@ -36,8 +36,6 @@ public abstract class SAbstractObject implements TruffleObject {
 
   public abstract SClass getSOMClass(Universe universe);
 
-  public abstract SClass getSOMClassBis(Universe universe, ValueProfile profiledClass);
-
   public abstract ValueProfile getValueProfile();
 
   public void send(final String selectorString, final SAbstractObject[] arguments,

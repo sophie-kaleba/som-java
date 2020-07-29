@@ -25,9 +25,9 @@
 package som.vmobjects;
 
 import com.oracle.truffle.api.CompilerDirectives;
-import com.oracle.truffle.api.Truffle;
 import com.oracle.truffle.api.nodes.IndirectCallNode;
 import com.oracle.truffle.api.profiles.ValueProfile;
+
 import som.interpreter.Frame;
 import som.interpreter.Interpreter;
 import som.vm.Universe;
@@ -36,11 +36,9 @@ import som.vm.Universe;
 public class SBlock extends SAbstractObject {
 
   private final ValueProfile valueProfile;
-
-  @CompilerDirectives.TruffleBoundary
-  public final ValueProfile getValueProfile() {
-    return valueProfile;
-  }
+  private final SMethod      method;
+  private final Frame        context;
+  private final SClass       blockClass;
 
   @CompilerDirectives.TruffleBoundary
   public SBlock(final SMethod method, final Frame context, final SClass blockClass) {
@@ -59,14 +57,13 @@ public class SBlock extends SAbstractObject {
   }
 
   @Override
-  public final SClass getSOMClassBis(final Universe universe,
-      final ValueProfile classProfiled) {
-    return classProfiled.profile(blockClass);
-  }
-
-  @Override
   public final SClass getSOMClass(final Universe universe) {
     return blockClass;
+  }
+
+  @CompilerDirectives.TruffleBoundary
+  public final ValueProfile getValueProfile() {
+    return valueProfile;
   }
 
   public static SPrimitive getEvaluationPrimitive(int numberOfArguments,
@@ -75,6 +72,8 @@ public class SBlock extends SAbstractObject {
   }
 
   public static class Evaluation extends SPrimitive {
+
+    private final int numberOfArguments;
 
     public Evaluation(int numberOfArguments, final Universe universe) {
       super(computeSignatureString(numberOfArguments), universe);
@@ -119,10 +118,5 @@ public class SBlock extends SAbstractObject {
       return signatureString;
     }
 
-    private final int numberOfArguments;
   }
-
-  private final SMethod method;
-  private final Frame   context;
-  private final SClass  blockClass;
 }

@@ -26,24 +26,22 @@
 package som.vmobjects;
 
 import com.oracle.truffle.api.CompilerDirectives;
+import com.oracle.truffle.api.CompilerDirectives.CompilationFinal;
 import com.oracle.truffle.api.nodes.DirectCallNode;
 import com.oracle.truffle.api.profiles.ValueProfile;
+
 import som.interpreter.Frame;
 import som.interpreter.Interpreter;
 import som.vm.Universe;
 
-import javax.swing.*;
-
 
 public abstract class SPrimitive extends SAbstractObject implements SInvokable {
 
-  @CompilerDirectives.CompilationFinal private final ValueProfile valueProfile =
-      ValueProfile.createClassProfile();
+  private final SSymbol signature;
+  private SClass        holder;
 
-  @CompilerDirectives.TruffleBoundary
-  public final ValueProfile getValueProfile() {
-    return valueProfile;
-  }
+  @CompilationFinal private final ValueProfile valueProfile =
+      ValueProfile.createClassProfile();
 
   @Override
   public boolean isPrimitive() {
@@ -89,9 +87,9 @@ public abstract class SPrimitive extends SAbstractObject implements SInvokable {
     return universe.primitiveClass;
   }
 
-  @Override
-  public final SClass getSOMClassBis(Universe universe, ValueProfile profiledClass) {
-    return profiledClass.profile(universe.primitiveClass);
+  @CompilerDirectives.TruffleBoundary
+  public final ValueProfile getValueProfile() {
+    return valueProfile;
   }
 
   public static SPrimitive getEmptyPrimitive(java.lang.String signatureString,
@@ -113,7 +111,4 @@ public abstract class SPrimitive extends SAbstractObject implements SInvokable {
       }
     });
   }
-
-  private final SSymbol signature;
-  private SClass        holder;
 }
