@@ -24,13 +24,11 @@
 
 package som.vmobjects;
 
-import com.oracle.truffle.api.CompilerDirectives;
 import com.oracle.truffle.api.interop.InteropLibrary;
 import com.oracle.truffle.api.interop.UnsupportedMessageException;
 import com.oracle.truffle.api.library.ExportLibrary;
 import com.oracle.truffle.api.library.ExportMessage;
 
-import com.oracle.truffle.api.profiles.ValueProfile;
 import som.vm.Universe;
 
 
@@ -38,9 +36,6 @@ import som.vm.Universe;
 public class SSymbol extends SString {
 
   private final int numberOfSignatureArguments;
-
-  @CompilerDirectives.CompilationFinal private final ValueProfile valueProfile =
-      ValueProfile.createClassProfile();
 
   public SSymbol(final String value) {
     super(value);
@@ -91,10 +86,6 @@ public class SSymbol extends SString {
   @Override
   public SClass getSOMClass(final Universe universe) {
     return universe.symbolClass;
-  }
-
-  public final ValueProfile getValueProfile() {
-    return valueProfile;
   }
 
   /**

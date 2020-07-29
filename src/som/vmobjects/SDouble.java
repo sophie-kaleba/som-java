@@ -24,20 +24,15 @@
 
 package som.vmobjects;
 
-import com.oracle.truffle.api.CompilerDirectives;
 import com.oracle.truffle.api.interop.InteropLibrary;
 import com.oracle.truffle.api.library.ExportLibrary;
 import com.oracle.truffle.api.library.ExportMessage;
 
-import com.oracle.truffle.api.profiles.ValueProfile;
 import som.vm.Universe;
 
 
 @ExportLibrary(InteropLibrary.class)
 public final class SDouble extends SNumber {
-
-  @CompilerDirectives.CompilationFinal private final ValueProfile valueProfile =
-      ValueProfile.createClassProfile();
 
   private final double embeddedDouble;
 
@@ -53,10 +48,6 @@ public final class SDouble extends SNumber {
   @Override
   public SClass getSOMClass(final Universe universe) {
     return universe.doubleClass;
-  }
-
-  public ValueProfile getValueProfile() {
-    return valueProfile;
   }
 
   private double coerceToDouble(final SNumber o, final Universe universe) {

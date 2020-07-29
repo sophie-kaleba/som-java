@@ -24,9 +24,7 @@
 
 package som.vmobjects;
 
-import com.oracle.truffle.api.CompilerDirectives;
 import com.oracle.truffle.api.nodes.IndirectCallNode;
-import com.oracle.truffle.api.profiles.ValueProfile;
 
 import som.interpreter.Frame;
 import som.interpreter.Interpreter;
@@ -35,16 +33,14 @@ import som.vm.Universe;
 
 public class SBlock extends SAbstractObject {
 
-  private final ValueProfile valueProfile;
-  private final SMethod      method;
-  private final Frame        context;
-  private final SClass       blockClass;
+  private final SMethod method;
+  private final Frame   context;
+  private final SClass  blockClass;
 
   public SBlock(final SMethod method, final Frame context, final SClass blockClass) {
     this.method = method;
     this.context = context;
     this.blockClass = blockClass;
-    this.valueProfile = ValueProfile.createClassProfile();
   }
 
   public SMethod getMethod() {
@@ -58,10 +54,6 @@ public class SBlock extends SAbstractObject {
   @Override
   public final SClass getSOMClass(final Universe universe) {
     return blockClass;
-  }
-
-  public final ValueProfile getValueProfile() {
-    return valueProfile;
   }
 
   public static SPrimitive getEvaluationPrimitive(int numberOfArguments,

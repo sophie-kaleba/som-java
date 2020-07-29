@@ -204,7 +204,7 @@ public class Interpreter {
     ValueProfile receiverClassValueProfile = method.getValueProfile(bytecodeIndex);
     if (receiverClassValueProfile == null) {
       CompilerDirectives.transferToInterpreterAndInvalidate();
-      receiverClassValueProfile = receiver.getValueProfile();
+      receiverClassValueProfile = ValueProfile.createClassProfile();
       method.setValueProfile(bytecodeIndex, receiverClassValueProfile);
     }
 

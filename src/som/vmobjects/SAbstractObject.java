@@ -26,7 +26,6 @@ package som.vmobjects;
 
 import com.oracle.truffle.api.interop.TruffleObject;
 
-import com.oracle.truffle.api.profiles.ValueProfile;
 import som.interpreter.Frame;
 import som.interpreter.Interpreter;
 import som.vm.Universe;
@@ -35,8 +34,6 @@ import som.vm.Universe;
 public abstract class SAbstractObject implements TruffleObject {
 
   public abstract SClass getSOMClass(Universe universe);
-
-  public abstract ValueProfile getValueProfile();
 
   public void send(final String selectorString, final SAbstractObject[] arguments,
       final Universe universe, final Interpreter interpreter, Frame frame) {

@@ -29,18 +29,13 @@ import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.oracle.truffle.api.CompilerDirectives.CompilationFinal;
 import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
 import com.oracle.truffle.api.library.ExportMessage;
 
-import com.oracle.truffle.api.profiles.ValueProfile;
 import som.vm.Universe;
 
 
 public final class SInteger extends SNumber {
-
-  @CompilationFinal private final ValueProfile valueProfile =
-      ValueProfile.createClassProfile();
 
   /**
    * Language convention requires integers up to this value to be identical.
@@ -80,10 +75,6 @@ public final class SInteger extends SNumber {
   @Override
   public SClass getSOMClass(final Universe universe) {
     return universe.integerClass;
-  }
-
-  public ValueProfile getValueProfile() {
-    return valueProfile;
   }
 
   @Override

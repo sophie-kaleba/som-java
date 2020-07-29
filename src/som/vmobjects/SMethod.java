@@ -28,7 +28,6 @@ import java.util.List;
 
 import com.oracle.truffle.api.*;
 import com.oracle.truffle.api.CompilerDirectives.CompilationFinal;
-import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
 import com.oracle.truffle.api.nodes.DirectCallNode;
 import com.oracle.truffle.api.nodes.IndirectCallNode;
 import com.oracle.truffle.api.profiles.ValueProfile;
@@ -46,8 +45,6 @@ public class SMethod extends SAbstractObject implements SInvokable {
   final @CompilationFinal(dimensions = 1) DirectCallNode[]          inlineCacheDirectCallNodes;
   final @CompilationFinal(dimensions = 1) ValueProfile[]            receiverClassProfiles;
   private final @CompilationFinal(dimensions = 1) SAbstractObject[] literals;
-  private final @CompilationFinal ValueProfile                      valueProfile =
-      ValueProfile.createClassProfile();
 
   private final Method     method;
   private final CallTarget callTarget;
@@ -211,10 +208,6 @@ public class SMethod extends SAbstractObject implements SInvokable {
             DirectCallNode.create(((SMethod) invokable).getCallTarget());
       }
     }
-  }
-
-  public final ValueProfile getValueProfile() {
-    return valueProfile;
   }
 
   @Override
