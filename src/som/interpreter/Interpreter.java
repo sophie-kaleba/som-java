@@ -33,12 +33,11 @@ import com.oracle.truffle.api.Truffle;
 import com.oracle.truffle.api.nodes.DirectCallNode;
 import com.oracle.truffle.api.nodes.ExplodeLoop;
 import com.oracle.truffle.api.nodes.IndirectCallNode;
-
 import com.oracle.truffle.api.profiles.ValueProfile;
+
 import som.compiler.ProgramDefinitionError;
 import som.vm.Universe;
 import som.vmobjects.*;
-import sun.awt.SunHints;
 
 
 public class Interpreter {
