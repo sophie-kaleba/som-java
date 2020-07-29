@@ -201,11 +201,11 @@ public class Interpreter {
     int numberOfArguments = signature.getNumberOfSignatureArguments();
     SAbstractObject receiver = frame.getStackElement(numberOfArguments - 1);
 
-    ValueProfile receiverClassValueProfile = method.getValueProfile(bytecodeIndex);
+    ValueProfile receiverClassValueProfile = method.getReceiverProfile(bytecodeIndex);
     if (receiverClassValueProfile == null) {
       CompilerDirectives.transferToInterpreterAndInvalidate();
       receiverClassValueProfile = ValueProfile.createClassProfile();
-      method.setValueProfile(bytecodeIndex, receiverClassValueProfile);
+      method.setReceiverProfile(bytecodeIndex, receiverClassValueProfile);
     }
 
     send(signature,

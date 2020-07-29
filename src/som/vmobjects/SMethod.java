@@ -42,8 +42,8 @@ public class SMethod extends SAbstractObject implements SInvokable {
 
   private final @CompilationFinal(dimensions = 1) SClass[]          inlineCacheClass;
   private final @CompilationFinal(dimensions = 1) SInvokable[]      inlineCacheInvokable;
-  final @CompilationFinal(dimensions = 1) DirectCallNode[]          inlineCacheDirectCallNodes;
-  final @CompilationFinal(dimensions = 1) ValueProfile[]            receiverClassProfiles;
+  private final @CompilationFinal(dimensions = 1) DirectCallNode[]  inlineCacheDirectCallNodes;
+  private final @CompilationFinal(dimensions = 1) ValueProfile[]    receiverProfiles;
   private final @CompilationFinal(dimensions = 1) SAbstractObject[] literals;
 
   private final Method     method;
@@ -64,7 +64,7 @@ public class SMethod extends SAbstractObject implements SInvokable {
     inlineCacheClass = new SClass[numberOfBytecodes];
     inlineCacheInvokable = new SInvokable[numberOfBytecodes];
     inlineCacheDirectCallNodes = new DirectCallNode[numberOfBytecodes];
-    receiverClassProfiles = new ValueProfile[numberOfBytecodes];
+    receiverProfiles = new ValueProfile[numberOfBytecodes];
     maximumNumberOfStackElements = maxNumStackElements;
     this.literals = new SAbstractObject[numberOfLiterals];
 
@@ -186,13 +186,13 @@ public class SMethod extends SAbstractObject implements SInvokable {
     return inlineCacheDirectCallNodes[bytecodeIndex];
   }
 
-  public void setValueProfile(final int bytecodeIndex,
+  public void setReceiverProfile(final int bytecodeIndex,
       final ValueProfile valueProfile) {
-    receiverClassProfiles[bytecodeIndex] = valueProfile;
+    receiverProfiles[bytecodeIndex] = valueProfile;
   }
 
-  public ValueProfile getValueProfile(final int bytecodeIndex) {
-    return receiverClassProfiles[bytecodeIndex];
+  public ValueProfile getReceiverProfile(final int bytecodeIndex) {
+    return receiverProfiles[bytecodeIndex];
   }
 
   public void setInlineCache(final int bytecodeIndex, final SClass receiverClass,
