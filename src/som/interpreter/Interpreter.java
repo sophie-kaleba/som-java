@@ -232,11 +232,12 @@ public class Interpreter {
     SAbstractObject receiver = StackUtils.getRelativeStackElement(frame,
         numberOfArguments - 1);
 
-    ValueProfile receiverClassValueProfile = method.getReceiverProfile(bytecodeIndex);
+    ValueProfile receiverClassValueProfile =
+        method.getMethod().getReceiverProfile(bytecodeIndex);
     if (receiverClassValueProfile == null) {
       CompilerDirectives.transferToInterpreterAndInvalidate();
       receiverClassValueProfile = ValueProfile.createClassProfile();
-      method.setReceiverProfile(bytecodeIndex, receiverClassValueProfile);
+      method.getMethod().setReceiverProfile(bytecodeIndex, receiverClassValueProfile);
     }
 
     send(signature,
@@ -375,12 +376,12 @@ public class Interpreter {
     // First try the inline cache
     SInvokable invokableWithoutCacheHit = null;
 
-    SClass cachedClass = method.getInlineCacheClass(bytecodeIndex);
+    SClass cachedClass = method.getMethod().getInlineCacheClass(bytecodeIndex);
     if (cachedClass == receiverClass) {
-      SInvokable invokable = method.getInlineCacheInvokable(bytecodeIndex);
+      SInvokable invokable = method.getMethod().getInlineCacheInvokable(bytecodeIndex);
       if (invokable != null) {
         DirectCallNode invokableDirectCallNode =
-            method.getInlineCacheDirectCallNode(bytecodeIndex);
+            method.getMethod().getInlineCacheDirectCallNode(bytecodeIndex);
         CompilerAsserts.partialEvaluationConstant(invokableDirectCallNode);
         invokable.directInvoke(frame, this, invokableDirectCallNode);
         return;
@@ -390,16 +391,17 @@ public class Interpreter {
         CompilerDirectives.transferToInterpreterAndInvalidate();
         // Lookup the invokable with the given signature
         invokableWithoutCacheHit = receiverClass.lookupInvokable(selector);
-        method.setInlineCache(bytecodeIndex, receiverClass, invokableWithoutCacheHit);
+        method.getMethod().setInlineCache(bytecodeIndex, receiverClass,
+            invokableWithoutCacheHit);
       } else {
         // the bytecode index after the send is used by the selector constant, and can be used
         // safely as another cache item
-        cachedClass = method.getInlineCacheClass(bytecodeIndex + 1);
+        cachedClass = method.getMethod().getInlineCacheClass(bytecodeIndex + 1);
         if (cachedClass == receiverClass) {
-          SInvokable invokable = method.getInlineCacheInvokable(bytecodeIndex + 1);
+          SInvokable invokable = method.getMethod().getInlineCacheInvokable(bytecodeIndex + 1);
           if (invokable != null) {
             DirectCallNode invokableDirectCallNode =
-                method.getInlineCacheDirectCallNode(bytecodeIndex + 1);
+                method.getMethod().getInlineCacheDirectCallNode(bytecodeIndex + 1);
             CompilerAsserts.partialEvaluationConstant(invokableDirectCallNode);
             invokable.directInvoke(frame, this, invokableDirectCallNode);
             return;
@@ -408,7 +410,8 @@ public class Interpreter {
           CompilerDirectives.transferToInterpreterAndInvalidate();
           invokableWithoutCacheHit = receiverClass.lookupInvokable(selector);
           if (cachedClass == null) {
-            method.setInlineCache(bytecodeIndex + 1, receiverClass, invokableWithoutCacheHit);
+            method.getMethod().setInlineCache(bytecodeIndex + 1, receiverClass,
+                invokableWithoutCacheHit);
           }
         }
       }
