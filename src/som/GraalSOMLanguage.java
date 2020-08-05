@@ -54,8 +54,7 @@ public final class GraalSOMLanguage extends TruffleLanguage<Universe> {
       category = OptionCategory.USER) public static final OptionKey<String> TestClasspath =
           new OptionKey<>("");
 
-  public GraalSOMLanguage() {
-  }
+  public GraalSOMLanguage() {}
 
   @Override
   protected Universe createContext(final Env env) {
