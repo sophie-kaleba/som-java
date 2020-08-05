@@ -32,6 +32,7 @@ import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
 import som.primitives.Primitives;
 import som.vm.Universe;
 
+
 public class SClass extends SObject {
 
   private final Universe universe;
