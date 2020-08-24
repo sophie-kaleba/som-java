@@ -25,11 +25,25 @@
 
 package som.compiler;
 
-import static som.interpreter.Bytecodes.*;
+import static som.interpreter.Bytecodes.DUP;
+import static som.interpreter.Bytecodes.HALT;
+import static som.interpreter.Bytecodes.POP;
+import static som.interpreter.Bytecodes.POP_ARGUMENT;
+import static som.interpreter.Bytecodes.POP_FIELD;
+import static som.interpreter.Bytecodes.POP_LOCAL;
+import static som.interpreter.Bytecodes.PUSH_ARGUMENT;
+import static som.interpreter.Bytecodes.PUSH_BLOCK;
+import static som.interpreter.Bytecodes.PUSH_CONSTANT;
+import static som.interpreter.Bytecodes.PUSH_FIELD;
+import static som.interpreter.Bytecodes.PUSH_GLOBAL;
+import static som.interpreter.Bytecodes.PUSH_LOCAL;
+import static som.interpreter.Bytecodes.RETURN_LOCAL;
+import static som.interpreter.Bytecodes.RETURN_NON_LOCAL;
+import static som.interpreter.Bytecodes.SEND;
+import static som.interpreter.Bytecodes.SUPER_SEND;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Vector;
 
 import som.vm.Universe;
 import som.vmobjects.*;
@@ -46,7 +60,7 @@ public class MethodGenerationContext {
   private final List<String>          locals    = new ArrayList<String>();
   private final List<SAbstractObject> literals  = new ArrayList<SAbstractObject>();
   private boolean                     finished;
-  private final Vector<Byte>          bytecode  = new Vector<Byte>();
+  private final ArrayList<Byte>       bytecode  = new ArrayList<>();
 
   public void setHolder(final ClassGenerationContext cgenc) {
     holderGenc = cgenc;
@@ -90,7 +104,7 @@ public class MethodGenerationContext {
     int i = 0;
 
     while (i < bytecode.size()) {
-      switch (bytecode.elementAt(i)) {
+      switch (bytecode.get(i)) {
         case HALT:
           i++;
           break;
@@ -127,7 +141,7 @@ public class MethodGenerationContext {
         case SUPER_SEND: {
           // these are special: they need to look at the number of
           // arguments (extractable from the signature)
-          SSymbol sig = (SSymbol) literals.get(bytecode.elementAt(i + 1));
+          SSymbol sig = (SSymbol) literals.get(bytecode.get(i + 1));
 
           depth -= sig.getNumberOfSignatureArguments();
 
@@ -141,7 +155,7 @@ public class MethodGenerationContext {
           break;
         default:
           throw new IllegalStateException("Illegal bytecode "
-              + bytecode.elementAt(i));
+              + bytecode.get(i));
       }
 
       if (depth > maxDepth) {
@@ -191,7 +205,7 @@ public class MethodGenerationContext {
   }
 
   public void removeLastBytecode() {
-    bytecode.removeElementAt(bytecode.size() - 1);
+    bytecode.remove(bytecode.size() - 1);
   }
 
   public boolean isBlockMethod() {
