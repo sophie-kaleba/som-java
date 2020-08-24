@@ -64,9 +64,9 @@ public class BasicInterpreterTests {
         {"Blocks", "testArg2", 77, Long.class},
         {"Blocks", "testArgAndLocal", 8, Long.class},
         {"Blocks", "testArgAndContext", 8, Long.class},
-        {"Blocks", "testEmptyZeroArg",  1, Long.class},
-        {"Blocks", "testEmptyOneArg",   1, Long.class},
-        {"Blocks", "testEmptyTwoArg",   1, Long.class},
+        {"Blocks", "testEmptyZeroArg", 1, Long.class},
+        {"Blocks", "testEmptyOneArg", 1, Long.class},
+        {"Blocks", "testEmptyTwoArg", 1, Long.class},
 
         {"Return", "testReturnSelf", "Return", SClass.class},
         {"Return", "testReturnSelfImplicitly", "Return", SClass.class},
