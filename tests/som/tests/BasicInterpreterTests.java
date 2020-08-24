@@ -114,11 +114,15 @@ public class BasicInterpreterTests {
         {"NonLocalVars", "testWriteDifferentTypes", 3.75, Double.class},
 
         {"ObjectCreation", "test", 1000000, Long.class},
+        {"Regressions", "testSymbolEquality", 1, Long.class},
+        {"Regressions", "testSymbolReferenceEquality", 1, Long.class},
+        {"Regressions", "testUninitializedLocal", 1, Long.class},
+        {"Regressions", "testUninitializedLocalInBlock", 1, Long.class},
 
         {"Regressions", "testSymbolEquality", 1, Long.class},
         {"Regressions", "testSymbolReferenceEquality", 1, Long.class},
 
-        {"NumberOfTests", "numberOfTests", 52, Long.class}
+        {"NumberOfTests", "numberOfTests", 54, Long.class}
     });
   }
 
