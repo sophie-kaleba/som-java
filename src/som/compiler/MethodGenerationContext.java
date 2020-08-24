@@ -218,6 +218,10 @@ public class MethodGenerationContext {
     locals.add(local);
   }
 
+  public boolean hasBytecodes() {
+    return !bytecode.isEmpty();
+  }
+
   public void removeLastBytecode() {
     bytecode.remove(bytecode.size() - 1);
   }
