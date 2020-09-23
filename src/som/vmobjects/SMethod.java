@@ -28,6 +28,7 @@ import java.util.List;
 
 import com.oracle.truffle.api.*;
 import com.oracle.truffle.api.CompilerDirectives.CompilationFinal;
+import com.oracle.truffle.api.frame.*;
 import com.oracle.truffle.api.nodes.DirectCallNode;
 import com.oracle.truffle.api.nodes.IndirectCallNode;
 import com.oracle.truffle.api.profiles.ValueProfile;
@@ -35,6 +36,7 @@ import com.oracle.truffle.api.profiles.ValueProfile;
 import som.interpreter.Frame;
 import som.interpreter.Interpreter;
 import som.interpreter.Method;
+import som.interpreter.StackUtils;
 import som.vm.Universe;
 
 
@@ -59,8 +61,6 @@ public class SMethod extends SAbstractObject implements SInvokable {
       final TruffleLanguage<?> language) {
     this.signature = signature;
     this.numberOfLocals = numberOfLocals;
-    this.method = new Method(language, numberOfBytecodes, this);
-    this.callTarget = Truffle.getRuntime().createCallTarget(method);
     inlineCacheClass = new SClass[numberOfBytecodes];
     inlineCacheInvokable = new SInvokable[numberOfBytecodes];
     inlineCacheDirectCallNodes = new DirectCallNode[numberOfBytecodes];
@@ -75,6 +75,15 @@ public class SMethod extends SAbstractObject implements SInvokable {
         this.literals[i++] = l;
       }
     }
+
+    FrameDescriptor frameDescriptor = new FrameDescriptor();
+    FrameSlot stack = frameDescriptor.addFrameSlot("stack", FrameSlotKind.Object);
+    FrameSlot stackPointer = frameDescriptor.addFrameSlot("stackPointer", FrameSlotKind.Int);
+    FrameSlot onStack = frameDescriptor.addFrameSlot("onStack", FrameSlotKind.Boolean);
+    this.method =
+        new Method(language, numberOfBytecodes, this, frameDescriptor, stack, stackPointer,
+            onStack);
+    this.callTarget = Truffle.getRuntime().createCallTarget(method);
   }
 
   @Override
@@ -91,6 +100,13 @@ public class SMethod extends SAbstractObject implements SInvokable {
     // Get the maximum number of stack elements (converted to a Java
     // integer)
     return maximumNumberOfStackElements;
+  }
+
+  // TODO = disambiguate with above method
+  public long getMaximumLengthOfStack() {
+    return this.getNumberOfArguments()
+        + this.getNumberOfLocals().getEmbeddedInteger()
+        + this.getMaximumNumberOfStackElements().getEmbeddedInteger() + 2;
   }
 
   @Override
@@ -142,28 +158,42 @@ public class SMethod extends SAbstractObject implements SInvokable {
   }
 
   @Override
-  public void indirectInvoke(final Frame frame, final Interpreter interpreter) {
+  public void indirectInvoke(final Frame frame, VirtualFrame truffleFrame,
+      final Interpreter interpreter) {
     final Frame newFrame = interpreter.newFrame(frame, this, null);
     newFrame.copyArgumentsFrom(frame);
 
     IndirectCallNode indirectCallNode = interpreter.getIndirectCallNode();
     SAbstractObject result =
-        (SAbstractObject) indirectCallNode.call(callTarget, interpreter, newFrame);
+        (SAbstractObject) indirectCallNode.call(callTarget, interpreter, newFrame, this,
+            newFrame.getAllArgumentsFrom(frame));
 
+    try {
+      StackUtils.popArgumentsAndPushResult(truffleFrame, result, this);
+    } catch (FrameSlotTypeException e) {
+      e.printStackTrace();
+    }
     frame.popArgumentsAndPushResult(result, this);
     newFrame.clearPreviousFrame();
   }
 
-  public void directInvoke(final Frame frame, final Interpreter interpreter,
-      DirectCallNode directCallNode) {
+  public void directInvoke(final Frame frame, VirtualFrame truffleFrame,
+      final Interpreter interpreter, DirectCallNode directCallNode) {
 
     CompilerAsserts.partialEvaluationConstant(directCallNode);
 
     final Frame newFrame = interpreter.newFrame(frame, this, null);
     newFrame.copyArgumentsFrom(frame);
-    SAbstractObject result = (SAbstractObject) directCallNode.call(interpreter, newFrame);
+    // TODO - broken - need to get arguments from elsewhere
+    SAbstractObject result = (SAbstractObject) directCallNode.call(interpreter, newFrame, this,
+        newFrame.getAllArgumentsFrom(frame));
 
     frame.popArgumentsAndPushResult(result, this);
+    try {
+      StackUtils.popArgumentsAndPushResult(truffleFrame, result, this);
+    } catch (FrameSlotTypeException e) {
+      e.printStackTrace();
+    }
     newFrame.clearPreviousFrame();
   }
 
@@ -210,9 +240,25 @@ public class SMethod extends SAbstractObject implements SInvokable {
     }
   }
 
+  public final FrameSlot getStackSlot() {
+    return method.executionStackSlot;
+  }
+
+  public final FrameSlot getStackPointerSlot() {
+    return method.stackPointerSlot;
+  }
+
+  public final FrameSlot getOnStackSlot() {
+    return method.onStackSlot;
+  }
+
   @Override
   public SClass getSOMClass(final Universe universe) {
     return universe.methodClass;
+  }
+
+  public Method getMethod() {
+    return this.method;
   }
 
   public CallTarget getCallTarget() {

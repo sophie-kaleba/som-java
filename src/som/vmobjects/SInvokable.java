@@ -24,7 +24,9 @@
 
 package som.vmobjects;
 
+import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.nodes.DirectCallNode;
+
 import som.interpreter.Frame;
 import som.interpreter.Interpreter;
 
@@ -35,9 +37,10 @@ public interface SInvokable {
   boolean isPrimitive();
 
   // Invoke this invokable object in a given frame
-  void indirectInvoke(Frame frame, Interpreter interpreter);
+  void indirectInvoke(Frame frame, VirtualFrame truffleFrame, Interpreter interpreter);
 
-  void directInvoke(Frame frame, Interpreter interpreter, DirectCallNode callNode);
+  void directInvoke(Frame frame, VirtualFrame truffleFrame, Interpreter interpreter,
+      DirectCallNode callNode);
 
   // Get the signature for this invokable object
   SSymbol getSignature();
