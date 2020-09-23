@@ -36,7 +36,12 @@ import java.util.List;
 import java.util.StringTokenizer;
 
 import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
+import com.oracle.truffle.api.Truffle;
 import com.oracle.truffle.api.TruffleLanguage;
+import com.oracle.truffle.api.frame.FrameDescriptor;
+import com.oracle.truffle.api.frame.FrameSlotTypeException;
+import com.oracle.truffle.api.frame.MaterializedFrame;
+import com.oracle.truffle.api.frame.VirtualFrame;
 
 import som.GraalSOMLanguage;
 import som.compiler.Disassembler;
@@ -44,6 +49,7 @@ import som.compiler.ProgramDefinitionError;
 import som.compiler.SourcecodeCompiler;
 import som.interpreter.Frame;
 import som.interpreter.Interpreter;
+import som.interpreter.StackUtils;
 import som.vmobjects.*;
 
 
@@ -303,7 +309,7 @@ public final class Universe {
       throw new RuntimeException("Lookup of " + className + ">>#" + selector + " failed");
     }
 
-    return interpretMethod(clazz, initialize, null);
+    return interpretMethod(clazz, initialize, null, null);
   }
 
   private SAbstractObject initialize(final String[] arguments) throws ProgramDefinitionError {
@@ -325,7 +331,7 @@ public final class Universe {
     SArray argumentsArray = newArray(arguments);
 
     return interpretMethod(objectSystem, initialize,
-        argumentsArray);
+        argumentsArray, arguments);
   }
 
   public SMethod createBootstrapMethod() {
@@ -337,8 +343,36 @@ public final class Universe {
     return bootstrapMethod;
   }
 
+  public static VirtualFrame createTruffleBootstrapFrame(String[] args,
+      SAbstractObject receiver, SMethod bootstrapMethod) {
+    FrameDescriptor fd = bootstrapMethod.getMethod().getFrameDescriptor();
+    Object[] arguments = new Object[] {null, null, bootstrapMethod, args};
+
+    VirtualFrame bootTruffle =
+        Truffle.getRuntime().createVirtualFrame(arguments, fd);
+
+    int stackLength = (int) bootstrapMethod.getMaximumLengthOfStack();
+    SAbstractObject[] stack = new SAbstractObject[stackLength];
+
+    for (int i = 0; i < stackLength; i++) {
+      stack[i] = Universe.current().nilObject;
+    }
+
+    bootTruffle.setObject(bootstrapMethod.getStackSlot(), stack);
+    StackUtils.resetStackPointer(bootTruffle, bootstrapMethod);
+    bootTruffle.setBoolean(bootstrapMethod.getOnStackSlot(), true);
+
+    try {
+      StackUtils.push(bootTruffle, receiver);
+    } catch (FrameSlotTypeException e) {
+      e.printStackTrace();
+    }
+    return bootTruffle;
+  }
+
   public SAbstractObject interpretMethod(final SAbstractObject receiver,
-      final SInvokable invokable, final SArray arguments) throws ProgramDefinitionError {
+      final SInvokable invokable, final SArray arguments, final String[] args)
+      throws ProgramDefinitionError {
     SMethod bootstrapMethod = createBootstrapMethod();
 
     // Create a fake bootstrap frame with the system object on the stack
@@ -351,7 +385,10 @@ public final class Universe {
 
     // Invoke the initialize invokable
     // TODO - May be cleaner to make invoke return an SAbstractObject
-    invokable.indirectInvoke(bootstrapFrame, interpreter);
+    VirtualFrame bootTruffle = createTruffleBootstrapFrame(args, receiver, bootstrapMethod);
+
+    invokable.indirectInvoke(bootstrapFrame, bootTruffle,
+        interpreter);
     return bootstrapFrame.getStackElement(0);
   }
 
@@ -481,10 +518,11 @@ public final class Universe {
   }
 
   @TruffleBoundary
-  public SBlock newBlock(final SMethod method, final Frame context, final int arguments)
+  public SBlock newBlock(final SMethod method, final Frame context, final int arguments,
+      final MaterializedFrame materializedFrame)
       throws ProgramDefinitionError {
     // Allocate a new block and set its class to be the block class
-    SBlock result = new SBlock(method, context, getBlockClass(arguments));
+    SBlock result = new SBlock(method, context, getBlockClass(arguments), materializedFrame);
     return result;
   }
 
