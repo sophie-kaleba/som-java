@@ -24,11 +24,14 @@
 
 package som.primitives;
 
+import com.oracle.truffle.api.frame.FrameSlotTypeException;
+import com.oracle.truffle.api.frame.VirtualFrame;
+
 import som.interpreter.Frame;
 import som.interpreter.Interpreter;
+import som.interpreter.StackUtils;
 import som.vm.Universe;
-import som.vmobjects.SClass;
-import som.vmobjects.SPrimitive;
+import som.vmobjects.*;
 
 
 public class ClassPrimitives extends Primitives {
@@ -42,45 +45,82 @@ public class ClassPrimitives extends Primitives {
     installInstancePrimitive(new SPrimitive("new", universe) {
 
       @Override
-      public void invoke(final Frame frame, final Interpreter interpreter) {
+      public void invoke(final Frame frame, VirtualFrame truffleFrame,
+          final Interpreter interpreter) throws FrameSlotTypeException {
         SClass self = (SClass) frame.pop();
-        frame.push(universe.newInstance(self));
+        SClass selfT = (SClass) StackUtils.pop(truffleFrame);
+
+        assert self == selfT : "Classes differ";
+
+        SAbstractObject instance = universe.newInstance(self);
+
+        frame.push(instance);
+        StackUtils.push(truffleFrame, instance);
       }
     });
 
     installInstancePrimitive(new SPrimitive("name", universe) {
 
       @Override
-      public void invoke(final Frame frame, final Interpreter interpreter) {
+      public void invoke(final Frame frame, VirtualFrame truffleFrame,
+          final Interpreter interpreter) throws FrameSlotTypeException {
         SClass self = (SClass) frame.pop();
-        frame.push(self.getName());
+        SClass selfT = (SClass) StackUtils.pop(truffleFrame);
+
+        assert self == selfT : "Classes differ";
+
+        SSymbol name = self.getName();
+        frame.push(name);
+        StackUtils.push(truffleFrame, name);
       }
     });
 
     installInstancePrimitive(new SPrimitive("superclass", universe) {
 
       @Override
-      public void invoke(final Frame frame, final Interpreter interpreter) {
+      public void invoke(final Frame frame, VirtualFrame truffleFrame,
+          final Interpreter interpreter) throws FrameSlotTypeException {
         SClass self = (SClass) frame.pop();
-        frame.push(self.getSuperClass());
+        SClass selfT = (SClass) StackUtils.pop(truffleFrame);
+
+        assert self == selfT : "Classes differ";
+
+        SObject superClass = self.getSuperClass();
+
+        frame.push(superClass);
+        StackUtils.push(truffleFrame, superClass);
       }
     });
 
     installInstancePrimitive(new SPrimitive("fields", universe) {
 
       @Override
-      public void invoke(final Frame frame, final Interpreter interpreter) {
+      public void invoke(final Frame frame, VirtualFrame truffleFrame,
+          final Interpreter interpreter) throws FrameSlotTypeException {
         SClass self = (SClass) frame.pop();
-        frame.push(self.getInstanceFields());
+        SClass selfT = (SClass) StackUtils.pop(truffleFrame);
+
+        assert self == selfT : "Classes differ";
+
+        SArray instanceFields = self.getInstanceFields();
+        frame.push(instanceFields);
+        StackUtils.push(truffleFrame, instanceFields);
       }
     });
 
     installInstancePrimitive(new SPrimitive("methods", universe) {
 
       @Override
-      public void invoke(final Frame frame, final Interpreter interpreter) {
+      public void invoke(final Frame frame, VirtualFrame truffleFrame,
+          final Interpreter interpreter) throws FrameSlotTypeException {
         SClass self = (SClass) frame.pop();
-        frame.push(self.getInstanceInvokables());
+        SClass selfT = (SClass) StackUtils.pop(truffleFrame);
+
+        assert self == selfT : "Classes differ";
+
+        SArray instanceInvokable = self.getInstanceInvokables();
+        frame.push(instanceInvokable);
+        StackUtils.push(truffleFrame, instanceInvokable);
       }
     });
   }

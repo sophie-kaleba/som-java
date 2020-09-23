@@ -24,11 +24,16 @@
 
 package som.primitives;
 
+import com.oracle.truffle.api.frame.FrameSlotTypeException;
+import com.oracle.truffle.api.frame.VirtualFrame;
+
 import som.interpreter.Frame;
 import som.interpreter.Interpreter;
+import som.interpreter.StackUtils;
 import som.vm.Universe;
 import som.vmobjects.SAbstractObject;
 import som.vmobjects.SPrimitive;
+import som.vmobjects.SString;
 import som.vmobjects.SSymbol;
 
 
@@ -43,22 +48,40 @@ public class SymbolPrimitives extends Primitives {
     installInstancePrimitive(new SPrimitive("asString", universe) {
 
       @Override
-      public void invoke(final Frame frame, final Interpreter interpreter) {
+      public void invoke(final Frame frame, final VirtualFrame truffleFrame,
+          final Interpreter interpreter) throws FrameSlotTypeException {
         SSymbol self = (SSymbol) frame.pop();
-        frame.push(universe.newString(self.getEmbeddedString()));
+        SSymbol selfT = (SSymbol) StackUtils.pop(truffleFrame);
+
+        assert self == selfT;
+
+        SString value = universe.newString(self.getEmbeddedString());
+
+        frame.push(value);
+        StackUtils.push(truffleFrame, value);
       }
     });
 
     installInstancePrimitive(new SPrimitive("=", universe) {
 
       @Override
-      public void invoke(final Frame frame, final Interpreter interpreter) {
+      public void invoke(final Frame frame, final VirtualFrame truffleFrame,
+          final Interpreter interpreter) throws FrameSlotTypeException {
         SAbstractObject op1 = frame.pop();
         SSymbol op2 = (SSymbol) frame.pop(); // self
+
+        SAbstractObject op1T = StackUtils.pop(truffleFrame);
+        SSymbol op2T = (SSymbol) StackUtils.pop(truffleFrame);
+
+        assert op1 == op1T;
+        assert op2 == op2T;
+
         if (op1 == op2) {
           frame.push(universe.trueObject);
+          StackUtils.push(truffleFrame, universe.trueObject);
         } else {
           frame.push(universe.falseObject);
+          StackUtils.push(truffleFrame, universe.falseObject);
         }
       }
     }, true);
