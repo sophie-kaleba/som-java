@@ -24,10 +24,14 @@
 
 package som.vmobjects;
 
+import com.oracle.truffle.api.frame.FrameSlotTypeException;
+import com.oracle.truffle.api.frame.MaterializedFrame;
+import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.interop.TruffleObject;
 
 import som.interpreter.Frame;
 import som.interpreter.Interpreter;
+import som.interpreter.StackUtils;
 import som.vm.Universe;
 
 
@@ -35,28 +39,37 @@ public abstract class SAbstractObject implements TruffleObject {
 
   public abstract SClass getSOMClass(Universe universe);
 
+  public MaterializedFrame getMaterializedContext() {
+    return null;
+  }
+
+  // TODO - hack on truffle frame
   public void send(final String selectorString, final SAbstractObject[] arguments,
-      final Universe universe, final Interpreter interpreter, Frame frame) {
+      final Universe universe, final Interpreter interpreter, Frame frame,
+      VirtualFrame truffleFrame) throws FrameSlotTypeException {
     // Turn the selector string into a selector
     SSymbol selector = universe.symbolFor(selectorString);
 
     // Push the receiver onto the stack
     frame.push(this);
+    StackUtils.push(truffleFrame, this);
 
     // Push the arguments onto the stack
     for (SAbstractObject arg : arguments) {
       frame.push(arg);
+      StackUtils.push(truffleFrame, arg);
     }
 
     // Lookup the invokable
     SInvokable invokable = getSOMClass(universe).lookupInvokable(selector);
 
     // Invoke the invokable
-    invokable.indirectInvoke(frame, interpreter);
+    invokable.indirectInvoke(frame, truffleFrame, interpreter);
   }
 
   public void sendDoesNotUnderstand(final SSymbol selector,
-      final Universe universe, final Interpreter interpreter, Frame frame) {
+      final Universe universe, final Interpreter interpreter, Frame frame,
+      VirtualFrame truffleFrame) throws FrameSlotTypeException {
     // Compute the number of arguments
     int numberOfArguments = selector.getNumberOfSignatureArguments();
 
@@ -64,27 +77,36 @@ public abstract class SAbstractObject implements TruffleObject {
     // except for the receiver, which is passed implicitly, as receiver of #dnu.
     SArray argumentsArray = universe.newArray(numberOfArguments - 1);
 
+    assert StackUtils.areStackEqual(truffleFrame,
+        frame) : "Stack are different";
+    assert StackUtils.getCurrentStackPointer(
+        truffleFrame) == frame.getStackPointer() : "Stack pointers differ";
+
     // Remove all arguments and put them in the freshly allocated array
     for (int i = numberOfArguments - 2; i >= 0; i--) {
       argumentsArray.setIndexableField(i, frame.pop());
+      StackUtils.pop(truffleFrame);
     }
 
     frame.pop(); // pop receiver
+    StackUtils.pop(truffleFrame);
 
     SAbstractObject[] args = {selector, argumentsArray};
-    send("doesNotUnderstand:arguments:", args, universe, interpreter, frame);
+    send("doesNotUnderstand:arguments:", args, universe, interpreter, frame, truffleFrame);
   }
 
   public void sendUnknownGlobal(final SSymbol globalName,
-      final Universe universe, final Interpreter interpreter, Frame frame) {
+      final Universe universe, final Interpreter interpreter, Frame frame,
+      VirtualFrame truffleFrame) throws FrameSlotTypeException {
     SAbstractObject[] arguments = {globalName};
-    send("unknownGlobal:", arguments, universe, interpreter, frame);
+    send("unknownGlobal:", arguments, universe, interpreter, frame, truffleFrame);
   }
 
   public void sendEscapedBlock(final SBlock block, final Universe universe,
-      final Interpreter interpreter, Frame frame) {
+      final Interpreter interpreter, Frame frame, VirtualFrame truffleFrame)
+      throws FrameSlotTypeException {
     SAbstractObject[] arguments = {block};
-    send("escapedBlock:", arguments, universe, interpreter, frame);
+    send("escapedBlock:", arguments, universe, interpreter, frame, truffleFrame);
   }
 
   @Override
