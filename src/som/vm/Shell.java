@@ -98,8 +98,9 @@ public class Shell {
           SInvokable initialize = myClass.lookupInvokable(
               universe.symbolFor("run:"));
 
+          // TODO - make the shell use truffle frames
           // Invoke the run method
-          initialize.indirectInvoke(frame, interpreter);
+          // initialize.indirectInvoke(frame, interpreter);
 
           // Save the result of the run method
           it = frame.pop();
