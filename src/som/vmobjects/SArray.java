@@ -24,6 +24,8 @@
 
 package som.vmobjects;
 
+import java.util.Arrays;
+
 import som.vm.Universe;
 
 
@@ -71,6 +73,23 @@ public class SArray extends SAbstractObject {
     for (int i = 0; i < getNumberOfIndexableFields(); i++) {
       destination.setIndexableField(i, getIndexableField(i));
     }
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
+    SArray sArray = (SArray) o;
+    return Arrays.equals(indexableFields, sArray.indexableFields);
+  }
+
+  @Override
+  public int hashCode() {
+    return Arrays.hashCode(indexableFields);
   }
 
   @Override
