@@ -171,6 +171,10 @@ public class Frame {
     stack[getStackPointer() - index] = value;
   }
 
+  public SAbstractObject[] getStack() {
+    return this.stack;
+  }
+
   private SAbstractObject getLocal(final int index) {
     return stack[localOffset + index];
   }
@@ -196,6 +200,15 @@ public class Frame {
 
     // Get the argument with the given index
     return context.stack[index];
+  }
+
+  public SAbstractObject[] getAllArgumentsFrom(final Frame frame) {
+    int numArgs = getMethod().getNumberOfArguments();
+    SAbstractObject[] args = new SAbstractObject[numArgs];
+    for (int i = 0; i < numArgs; ++i) {
+      args[i] = frame.getStackElement(numArgs - 1 - i);
+    }
+    return args;
   }
 
   public void setArgument(final int index, final int contextLevel,
