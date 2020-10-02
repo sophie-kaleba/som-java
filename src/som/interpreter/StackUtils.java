@@ -37,9 +37,9 @@ import som.vmobjects.SMethod;
 /**
  * Arguments:
  * 0) Interpreter
- * 1) Frame
  * 2) Invokable
  * 3) Arguments
+ * 4) Receiver
  *
  * Slots:
  * 0) Execution stack
@@ -49,15 +49,21 @@ import som.vmobjects.SMethod;
 public class StackUtils {
   private enum FrameArguments {
     INTERPRETER,
-    SOM_FRAME,
     INVOKABLE,
-    ARGUMENTS
+    ARGUMENTS,
+    RECEIVER
+  }
+
+  private enum FrameSlots {
+    STACK,
+    STACK_POINTER,
+    ON_STACK_MARKER
   }
 
   // TODO - clean
   public static void initializeStackSlots(final VirtualFrame frame,
       final FrameSlot executionStackSlot,
-      final FrameSlot onStackSlot,
+      final FrameSlot frameOnStackMarkerSlot,
       final SMethod method) {
     int stackLength = (int) method.getMaximumLengthOfStack();
     SAbstractObject[] stack = new SAbstractObject[stackLength];
@@ -66,7 +72,9 @@ public class StackUtils {
       stack[i] = Universe.current().nilObject;
     }
 
-    final SAbstractObject[] arguments = (SAbstractObject[]) frame.getArguments()[3];
+    final SAbstractObject[] arguments =
+        (SAbstractObject[]) frame.getArguments()[FrameArguments.ARGUMENTS.ordinal()];
+
     int numArgs = arguments.length;
     for (int i = 0; i < numArgs; ++i) {
       stack[i] = arguments[i];
@@ -74,7 +82,8 @@ public class StackUtils {
 
     frame.setObject(executionStackSlot, stack);
     resetStackPointer(frame, method);
-    frame.setBoolean(onStackSlot, true);
+    FrameOnStackMarker marker = new FrameOnStackMarker();
+    frame.setObject(frameOnStackMarkerSlot, marker);
   }
 
   /***
@@ -83,6 +92,14 @@ public class StackUtils {
 
   public static SMethod getCurrentMethod(final VirtualFrame frame) {
     return (SMethod) frame.getArguments()[FrameArguments.INVOKABLE.ordinal()];
+  }
+
+  public static SAbstractObject getCurrentReceiver(VirtualFrame frame) {
+    return (SAbstractObject) frame.getArguments()[FrameArguments.RECEIVER.ordinal()];
+  }
+
+  public static SAbstractObject[] getCurrentArguments(VirtualFrame frame) {
+    return (SAbstractObject[]) frame.getArguments()[FrameArguments.ARGUMENTS.ordinal()];
   }
 
   public static SAbstractObject[] getCurrentStack(VirtualFrame frame)
@@ -94,9 +111,19 @@ public class StackUtils {
     return frame.getInt(getCurrentMethod(frame).getStackPointerSlot());
   }
 
-  public static boolean getCurrentOnStackMarker(VirtualFrame frame)
+  public static FrameOnStackMarker getCurrentOnStackMarker(VirtualFrame frame)
       throws FrameSlotTypeException {
-    return frame.getBoolean(getCurrentMethod(frame).getOnStackSlot());
+    return (FrameOnStackMarker) frame.getObject(getCurrentMethod(frame).getOnStackSlot());
+  }
+
+  public static SAbstractObject[] copyArgumentFrom(VirtualFrame frame, SMethod method)
+      throws FrameSlotTypeException {
+    int numArgs = method.getNumberOfArguments();
+    SAbstractObject[] arguments = new SAbstractObject[numArgs];
+    for (int i = 0; i < numArgs; ++i) {
+      arguments[i] = StackUtils.getRelativeStackElement(frame, numArgs - 1 - i);
+    }
+    return arguments;
   }
 
   /**
@@ -175,17 +202,14 @@ public class StackUtils {
     push(frame, result);
   }
 
-  public static SAbstractObject getArgumentFrom(VirtualFrame truffleFrame, int index,
-      int contextLevel) {
-    VirtualFrame context = getContext(truffleFrame, contextLevel);
-
-    // Get the argument with the given index
-    return getAllArgumentsFrom(context)[index];
-  }
-
-  public static SAbstractObject[] getAllArgumentsFrom(VirtualFrame frame) {
-    return (SAbstractObject[]) frame.getArguments()[3];
-  }
+  // TODO - delete
+  // public static SAbstractObject getArgumentFrom(VirtualFrame truffleFrame, int index,
+  // int contextLevel) {
+  // VirtualFrame context = getContext(truffleFrame, contextLevel);
+  //
+  // // Get the argument with the given index
+  // return getCurrentArguments(context)[index];
+  // }
 
   public static SAbstractObject getArgumentFromStack(VirtualFrame frame, int index,
       int contextLevel) throws FrameSlotTypeException {
@@ -196,7 +220,7 @@ public class StackUtils {
   public static VirtualFrame getContext(VirtualFrame frame, int contextLevel) {
 
     while (contextLevel > 0) {
-      SBlock receiver = (SBlock) getAllArgumentsFrom(frame)[0];
+      SBlock receiver = (SBlock) getCurrentArguments(frame)[0];
       frame = receiver.getMaterializedContext();
       contextLevel--;
     }
@@ -205,15 +229,30 @@ public class StackUtils {
   }
 
   public static VirtualFrame getOuterContext(VirtualFrame frame) {
-    SAbstractObject receiver = getAllArgumentsFrom(frame)[0];
+    SAbstractObject receiver = getCurrentArguments(frame)[0];
 
     while (receiver.getMaterializedContext() != null) {
       frame = receiver.getMaterializedContext();
-      receiver = getAllArgumentsFrom(frame)[0];
+      receiver = getCurrentArguments(frame)[0];
     }
 
     return frame;
   }
+
+  // protected final VirtualFrame determineContext(final VirtualFrame frame) {
+  // SBlock self = (SBlock) SArguments.rcvr(frame);
+  // SAbstractObject receiver = getCurrentArguments(frame)[0];
+  // int i = contextLevel - 1;
+  //
+  // while (i > 0) {
+  // self = (SBlock) self.getOuterSelf();
+  // i--;
+  // }
+  //
+  // // Graal needs help here to see that this is always a MaterializedFrame
+  // // so, we record explicitly a class profile
+  // return frameType.profile(self.getContext());
+  // }
 
   public static SAbstractObject getLocal(final VirtualFrame frame,
       final int index, final int contextLevel)

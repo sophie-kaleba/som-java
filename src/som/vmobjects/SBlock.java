@@ -31,7 +31,6 @@ import com.oracle.truffle.api.frame.MaterializedFrame;
 import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.nodes.IndirectCallNode;
 
-import som.interpreter.Frame;
 import som.interpreter.Interpreter;
 import som.interpreter.StackUtils;
 import som.vm.Universe;
@@ -40,15 +39,13 @@ import som.vm.Universe;
 public class SBlock extends SAbstractObject {
 
   private final SMethod method;
-  private final Frame   context;
   private final SClass  blockClass;
 
   private final MaterializedFrame materializedContext;
 
-  public SBlock(final SMethod method, final Frame context, final SClass blockClass,
+  public SBlock(final SMethod method, final SClass blockClass,
       final MaterializedFrame materializedContext) {
     this.method = method;
-    this.context = context;
     this.blockClass = blockClass;
     this.materializedContext = materializedContext;
   }
@@ -59,10 +56,6 @@ public class SBlock extends SAbstractObject {
 
   public MaterializedFrame getMaterializedContext() {
     return materializedContext;
-  }
-
-  public Frame getContext() {
-    return context;
   }
 
   @Override
@@ -85,13 +78,12 @@ public class SBlock extends SAbstractObject {
     }
     SBlock sBlock = (SBlock) o;
     return Objects.equals(method, sBlock.method) &&
-        Objects.equals(context, sBlock.context) &&
         Objects.equals(blockClass, sBlock.blockClass);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(method, context, blockClass, materializedContext);
+    return Objects.hash(method, blockClass, materializedContext);
   }
 
   public static class Evaluation extends SPrimitive {
@@ -104,44 +96,25 @@ public class SBlock extends SAbstractObject {
     }
 
     @Override
-    public void invoke(final Frame frame, final VirtualFrame truffleFrame,
+    public void invoke(final VirtualFrame truffleFrame,
         final Interpreter interpreter) throws FrameSlotTypeException {
-      assert StackUtils.areStackEqual(truffleFrame,
-          frame) : "Stack are different, before";
-      assert StackUtils.getCurrentStackPointer(
-          truffleFrame) == frame.getStackPointer() : "Stack pointers differ, before";
 
       // Get the block (the receiver) from the stack
-      SBlock self = (SBlock) frame.getStackElement(numberOfArguments - 1);
       SBlock selfT =
           (SBlock) StackUtils.getRelativeStackElement(truffleFrame, numberOfArguments - 1);
 
-      // Get the context of the block...
-      Frame context = self.getContext();
-      VirtualFrame contextT = selfT.getMaterializedContext();
-      // TODO - use it
-
       // Push a new frame and set its context to be the one specified in
       // the block
-      Frame newFrame = interpreter.newFrame(frame, self.getMethod(), context);
-      newFrame.copyArgumentsFrom(frame);
       IndirectCallNode indirectCallNode = interpreter.getIndirectCallNode();
+      SAbstractObject[] arguments = StackUtils.copyArgumentFrom(truffleFrame, selfT.method);
 
       SAbstractObject result =
-          (SAbstractObject) indirectCallNode.call(self.getMethod().getCallTarget(),
-              interpreter, newFrame, self.getMethod(),
-              StackUtils.fetchArguments(truffleFrame,
-                  this.numberOfArguments));
+          (SAbstractObject) indirectCallNode.call(selfT.getMethod().getCallTarget(),
+              interpreter, selfT.getMethod(),
+              arguments);
 
-      frame.popArgumentsAndPushResult(result, self.getMethod());
-      StackUtils.popArgumentsAndPushResult(truffleFrame, result, self.method);
+      StackUtils.popArgumentsAndPushResult(truffleFrame, result, selfT.method);
 
-      newFrame.clearPreviousFrame();
-
-      assert StackUtils.areStackEqual(truffleFrame,
-          frame) : "Stack are different, after";
-      assert StackUtils.getCurrentStackPointer(
-          truffleFrame) == frame.getStackPointer() : "Stack pointers differ, after";
     }
 
     private static java.lang.String computeSignatureString(int numberOfArguments) {

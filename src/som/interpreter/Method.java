@@ -19,8 +19,9 @@ public final class Method extends Invokable {
   private final SMethod                          method;
   public final FrameSlot                         executionStackSlot;
   public final FrameSlot                         stackPointerSlot;
-  public final FrameSlot                         onStackSlot;
+  public final FrameSlot                         frameOnStackMarkerSlot;
 
+  // TODO - delete
   public Method(final TruffleLanguage<?> language, final int numberOfBytecodes,
       final SMethod method) {
     super(language);
@@ -28,7 +29,7 @@ public final class Method extends Invokable {
     this.method = method;
     this.executionStackSlot = null;
     this.stackPointerSlot = null;
-    onStackSlot = null;
+    frameOnStackMarkerSlot = null;
   }
 
   public Method(final TruffleLanguage<?> language, final int numberOfBytecodes,
@@ -40,41 +41,38 @@ public final class Method extends Invokable {
     this.method = method;
     this.executionStackSlot = executionStackSlot;
     this.stackPointerSlot = stackPointerSlot;
-    this.onStackSlot = onStackSlot;
+    this.frameOnStackMarkerSlot = onStackSlot;
   }
 
   @Override
   public Object execute(final VirtualFrame frame) throws ReturnException {
     Interpreter interpreter = (Interpreter) frame.getArguments()[0];
-    final Frame newFrame = (Frame) frame.getArguments()[1];
-
-    assert this.method == newFrame.getMethod();
 
     StackUtils.initializeStackSlots(frame, this.executionStackSlot,
-        this.onStackSlot, this.method);
+        this.frameOnStackMarkerSlot, this.method);
+    FrameOnStackMarker marker = new FrameOnStackMarker();
+    frame.setObject(frameOnStackMarkerSlot, marker);
 
     while (true) {
       try {
-        // start using the virtual Frame, it holds the same arguments as newFrame (for now...)
-        SAbstractObject result = interpreter.start(newFrame, frame, this.method);
+        SAbstractObject result = interpreter.start(frame, this.method);
         return result;
       } catch (ReturnException e) {
-        if (e.hasReachedTarget(newFrame)) {
+        if (e.hasReachedTarget(marker)) {
           SAbstractObject result = e.getResult();
           return result;
         }
-        frame.setBoolean(this.onStackSlot, false);
+        marker.frameNoLongerOnStack();
         throw e;
       } catch (ProgramDefinitionError | FrameSlotTypeException exception) {
         CompilerDirectives.transferToInterpreterAndInvalidate();
         exception.printStackTrace();
         System.exit(1);
       } catch (RestartLoopException rle) {
-        newFrame.resetStackPointer();
+        // newFrame.resetStackPointer();
         StackUtils.resetStackPointer(frame, method);
       } finally {
-        // TODO - wrong?
-        frame.setBoolean(this.onStackSlot, false);
+        marker.frameNoLongerOnStack();
       }
     }
   }

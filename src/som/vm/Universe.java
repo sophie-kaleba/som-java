@@ -103,7 +103,8 @@ public final class Universe {
     return GraalSOMLanguage.getCurrentContext();
   }
 
-  public SAbstractObject interpret(String[] arguments) throws ProgramDefinitionError {
+  public SAbstractObject interpret(String[] arguments)
+      throws ProgramDefinitionError, FrameSlotTypeException {
     // Check for command line switches
     arguments = handleArguments(arguments);
 
@@ -295,7 +296,7 @@ public final class Universe {
    * @throws ProgramDefinitionError
    */
   public SAbstractObject interpret(final String className,
-      final String selector) throws ProgramDefinitionError {
+      final String selector) throws ProgramDefinitionError, FrameSlotTypeException {
     setupClassPath(this.testClasspath);
     initializeObjectSystem();
 
@@ -312,7 +313,8 @@ public final class Universe {
     return interpretMethod(clazz, initialize, null, null);
   }
 
-  private SAbstractObject initialize(final String[] arguments) throws ProgramDefinitionError {
+  private SAbstractObject initialize(final String[] arguments)
+      throws ProgramDefinitionError, FrameSlotTypeException {
     SAbstractObject objectSystem = initializeObjectSystem();
 
     // Start the shell if no filename is given
@@ -343,10 +345,11 @@ public final class Universe {
     return bootstrapMethod;
   }
 
+  // TODO - clean
   public static VirtualFrame createTruffleBootstrapFrame(String[] args,
       SAbstractObject receiver, SMethod bootstrapMethod) {
     FrameDescriptor fd = bootstrapMethod.getMethod().getFrameDescriptor();
-    Object[] arguments = new Object[] {null, null, bootstrapMethod, args};
+    Object[] arguments = new Object[] {null, bootstrapMethod, args};
 
     VirtualFrame bootTruffle =
         Truffle.getRuntime().createVirtualFrame(arguments, fd);
@@ -372,24 +375,32 @@ public final class Universe {
 
   public SAbstractObject interpretMethod(final SAbstractObject receiver,
       final SInvokable invokable, final SArray arguments, final String[] args)
-      throws ProgramDefinitionError {
+      throws ProgramDefinitionError, FrameSlotTypeException {
     SMethod bootstrapMethod = createBootstrapMethod();
 
     // Create a fake bootstrap frame with the system object on the stack
-    Frame bootstrapFrame = this.newFrame(null, bootstrapMethod, null);
-    bootstrapFrame.push(receiver);
+    // Frame bootstrapFrame = this.newFrame(null, bootstrapMethod, null);
+    // bootstrapFrame.push(receiver);
+    VirtualFrame bootTruffle =
+        createTruffleBootstrapFrame(args, receiver, bootstrapMethod);
 
     if (arguments != null) {
-      bootstrapFrame.push(arguments);
+      // bootstrapFrame.push(arguments);
+      StackUtils.push(bootTruffle, arguments);
     }
 
     // Invoke the initialize invokable
     // TODO - May be cleaner to make invoke return an SAbstractObject
-    VirtualFrame bootTruffle = createTruffleBootstrapFrame(args, receiver, bootstrapMethod);
 
-    invokable.indirectInvoke(bootstrapFrame, bootTruffle,
+    invokable.indirectInvoke(bootTruffle,
         interpreter);
-    return bootstrapFrame.getStackElement(0);
+
+    // SAbstractObject result = bootstrapFrame.getStackElement(0);
+    SAbstractObject result = StackUtils.getRelativeStackElement(bootTruffle, 0);
+
+    // assert result == resultT;
+
+    return result;
   }
 
   @TruffleBoundary
@@ -518,11 +529,11 @@ public final class Universe {
   }
 
   @TruffleBoundary
-  public SBlock newBlock(final SMethod method, final Frame context, final int arguments,
+  public SBlock newBlock(final SMethod method, final int arguments,
       final MaterializedFrame materializedFrame)
       throws ProgramDefinitionError {
     // Allocate a new block and set its class to be the block class
-    SBlock result = new SBlock(method, context, getBlockClass(arguments), materializedFrame);
+    SBlock result = new SBlock(method, getBlockClass(arguments), materializedFrame);
     return result;
   }
 

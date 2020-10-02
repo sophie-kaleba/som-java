@@ -33,7 +33,6 @@ import com.oracle.truffle.api.nodes.DirectCallNode;
 import com.oracle.truffle.api.nodes.IndirectCallNode;
 import com.oracle.truffle.api.profiles.ValueProfile;
 
-import som.interpreter.Frame;
 import som.interpreter.Interpreter;
 import som.interpreter.Method;
 import som.interpreter.StackUtils;
@@ -79,7 +78,7 @@ public class SMethod extends SAbstractObject implements SInvokable {
     FrameDescriptor frameDescriptor = new FrameDescriptor();
     FrameSlot stack = frameDescriptor.addFrameSlot("stack", FrameSlotKind.Object);
     FrameSlot stackPointer = frameDescriptor.addFrameSlot("stackPointer", FrameSlotKind.Int);
-    FrameSlot onStack = frameDescriptor.addFrameSlot("onStack", FrameSlotKind.Boolean);
+    FrameSlot onStack = frameDescriptor.addFrameSlot("onStack", FrameSlotKind.Object);
     this.method =
         new Method(language, numberOfBytecodes, this, frameDescriptor, stack, stackPointer,
             onStack);
@@ -158,43 +157,31 @@ public class SMethod extends SAbstractObject implements SInvokable {
   }
 
   @Override
-  public void indirectInvoke(final Frame frame, VirtualFrame truffleFrame,
-      final Interpreter interpreter) {
-    final Frame newFrame = interpreter.newFrame(frame, this, null);
-    newFrame.copyArgumentsFrom(frame);
+  public void indirectInvoke(VirtualFrame truffleFrame,
+      final Interpreter interpreter) throws FrameSlotTypeException {
+
+    SAbstractObject[] arguments = StackUtils.copyArgumentFrom(truffleFrame, this);
 
     IndirectCallNode indirectCallNode = interpreter.getIndirectCallNode();
     SAbstractObject result =
-        (SAbstractObject) indirectCallNode.call(callTarget, interpreter, newFrame, this,
-            newFrame.getAllArgumentsFrom(frame));
+        (SAbstractObject) indirectCallNode.call(callTarget, interpreter, this,
+            arguments);
 
-    try {
-      StackUtils.popArgumentsAndPushResult(truffleFrame, result, this);
-    } catch (FrameSlotTypeException e) {
-      e.printStackTrace();
-    }
-    frame.popArgumentsAndPushResult(result, this);
-    newFrame.clearPreviousFrame();
+    StackUtils.popArgumentsAndPushResult(truffleFrame, result, this);
   }
 
-  public void directInvoke(final Frame frame, VirtualFrame truffleFrame,
-      final Interpreter interpreter, DirectCallNode directCallNode) {
+  public void directInvoke(VirtualFrame truffleFrame,
+      final Interpreter interpreter, DirectCallNode directCallNode)
+      throws FrameSlotTypeException {
 
     CompilerAsserts.partialEvaluationConstant(directCallNode);
 
-    final Frame newFrame = interpreter.newFrame(frame, this, null);
-    newFrame.copyArgumentsFrom(frame);
-    // TODO - broken - need to get arguments from elsewhere
-    SAbstractObject result = (SAbstractObject) directCallNode.call(interpreter, newFrame, this,
-        newFrame.getAllArgumentsFrom(frame));
+    SAbstractObject[] arguments = StackUtils.copyArgumentFrom(truffleFrame, this);
 
-    frame.popArgumentsAndPushResult(result, this);
-    try {
-      StackUtils.popArgumentsAndPushResult(truffleFrame, result, this);
-    } catch (FrameSlotTypeException e) {
-      e.printStackTrace();
-    }
-    newFrame.clearPreviousFrame();
+    SAbstractObject result = (SAbstractObject) directCallNode.call(interpreter, this,
+        arguments);
+
+    StackUtils.popArgumentsAndPushResult(truffleFrame, result, this);
   }
 
   @Override
@@ -249,7 +236,7 @@ public class SMethod extends SAbstractObject implements SInvokable {
   }
 
   public final FrameSlot getOnStackSlot() {
-    return method.onStackSlot;
+    return method.frameOnStackMarkerSlot;
   }
 
   @Override

@@ -29,7 +29,6 @@ import com.oracle.truffle.api.frame.FrameSlotTypeException;
 import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.nodes.DirectCallNode;
 
-import som.interpreter.Frame;
 import som.interpreter.Interpreter;
 import som.vm.Universe;
 
@@ -68,21 +67,21 @@ public abstract class SPrimitive extends SAbstractObject implements SInvokable {
     return false;
   }
 
-  public abstract void invoke(final Frame frame, final VirtualFrame truffleFrame,
+  public abstract void invoke(final VirtualFrame truffleFrame,
       final Interpreter interpreter) throws FrameSlotTypeException;
 
-  public void indirectInvoke(Frame frame, VirtualFrame truffleFrame, Interpreter interpreter) {
+  public void indirectInvoke(VirtualFrame truffleFrame, Interpreter interpreter) {
     try {
-      invoke(frame, truffleFrame, interpreter);
+      invoke(truffleFrame, interpreter);
     } catch (FrameSlotTypeException e) {
       e.printStackTrace();
     }
   }
 
-  public void directInvoke(Frame frame, VirtualFrame truffleFrame, Interpreter interpreter,
+  public void directInvoke(VirtualFrame truffleFrame, Interpreter interpreter,
       DirectCallNode callNode) {
     try {
-      invoke(frame, truffleFrame, interpreter);
+      invoke(truffleFrame, interpreter);
     } catch (FrameSlotTypeException e) {
       e.printStackTrace();
     }
@@ -99,7 +98,7 @@ public abstract class SPrimitive extends SAbstractObject implements SInvokable {
     return (new SPrimitive(signatureString, universe) {
 
       @Override
-      public void invoke(final Frame frame, VirtualFrame truffleFrame,
+      public void invoke(VirtualFrame truffleFrame,
           final Interpreter interpreter) {
         // Write a warning to the screen
         Universe.println("Warning: undefined primitive "

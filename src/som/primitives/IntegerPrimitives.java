@@ -29,7 +29,6 @@ import java.math.BigInteger;
 import com.oracle.truffle.api.frame.FrameSlotTypeException;
 import com.oracle.truffle.api.frame.VirtualFrame;
 
-import som.interpreter.Frame;
 import som.interpreter.Interpreter;
 import som.interpreter.StackUtils;
 import som.vm.Universe;
@@ -46,495 +45,300 @@ public class IntegerPrimitives extends Primitives {
   public void installPrimitives() {
     installInstancePrimitive(new SPrimitive("asString", universe) {
       @Override
-      public void invoke(final Frame frame, final VirtualFrame truffleFrame,
+      public void invoke(final VirtualFrame truffleFrame,
           final Interpreter interpreter) throws FrameSlotTypeException {
 
-        SNumber self = (SNumber) frame.pop();
-        SNumber selfT = (SNumber) StackUtils.pop(truffleFrame);
+        SNumber self = (SNumber) StackUtils.pop(truffleFrame);
 
-        assert self == selfT;
+        SString value = self.primAsString(universe);
 
-        SString stringed = self.primAsString(universe);
+        StackUtils.push(truffleFrame, value);
 
-        frame.push(stringed);
-        StackUtils.push(truffleFrame, stringed);
-
-        assert StackUtils.areStackEqual(truffleFrame,
-            frame) : "Stack are different";
-        assert StackUtils.getCurrentStackPointer(
-            truffleFrame) == frame.getStackPointer() : "Stack pointers differ";
       }
     });
 
     installInstancePrimitive(new SPrimitive("sqrt", universe) {
       @Override
-      public void invoke(final Frame frame, final VirtualFrame truffleFrame,
+      public void invoke(final VirtualFrame truffleFrame,
           final Interpreter interpreter) throws FrameSlotTypeException {
 
-        SInteger self = (SInteger) frame.pop();
-        SInteger selfT = (SInteger) StackUtils.pop(truffleFrame);
-
-        assert self == selfT;
+        SInteger self = (SInteger) StackUtils.pop(truffleFrame);
 
         SNumber result = self.primSqrt(universe);
 
-        frame.push(result);
         StackUtils.push(truffleFrame, result);
 
-        assert StackUtils.areStackEqual(truffleFrame,
-            frame) : "Stack are different";
-        assert StackUtils.getCurrentStackPointer(
-            truffleFrame) == frame.getStackPointer() : "Stack pointers differ";
       }
     });
 
     installInstancePrimitive(new SPrimitive("atRandom", universe) {
       @Override
-      public void invoke(final Frame frame, final VirtualFrame truffleFrame,
+      public void invoke(final VirtualFrame truffleFrame,
           final Interpreter interpreter) throws FrameSlotTypeException {
 
-        SInteger self = (SInteger) frame.pop();
-        SInteger selfT = (SInteger) StackUtils.pop(truffleFrame);
-
-        assert self == selfT;
+        SInteger self = (SInteger) StackUtils.pop(truffleFrame);
 
         SInteger randomInt = universe.newInteger(
             (long) (self.getEmbeddedInteger() * Math.random()));
 
-        frame.push(randomInt);
         StackUtils.push(truffleFrame, randomInt);
 
-        assert StackUtils.areStackEqual(truffleFrame,
-            frame) : "Stack are different";
-        assert StackUtils.getCurrentStackPointer(
-            truffleFrame) == frame.getStackPointer() : "Stack pointers differ";
       }
     });
 
     installInstancePrimitive(new SPrimitive("+", universe) {
       @Override
-      public void invoke(final Frame frame, final VirtualFrame truffleFrame,
+      public void invoke(final VirtualFrame truffleFrame,
           final Interpreter interpreter) throws FrameSlotTypeException {
 
-        SNumber right = (SNumber) frame.pop();
-        SNumber left = (SNumber) frame.pop();
-
-        SNumber rightT = (SNumber) StackUtils.pop(truffleFrame);
-        SNumber leftT = (SNumber) StackUtils.pop(truffleFrame);
-
-        assert right == rightT;
-        assert left == leftT;
+        SNumber right = (SNumber) StackUtils.pop(truffleFrame);
+        SNumber left = (SNumber) StackUtils.pop(truffleFrame);
 
         SNumber result = left.primAdd(right, universe);
 
-        frame.push(result);
         StackUtils.push(truffleFrame, result);
 
-        assert StackUtils.areStackEqual(truffleFrame,
-            frame) : "Stack are different";
-        assert StackUtils.getCurrentStackPointer(
-            truffleFrame) == frame.getStackPointer() : "Stack pointers differ";
       }
     });
 
     installInstancePrimitive(new SPrimitive("-", universe) {
       @Override
-      public void invoke(final Frame frame, final VirtualFrame truffleFrame,
+      public void invoke(final VirtualFrame truffleFrame,
           final Interpreter interpreter) throws FrameSlotTypeException {
 
-        SNumber right = (SNumber) frame.pop();
-        SNumber left = (SNumber) frame.pop();
-
-        SNumber rightT = (SNumber) StackUtils.pop(truffleFrame);
-        SNumber leftT = (SNumber) StackUtils.pop(truffleFrame);
-
-        assert right == rightT;
-        assert left == leftT;
+        SNumber right = (SNumber) StackUtils.pop(truffleFrame);
+        SNumber left = (SNumber) StackUtils.pop(truffleFrame);
 
         SNumber result = left.primSubtract(right, universe);
 
-        frame.push(result);
         StackUtils.push(truffleFrame, result);
 
-        assert StackUtils.areStackEqual(truffleFrame,
-            frame) : "Stack are different";
-        assert StackUtils.getCurrentStackPointer(
-            truffleFrame) == frame.getStackPointer() : "Stack pointers differ";
       }
     });
 
     installInstancePrimitive(new SPrimitive("*", universe) {
       @Override
-      public void invoke(final Frame frame, final VirtualFrame truffleFrame,
+      public void invoke(final VirtualFrame truffleFrame,
           final Interpreter interpreter) throws FrameSlotTypeException {
 
-        SNumber right = (SNumber) frame.pop();
-        SNumber left = (SNumber) frame.pop();
-
-        SNumber rightT = (SNumber) StackUtils.pop(truffleFrame);
-        SNumber leftT = (SNumber) StackUtils.pop(truffleFrame);
-
-        assert right == rightT;
-        assert left == leftT;
+        SNumber right = (SNumber) StackUtils.pop(truffleFrame);
+        SNumber left = (SNumber) StackUtils.pop(truffleFrame);
 
         SNumber result = left.primMultiply(right, universe);
 
-        frame.push(result);
         StackUtils.push(truffleFrame, result);
 
-        assert StackUtils.areStackEqual(truffleFrame,
-            frame) : "Stack are different";
-        assert StackUtils.getCurrentStackPointer(
-            truffleFrame) == frame.getStackPointer() : "Stack pointers differ";
       }
     });
 
     installInstancePrimitive(new SPrimitive("//", universe) {
       @Override
-      public void invoke(final Frame frame, final VirtualFrame truffleFrame,
+      public void invoke(final VirtualFrame truffleFrame,
           final Interpreter interpreter) throws FrameSlotTypeException {
 
-        SNumber right = (SNumber) frame.pop();
-        SNumber left = (SNumber) frame.pop();
-
-        SNumber rightT = (SNumber) StackUtils.pop(truffleFrame);
-        SNumber leftT = (SNumber) StackUtils.pop(truffleFrame);
-
-        assert right == rightT;
-        assert left == leftT;
+        SNumber right = (SNumber) StackUtils.pop(truffleFrame);
+        SNumber left = (SNumber) StackUtils.pop(truffleFrame);
 
         SNumber result = left.primDoubleDivide(right, universe);
 
-        frame.push(result);
         StackUtils.push(truffleFrame, result);
 
-        assert StackUtils.areStackEqual(truffleFrame,
-            frame) : "Stack are different";
-        assert StackUtils.getCurrentStackPointer(
-            truffleFrame) == frame.getStackPointer() : "Stack pointers differ";
       }
     });
 
     installInstancePrimitive(new SPrimitive("/", universe) {
       @Override
-      public void invoke(final Frame frame, final VirtualFrame truffleFrame,
+      public void invoke(final VirtualFrame truffleFrame,
           final Interpreter interpreter) throws FrameSlotTypeException {
 
-        SNumber right = (SNumber) frame.pop();
-        SNumber left = (SNumber) frame.pop();
-
-        SNumber rightT = (SNumber) StackUtils.pop(truffleFrame);
-        SNumber leftT = (SNumber) StackUtils.pop(truffleFrame);
-
-        assert right == rightT;
-        assert left == leftT;
+        SNumber right = (SNumber) StackUtils.pop(truffleFrame);
+        SNumber left = (SNumber) StackUtils.pop(truffleFrame);
 
         SNumber result = left.primIntegerDivide(right, universe);
 
-        frame.push(result);
         StackUtils.push(truffleFrame, result);
 
-        assert StackUtils.areStackEqual(truffleFrame,
-            frame) : "Stack are different";
-        assert StackUtils.getCurrentStackPointer(
-            truffleFrame) == frame.getStackPointer() : "Stack pointers differ";
       }
     });
 
     installInstancePrimitive(new SPrimitive("%", universe) {
       @Override
-      public void invoke(final Frame frame, final VirtualFrame truffleFrame,
+      public void invoke(final VirtualFrame truffleFrame,
           final Interpreter interpreter) throws FrameSlotTypeException {
 
-        SNumber right = (SNumber) frame.pop();
-        SNumber left = (SNumber) frame.pop();
-
-        SNumber rightT = (SNumber) StackUtils.pop(truffleFrame);
-        SNumber leftT = (SNumber) StackUtils.pop(truffleFrame);
-
-        assert right == rightT;
-        assert left == leftT;
+        SNumber right = (SNumber) StackUtils.pop(truffleFrame);
+        SNumber left = (SNumber) StackUtils.pop(truffleFrame);
 
         SNumber result = left.primModulo(right, universe);
 
-        frame.push(result);
         StackUtils.push(truffleFrame, result);
 
-        assert StackUtils.areStackEqual(truffleFrame,
-            frame) : "Stack are different";
-        assert StackUtils.getCurrentStackPointer(
-            truffleFrame) == frame.getStackPointer() : "Stack pointers differ";
       }
     });
 
     installInstancePrimitive(new SPrimitive("rem:", universe) {
       @Override
-      public void invoke(final Frame frame, final VirtualFrame truffleFrame,
+      public void invoke(final VirtualFrame truffleFrame,
           final Interpreter interpreter) throws FrameSlotTypeException {
 
-        SNumber right = (SNumber) frame.pop();
-        SInteger left = (SInteger) frame.pop();
-
-        SNumber rightT = (SNumber) StackUtils.pop(truffleFrame);
-        SInteger leftT = (SInteger) StackUtils.pop(truffleFrame);
-
-        assert right == rightT;
-        assert left == leftT;
+        SNumber right = (SNumber) StackUtils.pop(truffleFrame);
+        SInteger left = (SInteger) StackUtils.pop(truffleFrame);
 
         SInteger result = left.primRemainder(right, universe);
 
-        frame.push(result);
         StackUtils.push(truffleFrame, result);
 
-        assert StackUtils.areStackEqual(truffleFrame,
-            frame) : "Stack are different";
-        assert StackUtils.getCurrentStackPointer(
-            truffleFrame) == frame.getStackPointer() : "Stack pointers differ";
       }
     });
 
     installInstancePrimitive(new SPrimitive("&", universe) {
       @Override
-      public void invoke(final Frame frame, final VirtualFrame truffleFrame,
+      public void invoke(final VirtualFrame truffleFrame,
           final Interpreter interpreter) throws FrameSlotTypeException {
 
-        SNumber right = (SNumber) frame.pop();
-        SNumber left = (SNumber) frame.pop();
-
-        SNumber rightT = (SNumber) StackUtils.pop(truffleFrame);
-        SNumber leftT = (SNumber) StackUtils.pop(truffleFrame);
-
-        assert right == rightT;
-        assert left == leftT;
+        SNumber right = (SNumber) StackUtils.pop(truffleFrame);
+        SNumber left = (SNumber) StackUtils.pop(truffleFrame);
 
         SNumber result = left.primBitAnd(right, universe);
 
-        frame.push(result);
         StackUtils.push(truffleFrame, result);
 
-        assert StackUtils.areStackEqual(truffleFrame,
-            frame) : "Stack are different";
-        assert StackUtils.getCurrentStackPointer(
-            truffleFrame) == frame.getStackPointer() : "Stack pointers differ";
       }
     });
 
     installInstancePrimitive(new SPrimitive("=", universe) {
       @Override
-      public void invoke(final Frame frame, final VirtualFrame truffleFrame,
+      public void invoke(final VirtualFrame truffleFrame,
           final Interpreter interpreter) throws FrameSlotTypeException {
 
-        SAbstractObject right = frame.pop();
-        SNumber left = (SNumber) frame.pop();
-
-        SAbstractObject rightT = StackUtils.pop(truffleFrame);
-        SNumber leftT = (SNumber) StackUtils.pop(truffleFrame);
-
-        assert left == leftT;
-        assert right == rightT;
+        SAbstractObject right = StackUtils.pop(truffleFrame);
+        SNumber left = (SNumber) StackUtils.pop(truffleFrame);
 
         SObject result = left.primEqual(right, universe);
 
-        frame.push(result);
         StackUtils.push(truffleFrame, result);
 
-        assert StackUtils.areStackEqual(truffleFrame,
-            frame) : "Stack are different";
-        assert StackUtils.getCurrentStackPointer(
-            truffleFrame) == frame.getStackPointer() : "Stack pointers differ";
       }
     });
 
     installInstancePrimitive(new SPrimitive("<", universe) {
       @Override
-      public void invoke(final Frame frame, final VirtualFrame truffleFrame,
+      public void invoke(final VirtualFrame truffleFrame,
           final Interpreter interpreter) throws FrameSlotTypeException {
 
-        SNumber right = (SNumber) frame.pop();
-        SNumber left = (SNumber) frame.pop();
+        ;
 
-        SNumber rightT = (SNumber) StackUtils.pop(truffleFrame);
-        SNumber leftT = (SNumber) StackUtils.pop(truffleFrame);
-
-        assert right == rightT;
-        assert left == leftT;
+        SNumber right = (SNumber) StackUtils.pop(truffleFrame);
+        SNumber left = (SNumber) StackUtils.pop(truffleFrame);
 
         SObject result = left.primLessThan(right, universe);
 
-        frame.push(result);
         StackUtils.push(truffleFrame, result);
 
-        assert StackUtils.areStackEqual(truffleFrame,
-            frame) : "Stack are different";
-        assert StackUtils.getCurrentStackPointer(
-            truffleFrame) == frame.getStackPointer() : "Stack pointers differ";
       }
     });
 
     installInstancePrimitive(new SPrimitive("<<", universe) {
       @Override
-      public void invoke(final Frame frame, final VirtualFrame truffleFrame,
+      public void invoke(final VirtualFrame truffleFrame,
           final Interpreter interpreter) throws FrameSlotTypeException {
 
-        SNumber right = (SNumber) frame.pop();
-        SNumber rightT = (SNumber) StackUtils.pop(truffleFrame);
+        SNumber right = (SNumber) StackUtils.pop(truffleFrame);
 
-        assert right == rightT;
+        SNumber left = (SNumber) StackUtils.pop(truffleFrame);
 
-        SNumber left = (SNumber) frame.pop();
-        SNumber leftT = (SNumber) StackUtils.pop(truffleFrame);
+        SNumber value = left.primLeftShift(right, universe);
 
-        assert left == leftT;
+        StackUtils.push(truffleFrame, value);
 
-        SNumber shifted = left.primLeftShift(right, universe);
-
-        frame.push(shifted);
-
-        StackUtils.push(truffleFrame, shifted);
-
-        assert StackUtils.areStackEqual(truffleFrame,
-            frame) : "Stack are different";
-        assert StackUtils.getCurrentStackPointer(
-            truffleFrame) == frame.getStackPointer() : "Stack pointers differ";
       }
     });
 
     installInstancePrimitive(new SPrimitive("bitXor:", universe) {
       @Override
-      public void invoke(final Frame frame, final VirtualFrame truffleFrame,
+      public void invoke(final VirtualFrame truffleFrame,
           final Interpreter interpreter) throws FrameSlotTypeException {
 
-        SNumber right = (SNumber) frame.pop();
-        SNumber rightT = (SNumber) StackUtils.pop(truffleFrame);
+        SNumber right = (SNumber) StackUtils.pop(truffleFrame);
 
-        assert right == rightT;
-
-        SNumber left = (SNumber) frame.pop();
-        SNumber leftT = (SNumber) StackUtils.pop(truffleFrame);
-
-        assert left == leftT;
+        SNumber left = (SNumber) StackUtils.pop(truffleFrame);
 
         SNumber xored = left.primBitXor(right, universe);
 
-        frame.push(xored);
         StackUtils.push(truffleFrame, xored);
 
-        assert StackUtils.areStackEqual(truffleFrame,
-            frame) : "Stack are different";
-        assert StackUtils.getCurrentStackPointer(
-            truffleFrame) == frame.getStackPointer() : "Stack pointers differ";
       }
     });
 
     installInstancePrimitive(new SPrimitive("as32BitSignedValue", universe) {
       @Override
-      public void invoke(final Frame frame, final VirtualFrame truffleFrame,
+      public void invoke(final VirtualFrame truffleFrame,
           final Interpreter interpreter) throws FrameSlotTypeException {
 
-        SInteger rcvr = (SInteger) frame.pop();
-        SInteger rcvrT = (SInteger) StackUtils.pop(truffleFrame);
-
-        assert rcvr == rcvrT;
+        SInteger rcvr = (SInteger) StackUtils.pop(truffleFrame);
 
         SInteger asSigned32 = universe.newInteger((int) rcvr.getEmbeddedInteger());
 
-        frame.push(asSigned32);
         StackUtils.push(truffleFrame, asSigned32);
-
-        assert StackUtils.areStackEqual(truffleFrame,
-            frame) : "Stack are different";
-        assert StackUtils.getCurrentStackPointer(
-            truffleFrame) == frame.getStackPointer() : "Stack pointers differ";
 
       }
     });
 
     installInstancePrimitive(new SPrimitive("as32BitUnsignedValue", universe) {
       @Override
-      public void invoke(final Frame frame, final VirtualFrame truffleFrame,
+      public void invoke(final VirtualFrame truffleFrame,
           final Interpreter interpreter) throws FrameSlotTypeException {
 
-        SInteger rcvr = (SInteger) frame.pop();
-        SInteger rcvrT = (SInteger) StackUtils.pop(truffleFrame);
-
-        assert rcvr == rcvrT;
+        SInteger rcvr = (SInteger) StackUtils.pop(truffleFrame);
 
         SInteger as32Int =
             universe.newInteger(Integer.toUnsignedLong((int) rcvr.getEmbeddedInteger()));
 
-        frame.push(as32Int);
         StackUtils.push(truffleFrame, as32Int);
 
-        assert StackUtils.areStackEqual(truffleFrame,
-            frame) : "Stack are different";
-        assert StackUtils.getCurrentStackPointer(
-            truffleFrame) == frame.getStackPointer() : "Stack pointers differ";
       }
     });
 
     installInstancePrimitive(new SPrimitive(">>>", universe) {
       @Override
-      public void invoke(final Frame frame, final VirtualFrame truffleFrame,
+      public void invoke(final VirtualFrame truffleFrame,
           final Interpreter interpreter) throws FrameSlotTypeException {
 
-        SInteger right = (SInteger) frame.pop();
-        SInteger rightT = (SInteger) StackUtils.pop(truffleFrame);
+        SInteger right = (SInteger) StackUtils.pop(truffleFrame);
 
-        assert right == rightT;
-
-        SInteger rcvr = (SInteger) frame.pop();
-        SInteger rcvrT = (SInteger) StackUtils.pop(truffleFrame);
-
-        assert rcvr == rcvrT;
+        SInteger rcvr = (SInteger) StackUtils.pop(truffleFrame);
 
         SInteger shiftedInteger =
             universe.newInteger(rcvr.getEmbeddedInteger() >>> right.getEmbeddedInteger());
 
-        frame.push(shiftedInteger);
         StackUtils.push(truffleFrame, shiftedInteger);
 
-        assert StackUtils.areStackEqual(truffleFrame,
-            frame) : "Stack are different";
-        assert StackUtils.getCurrentStackPointer(
-            truffleFrame) == frame.getStackPointer() : "Stack pointers differ";
       }
     });
 
     installClassPrimitive(new SPrimitive("fromString:", universe) {
       @Override
-      public void invoke(final Frame frame, final VirtualFrame truffleFrame,
+      public void invoke(final VirtualFrame truffleFrame,
           final Interpreter interpreter) throws FrameSlotTypeException {
 
-        SString param = (SString) frame.pop();
-        SString paramT = (SString) StackUtils.pop(truffleFrame);
+        SString param = (SString) StackUtils.pop(truffleFrame);
 
-        frame.pop();
         StackUtils.pop(truffleFrame);
 
         try {
           long result = Long.parseLong(param.getEmbeddedString());
-          long resultT = Long.parseLong(paramT.getEmbeddedString());
-
-          assert result == resultT : "objects differ";
 
           SInteger integer = universe.newInteger(result);
-          frame.push(integer);
+
           StackUtils.push(truffleFrame, integer);
 
         } catch (NumberFormatException e) {
           BigInteger result = new BigInteger(param.getEmbeddedString());
-          BigInteger resultT = new BigInteger(paramT.getEmbeddedString());
-
-          assert result == resultT : "objects differ";
 
           SBigInteger bigInteger = new SBigInteger(result);
-          frame.push(bigInteger);
           StackUtils.push(truffleFrame, bigInteger);
         }
-        assert StackUtils.areStackEqual(truffleFrame,
-            frame) : "Stack are different";
-        assert StackUtils.getCurrentStackPointer(
-            truffleFrame) == frame.getStackPointer() : "Stack pointers differ";
+
       }
     });
   }
