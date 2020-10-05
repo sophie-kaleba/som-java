@@ -339,7 +339,7 @@ public final class Universe {
   public SMethod createBootstrapMethod() {
     // Create a fake bootstrap method to simplify later frame traversal
     SMethod bootstrapMethod =
-        newMethod(symbolFor("bootstrap"), 1, 0, newInteger(0), newInteger(2), null);
+        newMethod(symbolFor("bootstrap"), 1, 0, newInteger(0), newInteger(2), null, 0);
     bootstrapMethod.setBytecode(0, HALT);
     bootstrapMethod.setHolder(systemClass);
     return bootstrapMethod;
@@ -567,10 +567,12 @@ public final class Universe {
 
   public SMethod newMethod(final SSymbol signature, final int numberOfBytecodes,
       final int numberOfLiterals, final SInteger numberOfLocals,
-      final SInteger maxNumStackElements, final List<SAbstractObject> literals) {
+      final SInteger maxNumStackElements, final List<SAbstractObject> literals,
+      final int contextLevel) {
     // Allocate a new method and set its class to be the method class
     SMethod result = new SMethod(nilObject, signature, numberOfBytecodes,
-        numberOfLocals, maxNumStackElements, numberOfLiterals, literals, language);
+        numberOfLocals, maxNumStackElements, numberOfLiterals, literals, language,
+        contextLevel);
     return result;
   }
 

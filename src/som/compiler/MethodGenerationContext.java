@@ -32,11 +32,7 @@ import java.util.List;
 import java.util.Vector;
 
 import som.vm.Universe;
-import som.vmobjects.SAbstractObject;
-import som.vmobjects.SInvokable;
-import som.vmobjects.SMethod;
-import som.vmobjects.SPrimitive;
-import som.vmobjects.SSymbol;
+import som.vmobjects.*;
 
 
 public class MethodGenerationContext {
@@ -76,7 +72,7 @@ public class MethodGenerationContext {
 
     SMethod meth = universe.newMethod(signature, bytecode.size(), numLiterals,
         universe.newInteger(numLocals), universe.newInteger(computeStackDepth()),
-        literals);
+        literals, getOuterSelfContextLevel());
 
     // copy bytecodes into method
     int i = 0;
@@ -258,6 +254,16 @@ public class MethodGenerationContext {
     }
 
     return true;
+  }
+
+  private int getOuterSelfContextLevel() {
+    int level = 0;
+    MethodGenerationContext ctx = outerGenc;
+    while (ctx != null) {
+      ctx = ctx.outerGenc;
+      level++;
+    }
+    return level;
   }
 
   public boolean hasField(final SSymbol field) {

@@ -42,7 +42,11 @@ public abstract class SAbstractObject implements TruffleObject {
     return null;
   }
 
-  // TODO - hack on truffle frame
+  // TODO - this is a silly hack, should get rid of it
+  public int getContextLevel() {
+    return 0;
+  }
+
   public void send(final String selectorString, final SAbstractObject[] arguments,
       final Universe universe, final Interpreter interpreter,
       VirtualFrame truffleFrame) throws FrameSlotTypeException {

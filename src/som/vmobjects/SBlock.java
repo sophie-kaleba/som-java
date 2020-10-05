@@ -50,6 +50,10 @@ public class SBlock extends SAbstractObject {
     this.materializedContext = materializedContext;
   }
 
+  public int getContextLevel() {
+    return method.getContextLevel();
+  }
+
   public SMethod getMethod() {
     return method;
   }

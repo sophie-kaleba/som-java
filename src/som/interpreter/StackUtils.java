@@ -228,31 +228,18 @@ public class StackUtils {
     return frame;
   }
 
-  public static VirtualFrame getOuterContext(VirtualFrame frame) {
-    SAbstractObject receiver = getCurrentArguments(frame)[0];
+  protected static VirtualFrame determineContext(VirtualFrame frame) {
+    SAbstractObject self = getCurrentArguments(frame)[0];
+    int i = self.getContextLevel();
 
-    while (receiver.getMaterializedContext() != null) {
-      frame = receiver.getMaterializedContext();
-      receiver = getCurrentArguments(frame)[0];
+    while (i > 0) {
+      frame = self.getMaterializedContext();
+      self = getCurrentArguments(frame)[0];
+      i--;
     }
 
     return frame;
   }
-
-  // protected final VirtualFrame determineContext(final VirtualFrame frame) {
-  // SBlock self = (SBlock) SArguments.rcvr(frame);
-  // SAbstractObject receiver = getCurrentArguments(frame)[0];
-  // int i = contextLevel - 1;
-  //
-  // while (i > 0) {
-  // self = (SBlock) self.getOuterSelf();
-  // i--;
-  // }
-  //
-  // // Graal needs help here to see that this is always a MaterializedFrame
-  // // so, we record explicitly a class profile
-  // return frameType.profile(self.getContext());
-  // }
 
   public static SAbstractObject getLocal(final VirtualFrame frame,
       final int index, final int contextLevel)

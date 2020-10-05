@@ -53,11 +53,12 @@ public class SMethod extends SAbstractObject implements SInvokable {
   private SClass           holder;
   private final SInteger   numberOfLocals;
   private final SInteger   maximumNumberOfStackElements;
+  private final int        contextLevel;
 
   public SMethod(final SObject nilObject, final SSymbol signature, final int numberOfBytecodes,
       final SInteger numberOfLocals, final SInteger maxNumStackElements,
       final int numberOfLiterals, final List<SAbstractObject> literals,
-      final TruffleLanguage<?> language) {
+      final TruffleLanguage<?> language, final int contextLevel) {
     this.signature = signature;
     this.numberOfLocals = numberOfLocals;
     inlineCacheClass = new SClass[numberOfBytecodes];
@@ -66,6 +67,7 @@ public class SMethod extends SAbstractObject implements SInvokable {
     receiverProfiles = new ValueProfile[numberOfBytecodes];
     maximumNumberOfStackElements = maxNumStackElements;
     this.literals = new SAbstractObject[numberOfLiterals];
+    this.contextLevel = contextLevel;
 
     // copy literals into the method
     if (numberOfLiterals > 0) {
@@ -93,6 +95,10 @@ public class SMethod extends SAbstractObject implements SInvokable {
   public SInteger getNumberOfLocals() {
     // Get the number of locals (converted to a Java integer)
     return numberOfLocals;
+  }
+
+  public int getContextLevel() {
+    return contextLevel;
   }
 
   public SInteger getMaximumNumberOfStackElements() {
