@@ -68,9 +68,6 @@ public final class Method extends Invokable {
         CompilerDirectives.transferToInterpreterAndInvalidate();
         exception.printStackTrace();
         System.exit(1);
-      } catch (RestartLoopException rle) {
-        // newFrame.resetStackPointer();
-        StackUtils.resetStackPointer(frame, method);
       } finally {
         marker.frameNoLongerOnStack();
       }

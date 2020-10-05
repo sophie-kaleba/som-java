@@ -209,7 +209,7 @@ public class Interpreter {
 
     SAbstractObject valueT = StackUtils.pop(truffleFrame);
 
-    VirtualFrame context = StackUtils.getOuterContext(truffleFrame);
+    VirtualFrame context = StackUtils.determineContext(truffleFrame);
     FrameOnStackMarker marker = StackUtils.getCurrentOnStackMarker(context);
 
     // TODOd - when the body was commented, the tests for NLR were still passing, this need
@@ -285,9 +285,6 @@ public class Interpreter {
       switch (bytecode) {
         case HALT: {
           SAbstractObject resultT = StackUtils.getRelativeStackElement(truffleFrame, 0);
-          // SAbstractObject result = frame.getStackElement(0);
-
-          // assert result.equals(resultT) : "final return values differ";
           return resultT;
         }
 
@@ -347,12 +344,22 @@ public class Interpreter {
         }
 
         case SEND: {
-          doSend(currentBytecodeIndex, truffleFrame, method);
+          try {
+            doSend(currentBytecodeIndex, truffleFrame, method);
+          } catch (RestartLoopException e) {
+            bytecodeIndex = 0;
+            StackUtils.resetStackPointer(truffleFrame, method);
+          }
           break;
         }
 
         case SUPER_SEND: {
-          doSuperSend(currentBytecodeIndex, truffleFrame, method);
+          try {
+            doSuperSend(currentBytecodeIndex, truffleFrame, method);
+          } catch (RestartLoopException e) {
+            bytecodeIndex = 0;
+            StackUtils.resetStackPointer(truffleFrame, method);
+          }
           break;
         }
 
@@ -374,7 +381,7 @@ public class Interpreter {
   public SAbstractObject getSelf(final VirtualFrame truffleFrame)
       throws FrameSlotTypeException {
     // Get the self object from the interpreter
-    VirtualFrame outerContextT = StackUtils.getOuterContext(truffleFrame);
+    VirtualFrame outerContextT = StackUtils.determineContext(truffleFrame);
     SAbstractObject resultT = StackUtils.getArgument(outerContextT, 0, 0);
 
     return resultT;
