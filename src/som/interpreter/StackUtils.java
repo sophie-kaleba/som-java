@@ -203,12 +203,33 @@ public class StackUtils {
     push(frame, result);
   }
 
+  public static SAbstractObject getArgument(final VirtualFrame frame,
+      final int index,
+      final int contextLevel)
+      throws FrameSlotTypeException {
+    VirtualFrame context = getContext(frame, contextLevel);
+    return getStackElement(context, index);
+  }
+
+  public static void setArgument(final VirtualFrame frame,
+      final int index, final int contextLevel,
+      final SAbstractObject value) throws FrameSlotTypeException {
+    VirtualFrame context = getContext(frame, contextLevel);
+
+    // TODO - add a test for this commented case
+    // FrameSlot currentStackSlot = getCurrentMethod(frame).getStackSlot();
+    FrameSlot currentStackSlot = getCurrentMethod(context).getStackSlot();
+
+    setStackElement(context, currentStackSlot, index, value);
+  }
+
   public static SAbstractObject getArgumentFromStack(VirtualFrame frame, int index,
       int contextLevel) throws FrameSlotTypeException {
     VirtualFrame context = getContext(frame, contextLevel);
     return getStackElement(context, index);
   }
 
+  // TODO - might be merged with determineContext
   public static VirtualFrame getContext(VirtualFrame frame, int contextLevel) {
 
     while (contextLevel > 0) {
@@ -261,26 +282,6 @@ public class StackUtils {
     int localOffset = getCurrentMethod(context).getNumberOfArguments();
 
     setLocal(context, currentStackSlot, index, localOffset, value);
-  }
-
-  public static SAbstractObject getArgument(final VirtualFrame frame,
-      final int index,
-      final int contextLevel)
-      throws FrameSlotTypeException {
-    VirtualFrame context = getContext(frame, contextLevel);
-    return getStackElement(context, index);
-  }
-
-  public static void setArgument(final VirtualFrame frame,
-      final int index, final int contextLevel,
-      final SAbstractObject value) throws FrameSlotTypeException {
-    VirtualFrame context = getContext(frame, contextLevel);
-
-    // TODO - add a test for this case
-    // FrameSlot currentStackSlot = getCurrentMethod(frame).getStackSlot();
-    FrameSlot currentStackSlot = getCurrentMethod(context).getStackSlot();
-
-    setStackElement(context, currentStackSlot, index, value);
   }
 
 }

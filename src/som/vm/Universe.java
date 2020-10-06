@@ -393,12 +393,8 @@ public final class Universe {
     invokable.indirectInvoke(bootTruffle,
         interpreter);
 
-    // SAbstractObject result = bootstrapFrame.getStackElement(0);
-    SAbstractObject result = StackUtils.getRelativeStackElement(bootTruffle, 0);
+    return StackUtils.getRelativeStackElement(bootTruffle, 0);
 
-    // assert result == resultT;
-
-    return result;
   }
 
   @TruffleBoundary

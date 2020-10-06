@@ -52,178 +52,163 @@ public class Interpreter {
     this.universe = universe;
   }
 
-  private void doDup(final VirtualFrame truffleFrame, final SMethod method)
+  private void doDup(final VirtualFrame frame)
       throws FrameSlotTypeException {
-    SAbstractObject valueT = StackUtils.getRelativeStackElement(truffleFrame, 0);
+    SAbstractObject value = StackUtils.getRelativeStackElement(frame, 0);
 
-    StackUtils.push(truffleFrame, valueT);
+    StackUtils.push(frame, value);
   }
 
   private void doPushLocal(final int bytecodeIndex,
-      final VirtualFrame truffleFrame,
+      final VirtualFrame frame,
       final SMethod method) throws FrameSlotTypeException {
 
-    SAbstractObject valueT = StackUtils.getLocal(truffleFrame,
+    SAbstractObject value = StackUtils.getLocal(frame,
         method.getBytecode(bytecodeIndex + 1),
         method.getBytecode(bytecodeIndex + 2));
 
-    StackUtils.push(truffleFrame, valueT);
+    StackUtils.push(frame, value);
 
   }
 
-  private void doPushArgument(final int bytecodeIndex, final VirtualFrame truffleFrame,
+  private void doPushArgument(final int bytecodeIndex, final VirtualFrame frame,
       final SMethod method) throws FrameSlotTypeException {
-    SAbstractObject valueT =
-        StackUtils.getArgumentFromStack(truffleFrame, method.getBytecode(bytecodeIndex + 1),
+    SAbstractObject value =
+        StackUtils.getArgumentFromStack(frame, method.getBytecode(bytecodeIndex + 1),
             method.getBytecode(bytecodeIndex + 2));
 
-    StackUtils.push(truffleFrame, valueT);
+    StackUtils.push(frame, value);
 
   }
 
   private void doPushField(final int bytecodeIndex,
-      final SMethod method, final VirtualFrame truffleFrame) throws FrameSlotTypeException {
-    // Handle the PUSH FIELD bytecode
+      final SMethod method, final VirtualFrame frame) throws FrameSlotTypeException {
     int fieldIndex = method.getBytecode(bytecodeIndex + 1);
+    SAbstractObject value = ((SObject) getSelf(frame)).getField(fieldIndex);
 
-    // Push the field with the computed index onto the stack
-    SAbstractObject value = ((SObject) getSelf(truffleFrame)).getField(fieldIndex);
-
-    StackUtils.push(truffleFrame, value);
+    StackUtils.push(frame, value);
   }
 
   private void doPushBlock(final int bytecodeIndex,
-      final SMethod method, final VirtualFrame truffleFrame)
+      final SMethod method, final VirtualFrame frame)
       throws ProgramDefinitionError, FrameSlotTypeException {
 
     SMethod blockMethod = (SMethod) method.getConstant(bytecodeIndex);
     SBlock block = universe.newBlock(blockMethod,
-        blockMethod.getNumberOfArguments(), truffleFrame.materialize());
+        blockMethod.getNumberOfArguments(), frame.materialize());
 
-    StackUtils.push(truffleFrame, block);
+    StackUtils.push(frame, block);
   }
 
   private void doPushConstant(final int bytecodeIndex,
-      final VirtualFrame truffleFrame,
+      final VirtualFrame frame,
       final SMethod method) throws FrameSlotTypeException {
 
-    StackUtils.push(truffleFrame,
+    StackUtils.push(frame,
         method.getConstant(bytecodeIndex));
   }
 
   private void doPushGlobal(final int bytecodeIndex,
-      final VirtualFrame truffleFrame,
+      final VirtualFrame frame,
       final SMethod method) throws FrameSlotTypeException {
 
     SSymbol globalName = (SSymbol) method.getConstant(bytecodeIndex);
-
     SAbstractObject global = universe.getGlobal(globalName);
 
     if (global != null) {
-      // Push the global onto the stack
-      StackUtils.push(truffleFrame, global);
+      StackUtils.push(frame, global);
 
     } else {
       // Send 'unknownGlobal:' to self
       // TODO - reconsider
       CompilerDirectives.transferToInterpreter();
-      getSelf(truffleFrame).sendUnknownGlobal(globalName, universe, this, truffleFrame);
+      getSelf(frame).sendUnknownGlobal(globalName, universe, this, frame);
     }
   }
 
-  private void doPop(final VirtualFrame truffleFrame)
+  private void doPop(final VirtualFrame frame)
       throws FrameSlotTypeException {
 
-    StackUtils.pop(truffleFrame);
+    StackUtils.pop(frame);
 
   }
 
-  private void doPopLocal(final int bytecodeIndex, final VirtualFrame truffleFrame,
+  private void doPopLocal(final int bytecodeIndex, final VirtualFrame frame,
       final SMethod method) throws FrameSlotTypeException {
 
-    SAbstractObject valueT = StackUtils.pop(truffleFrame);
+    SAbstractObject value = StackUtils.pop(frame);
 
-    StackUtils.setLocal(truffleFrame,
+    StackUtils.setLocal(frame,
         method.getBytecode(bytecodeIndex + 1), method.getBytecode(bytecodeIndex + 2),
-        valueT);
+        value);
 
   }
 
   private void doPopArgument(final int bytecodeIndex,
-      final VirtualFrame truffleFrame,
+      final VirtualFrame frame,
       final SMethod method) throws FrameSlotTypeException {
 
-    SAbstractObject valueT = StackUtils.pop(truffleFrame);
+    SAbstractObject value = StackUtils.pop(frame);
 
-    StackUtils.setArgument(truffleFrame,
+    StackUtils.setArgument(frame,
         method.getBytecode(bytecodeIndex + 1), method.getBytecode(bytecodeIndex + 2),
-        valueT);
+        value);
 
   }
 
   private void doPopField(final int bytecodeIndex,
-      final SMethod method, final VirtualFrame truffleFrame) throws FrameSlotTypeException {
-    // Handle the POP FIELD bytecode
+      final SMethod method, final VirtualFrame frame) throws FrameSlotTypeException {
     int fieldIndex = method.getBytecode(bytecodeIndex + 1);
 
-    // Set the field with the computed index to the value popped from the stack
-    ((SObject) getSelf(truffleFrame)).setField(fieldIndex, StackUtils.pop(truffleFrame));;
+    ((SObject) getSelf(frame)).setField(fieldIndex, StackUtils.pop(frame));;
   }
 
   private void doSuperSend(final int bytecodeIndex,
-      final VirtualFrame truffleFrame,
+      final VirtualFrame frame,
       final SMethod method) throws FrameSlotTypeException {
-    // Handle the SUPER SEND bytecode
     SSymbol signature = (SSymbol) method.getConstant(bytecodeIndex);
 
-    // Send the message
-    // Lookup the invokable with the given signature
     SClass holderSuper = (SClass) method.getHolder().getSuperClass();
     SInvokable invokable = holderSuper.lookupInvokable(signature);
 
     if (invokable != null) {
-      // Invoke the invokable in the current frame
-      invokable.indirectInvoke(truffleFrame, this);
+      invokable.indirectInvoke(frame, this);
     } else {
       CompilerDirectives.transferToInterpreterAndInvalidate();
-      // Compute the number of arguments
       int numberOfArguments = signature.getNumberOfSignatureArguments();
 
-      // Compute the receiver
-      SAbstractObject receiverT =
-          StackUtils.getRelativeStackElement(truffleFrame, numberOfArguments - 1);
+      SAbstractObject receiver =
+          StackUtils.getRelativeStackElement(frame, numberOfArguments - 1);
 
-      receiverT.sendDoesNotUnderstand(signature, universe, this, truffleFrame);
+      receiver.sendDoesNotUnderstand(signature, universe, this, frame);
     }
   }
 
-  private SAbstractObject doReturnLocal(final VirtualFrame truffleFrame)
+  private SAbstractObject doReturnLocal(final VirtualFrame frame)
       throws FrameSlotTypeException {
-    SAbstractObject valueT = StackUtils.pop(truffleFrame);
-
-    return valueT;
+    return StackUtils.pop(frame);
   }
 
-  private SAbstractObject doReturnNonLocal(final VirtualFrame truffleFrame)
+  private SAbstractObject doReturnNonLocal(final VirtualFrame frame)
       throws ReturnException, FrameSlotTypeException {
 
-    SAbstractObject valueT = StackUtils.pop(truffleFrame);
+    SAbstractObject value = StackUtils.pop(frame);
 
-    VirtualFrame context = StackUtils.determineContext(truffleFrame);
+    VirtualFrame context = StackUtils.determineContext(frame);
     FrameOnStackMarker marker = StackUtils.getCurrentOnStackMarker(context);
 
-    // TODOd - when the body was commented, the tests for NLR were still passing, this need
+    // TODO - when the body was commented, the tests for NLR were still passing, this need
     // further investigation
     if (!marker.isOnStack()) {
       // Try to recover by sending 'escapedBlock:' to the sending object
       // this can get a bit nasty when using nested blocks. In this case
       // the "sender" will be the surrounding block and not the object
       // that actually sent the 'value' message.
-      SBlock blockT = (SBlock) StackUtils.getCurrentArguments(truffleFrame)[0];
+      SBlock blockT = (SBlock) StackUtils.getCurrentArguments(frame)[0];
       SAbstractObject receiver = StackUtils.getCurrentArguments(context)[0];
 
-      receiver.sendEscapedBlock(blockT, universe, this, truffleFrame);
-      return StackUtils.pop(truffleFrame);
+      receiver.sendEscapedBlock(blockT, universe, this, frame);
+      return StackUtils.pop(frame);
 
       // TODO - get the sender from truffle frame
       // SAbstractObject sender =
@@ -235,16 +220,16 @@ public class Interpreter {
     }
 
     // throw the exception to pass around the context and pop the right frames
-    throw new ReturnException(valueT, marker);
+    throw new ReturnException(value, marker);
   }
 
   private void doSend(final int bytecodeIndex,
-      final VirtualFrame truffleFrame,
+      final VirtualFrame frame,
       final SMethod method) throws FrameSlotTypeException {
     SSymbol signature = (SSymbol) method.getConstant(bytecodeIndex);
 
     int numberOfArguments = signature.getNumberOfSignatureArguments();
-    SAbstractObject receiverT = StackUtils.getRelativeStackElement(truffleFrame,
+    SAbstractObject receiver = StackUtils.getRelativeStackElement(frame,
         numberOfArguments - 1);
 
     ValueProfile receiverClassValueProfile = method.getReceiverProfile(bytecodeIndex);
@@ -255,8 +240,8 @@ public class Interpreter {
     }
 
     send(signature,
-        receiverClassValueProfile.profile(receiverT).getSOMClass(universe),
-        bytecodeIndex, truffleFrame, method);
+        receiverClassValueProfile.profile(receiver).getSOMClass(universe),
+        bytecodeIndex, frame, method);
 
   }
 
@@ -284,12 +269,11 @@ public class Interpreter {
       // Handle the current bytecode
       switch (bytecode) {
         case HALT: {
-          SAbstractObject resultT = StackUtils.getRelativeStackElement(truffleFrame, 0);
-          return resultT;
+          return StackUtils.getRelativeStackElement(truffleFrame, 0);
         }
 
         case DUP: {
-          doDup(truffleFrame, method);
+          doDup(truffleFrame);
           break;
         }
 
@@ -378,17 +362,15 @@ public class Interpreter {
     }
   }
 
-  public SAbstractObject getSelf(final VirtualFrame truffleFrame)
+  public SAbstractObject getSelf(final VirtualFrame frame)
       throws FrameSlotTypeException {
     // Get the self object from the interpreter
-    VirtualFrame outerContextT = StackUtils.determineContext(truffleFrame);
-    SAbstractObject resultT = StackUtils.getArgument(outerContextT, 0, 0);
-
-    return resultT;
+    VirtualFrame outerContext = StackUtils.determineContext(frame);
+    return StackUtils.getArgument(outerContext, 0, 0);
   }
 
   private void send(final SSymbol selector, final SClass receiverClass,
-      final int bytecodeIndex, final VirtualFrame truffleFrame,
+      final int bytecodeIndex, final VirtualFrame frame,
       final SMethod method) throws FrameSlotTypeException {
     // First try the inline cache
     SInvokable invokableWithoutCacheHit = null;
@@ -400,7 +382,7 @@ public class Interpreter {
         DirectCallNode invokableDirectCallNode =
             method.getInlineCacheDirectCallNode(bytecodeIndex);
         CompilerAsserts.partialEvaluationConstant(invokableDirectCallNode);
-        invokable.directInvoke(truffleFrame, this, invokableDirectCallNode);
+        invokable.directInvoke(frame, this, invokableDirectCallNode);
         return;
       }
     } else {
@@ -419,7 +401,7 @@ public class Interpreter {
             DirectCallNode invokableDirectCallNode =
                 method.getInlineCacheDirectCallNode(bytecodeIndex + 1);
             CompilerAsserts.partialEvaluationConstant(invokableDirectCallNode);
-            invokable.directInvoke(truffleFrame, this, invokableDirectCallNode);
+            invokable.directInvoke(frame, this, invokableDirectCallNode);
             return;
           }
         } else {
@@ -432,34 +414,25 @@ public class Interpreter {
       }
     }
     CompilerDirectives.transferToInterpreterAndInvalidate();
-    invokeWithoutCacheHit(selector, truffleFrame, invokableWithoutCacheHit);
+    invokeWithoutCacheHit(selector, frame, invokableWithoutCacheHit);
 
   }
 
-  private void invokeWithoutCacheHit(SSymbol selector, VirtualFrame truffleFrame,
+  private void invokeWithoutCacheHit(SSymbol selector, VirtualFrame frame,
       SInvokable invokableWithoutCacheHit) throws FrameSlotTypeException {
     if (invokableWithoutCacheHit != null) {
-      invokableWithoutCacheHit.indirectInvoke(truffleFrame, this);
+      invokableWithoutCacheHit.indirectInvoke(frame, this);
     } else {
       int numberOfArguments = selector.getNumberOfSignatureArguments();
 
-      SAbstractObject receiverT =
-          StackUtils.getRelativeStackElement(truffleFrame, numberOfArguments - 1);
+      SAbstractObject receiver =
+          StackUtils.getRelativeStackElement(frame, numberOfArguments - 1);
 
-      receiverT.sendDoesNotUnderstand(selector, universe, this, truffleFrame);
+      receiver.sendDoesNotUnderstand(selector, universe, this, frame);
     }
-  }
-
-  public final Frame newFrame(Frame prevFrame, final SMethod method, final Frame context) {
-    return this.universe.newFrame(prevFrame, method, context);
   }
 
   public IndirectCallNode getIndirectCallNode() {
     return indirectCallNode;
   }
-
-  /**
-   * Previous helpers from SOM>Frame, transposed to TruffleFrame
-   */
-
 }

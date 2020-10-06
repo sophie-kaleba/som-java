@@ -159,31 +159,31 @@ public class SMethod extends SAbstractObject implements SInvokable {
   }
 
   @Override
-  public void indirectInvoke(VirtualFrame truffleFrame,
+  public void indirectInvoke(VirtualFrame frame,
       final Interpreter interpreter) throws FrameSlotTypeException {
 
-    SAbstractObject[] arguments = StackUtils.copyArgumentFrom(truffleFrame, this);
+    SAbstractObject[] arguments = StackUtils.copyArgumentFrom(frame, this);
 
     IndirectCallNode indirectCallNode = interpreter.getIndirectCallNode();
     SAbstractObject result =
         (SAbstractObject) indirectCallNode.call(callTarget, interpreter, this,
             arguments);
 
-    StackUtils.popArgumentsAndPushResult(truffleFrame, result, this);
+    StackUtils.popArgumentsAndPushResult(frame, result, this);
   }
 
-  public void directInvoke(VirtualFrame truffleFrame,
+  public void directInvoke(VirtualFrame frame,
       final Interpreter interpreter, DirectCallNode directCallNode)
       throws FrameSlotTypeException {
 
     CompilerAsserts.partialEvaluationConstant(directCallNode);
 
-    SAbstractObject[] arguments = StackUtils.copyArgumentFrom(truffleFrame, this);
+    SAbstractObject[] arguments = StackUtils.copyArgumentFrom(frame, this);
 
     SAbstractObject result = (SAbstractObject) directCallNode.call(interpreter, this,
         arguments);
 
-    StackUtils.popArgumentsAndPushResult(truffleFrame, result, this);
+    StackUtils.popArgumentsAndPushResult(frame, result, this);
   }
 
   @Override

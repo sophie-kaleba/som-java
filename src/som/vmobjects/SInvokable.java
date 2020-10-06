@@ -37,10 +37,10 @@ public interface SInvokable {
   boolean isPrimitive();
 
   // Invoke this invokable object in a given frame
-  void indirectInvoke(VirtualFrame truffleFrame, Interpreter interpreter)
+  void indirectInvoke(VirtualFrame frame, Interpreter interpreter)
       throws FrameSlotTypeException;
 
-  void directInvoke(VirtualFrame truffleFrame, Interpreter interpreter,
+  void directInvoke(VirtualFrame frame, Interpreter interpreter,
       DirectCallNode callNode) throws FrameSlotTypeException;
 
   // Get the signature for this invokable object

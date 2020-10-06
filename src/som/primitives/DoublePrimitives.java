@@ -36,7 +36,6 @@ import som.vmobjects.*;
 
 public class DoublePrimitives extends Primitives {
 
-  // TODO - add tests for Double
   public DoublePrimitives(final Universe universe) {
     super(universe);
   }
