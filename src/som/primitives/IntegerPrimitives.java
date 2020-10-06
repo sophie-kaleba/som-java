@@ -226,8 +226,6 @@ public class IntegerPrimitives extends Primitives {
       public void invoke(final VirtualFrame truffleFrame,
           final Interpreter interpreter) throws FrameSlotTypeException {
 
-        ;
-
         SNumber right = (SNumber) StackUtils.pop(truffleFrame);
         SNumber left = (SNumber) StackUtils.pop(truffleFrame);
 

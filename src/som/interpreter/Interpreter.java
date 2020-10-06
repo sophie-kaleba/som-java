@@ -160,7 +160,7 @@ public class Interpreter {
       final SMethod method, final VirtualFrame frame) throws FrameSlotTypeException {
     int fieldIndex = method.getBytecode(bytecodeIndex + 1);
 
-    ((SObject) getSelf(frame)).setField(fieldIndex, StackUtils.pop(frame));;
+    ((SObject) getSelf(frame)).setField(fieldIndex, StackUtils.pop(frame));
   }
 
   private void doSuperSend(final int bytecodeIndex,

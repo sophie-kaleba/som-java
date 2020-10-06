@@ -35,7 +35,7 @@ import som.vmobjects.SMethod;
 
 
 /**
- * Arguments:
+ * Arguments.
  * 0) Interpreter
  * 2) Invokable
  * 3) Arguments
@@ -87,7 +87,7 @@ public class StackUtils {
   }
 
   /***
-   * CURRENT STATE OF THE FRAME
+   * CURRENT STATE OF THE FRAME.
    */
 
   public static SMethod getCurrentMethod(final VirtualFrame frame) {
@@ -124,7 +124,7 @@ public class StackUtils {
   }
 
   /**
-   * EXECUTION STACK MODIFIERS
+   * EXECUTION STACK MODIFIERS.
    */
 
   private static void setStackPointer(VirtualFrame frame, FrameSlot stackPointerSlot,
@@ -143,7 +143,7 @@ public class StackUtils {
   }
 
   /**
-   * will return top of stack if index is 0
+   * will return top of stack if index is 0.
    */
   public static SAbstractObject getRelativeStackElement(VirtualFrame frame, int index)
       throws FrameSlotTypeException {

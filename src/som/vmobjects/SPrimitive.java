@@ -67,8 +67,8 @@ public abstract class SPrimitive extends SAbstractObject implements SInvokable {
     return false;
   }
 
-  public abstract void invoke(final VirtualFrame truffleFrame,
-      final Interpreter interpreter) throws FrameSlotTypeException;
+  public abstract void invoke(VirtualFrame truffleFrame,
+      Interpreter interpreter) throws FrameSlotTypeException;
 
   public void indirectInvoke(VirtualFrame frame, Interpreter interpreter) {
     try {
