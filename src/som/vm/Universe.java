@@ -343,57 +343,44 @@ public final class Universe {
     return bootstrapMethod;
   }
 
-  // TODO - clean
-  public static VirtualFrame createTruffleBootstrapFrame(String[] args,
-      SAbstractObject receiver, SMethod bootstrapMethod) {
+  public static VirtualFrame createBootstrapFrame(String[] args,
+      SMethod bootstrapMethod) {
     FrameDescriptor fd = bootstrapMethod.getMethod().getFrameDescriptor();
-    Object[] arguments = new Object[] {null, bootstrapMethod, args};
+    Object[] frameArguments = new Object[] {null, bootstrapMethod, args};
 
-    VirtualFrame bootTruffle =
-        Truffle.getRuntime().createVirtualFrame(arguments, fd);
+    VirtualFrame bootstrapFrame =
+        Truffle.getRuntime().createVirtualFrame(frameArguments, fd);
 
     int stackLength = (int) bootstrapMethod.getMaximumLengthOfStack();
     SAbstractObject[] stack = new SAbstractObject[stackLength];
-
     for (int i = 0; i < stackLength; i++) {
       stack[i] = Universe.current().nilObject;
     }
 
-    bootTruffle.setObject(bootstrapMethod.getStackSlot(), stack);
-    StackUtils.resetStackPointer(bootTruffle, bootstrapMethod);
-    bootTruffle.setBoolean(bootstrapMethod.getOnStackSlot(), true);
+    bootstrapFrame.setObject(bootstrapMethod.getStackSlot(), stack);
+    StackUtils.resetStackPointer(bootstrapFrame, bootstrapMethod);
+    StackUtils.initializeStackMarkerSlot(bootstrapFrame,
+        bootstrapMethod.getFrameOnStackMarkerSlot());
 
-    try {
-      StackUtils.push(bootTruffle, receiver);
-    } catch (FrameSlotTypeException e) {
-      e.printStackTrace();
-    }
-    return bootTruffle;
+    return bootstrapFrame;
   }
 
   public SAbstractObject interpretMethod(final SAbstractObject receiver,
       final SInvokable invokable, final SArray arguments, final String[] args)
-      throws ProgramDefinitionError, FrameSlotTypeException {
+      throws FrameSlotTypeException {
     SMethod bootstrapMethod = createBootstrapMethod();
 
     // Create a fake bootstrap frame with the system object on the stack
-    // Frame bootstrapFrame = this.newFrame(null, bootstrapMethod, null);
-    // bootstrapFrame.push(receiver);
-    VirtualFrame bootTruffle =
-        createTruffleBootstrapFrame(args, receiver, bootstrapMethod);
+    VirtualFrame bootstrapFrame = createBootstrapFrame(args, bootstrapMethod);
+    StackUtils.push(bootstrapFrame, receiver);
 
     if (arguments != null) {
-      // bootstrapFrame.push(arguments);
-      StackUtils.push(bootTruffle, arguments);
+      StackUtils.push(bootstrapFrame, arguments);
     }
 
-    // Invoke the initialize invokable
-    // TODO - May be cleaner to make invoke return an SAbstractObject
+    invokable.indirectInvoke(bootstrapFrame, interpreter);
 
-    invokable.indirectInvoke(bootTruffle,
-        interpreter);
-
-    return StackUtils.getRelativeStackElement(bootTruffle, 0);
+    return StackUtils.getRelativeStackElement(bootstrapFrame, 0);
 
   }
 

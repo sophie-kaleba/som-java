@@ -39,7 +39,6 @@ import som.vmobjects.SMethod;
  * 0) Interpreter
  * 2) Invokable
  * 3) Arguments
- * 4) Receiver
  *
  * Slots:
  * 0) Execution stack
@@ -59,30 +58,26 @@ public class StackUtils {
     ON_STACK_MARKER
   }
 
-  // TODO - clean
   public static void initializeStackSlots(final VirtualFrame frame,
       final FrameSlot executionStackSlot,
       final SMethod method) {
+
     int stackLength = (int) method.getMaximumLengthOfStack();
     SAbstractObject[] stack = new SAbstractObject[stackLength];
-
     for (int i = 0; i < stackLength; i++) {
       stack[i] = Universe.current().nilObject;
     }
 
-    final SAbstractObject[] arguments =
-        (SAbstractObject[]) frame.getArguments()[FrameArguments.ARGUMENTS.ordinal()];
-
-    int numArgs = arguments.length;
-    for (int i = 0; i < numArgs; ++i) {
-      stack[i] = arguments[i];
-    }
+    // TODO - getting the arguments from the frame to put them on stack...
+    // could likely do both when putting them in the stack in the first place
+    // or just don't put them in the frame's arguments, is is useful anyway?
+    final SAbstractObject[] arguments = getCurrentArguments(frame);
+    System.arraycopy(arguments, 0, stack, 0, arguments.length);
 
     frame.setObject(executionStackSlot, stack);
     resetStackPointer(frame, method);
   }
 
-  // TODO - needs to init frame marker for bootstrap
   public static FrameOnStackMarker initializeStackMarkerSlot(VirtualFrame frame,
       FrameSlot frameOnStackMarkerSlot) {
     FrameOnStackMarker marker = new FrameOnStackMarker();
@@ -114,10 +109,11 @@ public class StackUtils {
 
   public static FrameOnStackMarker getCurrentOnStackMarker(VirtualFrame frame)
       throws FrameSlotTypeException {
-    return (FrameOnStackMarker) frame.getObject(getCurrentMethod(frame).getOnStackSlot());
+    return (FrameOnStackMarker) frame.getObject(
+        getCurrentMethod(frame).getFrameOnStackMarkerSlot());
   }
 
-  public static SAbstractObject[] copyArgumentFrom(VirtualFrame frame, SMethod method)
+  public static SAbstractObject[] getArguments(VirtualFrame frame, SMethod method)
       throws FrameSlotTypeException {
     int numArgs = method.getNumberOfArguments();
     SAbstractObject[] arguments = new SAbstractObject[numArgs];
@@ -223,12 +219,6 @@ public class StackUtils {
     setStackElement(context, currentStackSlot, index, value);
   }
 
-  public static SAbstractObject getArgumentFromStack(VirtualFrame frame, int index,
-      int contextLevel) throws FrameSlotTypeException {
-    VirtualFrame context = getContext(frame, contextLevel);
-    return getStackElement(context, index);
-  }
-
   // TODO - might be merged with determineContext
   public static VirtualFrame getContext(VirtualFrame frame, int contextLevel) {
 
@@ -257,11 +247,9 @@ public class StackUtils {
   public static SAbstractObject getLocal(final VirtualFrame frame,
       final int index, final int contextLevel)
       throws FrameSlotTypeException {
-    // Get the local with the given index in the given context
 
     VirtualFrame context = getContext(frame, contextLevel);
-    SMethod contextMethod =
-        (SMethod) context.getArguments()[FrameArguments.INVOKABLE.ordinal()];
+    SMethod contextMethod = getCurrentMethod(context);
     int localOffset = contextMethod.getNumberOfArguments();
 
     return getStackElement(context, localOffset + index);
@@ -276,7 +264,6 @@ public class StackUtils {
       final int index,
       final int contextLevel, SAbstractObject value)
       throws FrameSlotTypeException {
-    // Get the local with the given index in the given context
     FrameSlot currentStackSlot = getCurrentMethod(frame).getStackSlot();
     VirtualFrame context = getContext(frame, contextLevel);
     int localOffset = getCurrentMethod(context).getNumberOfArguments();

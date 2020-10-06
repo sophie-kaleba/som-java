@@ -9,6 +9,7 @@ import com.oracle.truffle.api.Option;
 import com.oracle.truffle.api.Truffle;
 import com.oracle.truffle.api.TruffleLanguage;
 import com.oracle.truffle.api.debug.DebuggerTags;
+import com.oracle.truffle.api.frame.FrameSlotTypeException;
 import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.instrumentation.ProvidedTags;
 import com.oracle.truffle.api.instrumentation.StandardTags;
@@ -105,7 +106,7 @@ public final class GraalSOMLanguage extends TruffleLanguage<Universe> {
         } else {
           return universe.interpret(args);
         }
-      } catch (ProgramDefinitionError e) {
+      } catch (ProgramDefinitionError | FrameSlotTypeException e) {
         GraalSOMLanguage.getCurrentContext().errorExit(e.getMessage());
         return 1;
       }

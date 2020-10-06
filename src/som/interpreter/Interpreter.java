@@ -74,7 +74,7 @@ public class Interpreter {
   private void doPushArgument(final int bytecodeIndex, final VirtualFrame frame,
       final SMethod method) throws FrameSlotTypeException {
     SAbstractObject value =
-        StackUtils.getArgumentFromStack(frame, method.getBytecode(bytecodeIndex + 1),
+        StackUtils.getArgument(frame, method.getBytecode(bytecodeIndex + 1),
             method.getBytecode(bytecodeIndex + 2));
 
     StackUtils.push(frame, value);

@@ -110,7 +110,7 @@ public class SBlock extends SAbstractObject {
       // Push a new frame and set its context to be the one specified in
       // the block
       IndirectCallNode indirectCallNode = interpreter.getIndirectCallNode();
-      SAbstractObject[] arguments = StackUtils.copyArgumentFrom(truffleFrame, selfT.method);
+      SAbstractObject[] arguments = StackUtils.getArguments(truffleFrame, selfT.method);
 
       SAbstractObject result =
           (SAbstractObject) indirectCallNode.call(selfT.getMethod().getCallTarget(),

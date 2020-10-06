@@ -162,7 +162,7 @@ public class SMethod extends SAbstractObject implements SInvokable {
   public void indirectInvoke(VirtualFrame frame,
       final Interpreter interpreter) throws FrameSlotTypeException {
 
-    SAbstractObject[] arguments = StackUtils.copyArgumentFrom(frame, this);
+    SAbstractObject[] arguments = StackUtils.getArguments(frame, this);
 
     IndirectCallNode indirectCallNode = interpreter.getIndirectCallNode();
     SAbstractObject result =
@@ -178,7 +178,7 @@ public class SMethod extends SAbstractObject implements SInvokable {
 
     CompilerAsserts.partialEvaluationConstant(directCallNode);
 
-    SAbstractObject[] arguments = StackUtils.copyArgumentFrom(frame, this);
+    SAbstractObject[] arguments = StackUtils.getArguments(frame, this);
 
     SAbstractObject result = (SAbstractObject) directCallNode.call(interpreter, this,
         arguments);
@@ -237,7 +237,7 @@ public class SMethod extends SAbstractObject implements SInvokable {
     return method.stackPointerSlot;
   }
 
-  public final FrameSlot getOnStackSlot() {
+  public final FrameSlot getFrameOnStackMarkerSlot() {
     return method.frameOnStackMarkerSlot;
   }
 
