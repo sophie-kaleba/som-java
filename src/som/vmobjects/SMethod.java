@@ -28,11 +28,14 @@ import java.util.List;
 
 import com.oracle.truffle.api.*;
 import com.oracle.truffle.api.CompilerDirectives.CompilationFinal;
-import com.oracle.truffle.api.frame.*;
+import com.oracle.truffle.api.frame.FrameSlot;
+import com.oracle.truffle.api.frame.FrameSlotTypeException;
+import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.nodes.DirectCallNode;
 import com.oracle.truffle.api.nodes.IndirectCallNode;
 import com.oracle.truffle.api.profiles.ValueProfile;
 
+import som.GraalSOMLanguage;
 import som.interpreter.Interpreter;
 import som.interpreter.Method;
 import som.interpreter.StackUtils;
@@ -76,14 +79,7 @@ public class SMethod extends SAbstractObject implements SInvokable {
         this.literals[i++] = l;
       }
     }
-
-    FrameDescriptor frameDescriptor = new FrameDescriptor();
-    FrameSlot stack = frameDescriptor.addFrameSlot("stack", FrameSlotKind.Object);
-    FrameSlot stackPointer = frameDescriptor.addFrameSlot("stackPointer", FrameSlotKind.Int);
-    FrameSlot onStack = frameDescriptor.addFrameSlot("onStack", FrameSlotKind.Object);
-    this.method =
-        new Method(language, numberOfBytecodes, this, frameDescriptor, stack, stackPointer,
-            onStack);
+    this.method = GraalSOMLanguage.getCurrentContext().newMethod(this, numberOfBytecodes);
     this.callTarget = Truffle.getRuntime().createCallTarget(method);
   }
 

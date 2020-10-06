@@ -70,7 +70,7 @@ public class MethodGenerationContext {
     int numLiterals = literals.size();
     int numLocals = locals.size();
 
-    SMethod meth = universe.newMethod(signature, bytecode.size(), numLiterals,
+    SMethod meth = universe.newSMethod(signature, bytecode.size(), numLiterals,
         universe.newInteger(numLocals), universe.newInteger(computeStackDepth()),
         literals, getOuterSelfContextLevel());
 

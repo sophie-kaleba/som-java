@@ -38,10 +38,7 @@ import java.util.StringTokenizer;
 import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
 import com.oracle.truffle.api.Truffle;
 import com.oracle.truffle.api.TruffleLanguage;
-import com.oracle.truffle.api.frame.FrameDescriptor;
-import com.oracle.truffle.api.frame.FrameSlotTypeException;
-import com.oracle.truffle.api.frame.MaterializedFrame;
-import com.oracle.truffle.api.frame.VirtualFrame;
+import com.oracle.truffle.api.frame.*;
 
 import som.GraalSOMLanguage;
 import som.compiler.Disassembler;
@@ -49,6 +46,7 @@ import som.compiler.ProgramDefinitionError;
 import som.compiler.SourcecodeCompiler;
 import som.interpreter.Frame;
 import som.interpreter.Interpreter;
+import som.interpreter.Method;
 import som.interpreter.StackUtils;
 import som.vmobjects.*;
 
@@ -339,7 +337,7 @@ public final class Universe {
   public SMethod createBootstrapMethod() {
     // Create a fake bootstrap method to simplify later frame traversal
     SMethod bootstrapMethod =
-        newMethod(symbolFor("bootstrap"), 1, 0, newInteger(0), newInteger(2), null, 0);
+        newSMethod(symbolFor("bootstrap"), 1, 0, newInteger(0), newInteger(2), null, 0);
     bootstrapMethod.setBytecode(0, HALT);
     bootstrapMethod.setHolder(systemClass);
     return bootstrapMethod;
@@ -565,7 +563,7 @@ public final class Universe {
     return result;
   }
 
-  public SMethod newMethod(final SSymbol signature, final int numberOfBytecodes,
+  public SMethod newSMethod(final SSymbol signature, final int numberOfBytecodes,
       final int numberOfLiterals, final SInteger numberOfLocals,
       final SInteger maxNumStackElements, final List<SAbstractObject> literals,
       final int contextLevel) {
@@ -574,6 +572,15 @@ public final class Universe {
         numberOfLocals, maxNumStackElements, numberOfLiterals, literals, language,
         contextLevel);
     return result;
+  }
+
+  public Method newMethod(SMethod method, int numberOfBytecodes) {
+    FrameDescriptor frameDescriptor = new FrameDescriptor();
+    FrameSlot stack = frameDescriptor.addFrameSlot("stack", FrameSlotKind.Object);
+    FrameSlot stackPointer = frameDescriptor.addFrameSlot("stackPointer", FrameSlotKind.Int);
+    FrameSlot onStack = frameDescriptor.addFrameSlot("onStack", FrameSlotKind.Object);
+    return new Method(language, numberOfBytecodes, method, frameDescriptor, stack,
+        stackPointer, onStack);
   }
 
   public SObject newInstance(final SClass instanceClass) {
