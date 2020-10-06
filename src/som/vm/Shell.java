@@ -36,6 +36,7 @@ import som.vmobjects.SInvokable;
 import som.vmobjects.SMethod;
 
 
+// TODO - adapt the shell to truffle frames
 public class Shell {
 
   private final Universe    universe;
