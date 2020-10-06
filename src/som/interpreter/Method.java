@@ -21,17 +21,6 @@ public final class Method extends Invokable {
   public final FrameSlot                         stackPointerSlot;
   public final FrameSlot                         frameOnStackMarkerSlot;
 
-  // TODO - delete
-  public Method(final TruffleLanguage<?> language, final int numberOfBytecodes,
-      final SMethod method) {
-    super(language);
-    this.bytecodes = new byte[numberOfBytecodes];
-    this.method = method;
-    this.executionStackSlot = null;
-    this.stackPointerSlot = null;
-    frameOnStackMarkerSlot = null;
-  }
-
   public Method(final TruffleLanguage<?> language, final int numberOfBytecodes,
       final SMethod method, final FrameDescriptor frameDescriptor,
       final FrameSlot executionStackSlot, final FrameSlot stackPointerSlot,
@@ -45,13 +34,13 @@ public final class Method extends Invokable {
   }
 
   @Override
-  public Object execute(final VirtualFrame frame) throws ReturnException {
+  public Object execute(final VirtualFrame frame)
+      throws ReturnException {
     Interpreter interpreter = (Interpreter) frame.getArguments()[0];
 
-    StackUtils.initializeStackSlots(frame, this.executionStackSlot,
-        this.frameOnStackMarkerSlot, this.method);
-    FrameOnStackMarker marker = new FrameOnStackMarker();
-    frame.setObject(frameOnStackMarkerSlot, marker);
+    StackUtils.initializeStackSlots(frame, this.executionStackSlot, this.method);
+    FrameOnStackMarker marker =
+        StackUtils.initializeStackMarkerSlot(frame, this.frameOnStackMarkerSlot);
 
     while (true) {
       try {

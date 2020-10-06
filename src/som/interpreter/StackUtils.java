@@ -51,7 +51,6 @@ public class StackUtils {
     INTERPRETER,
     INVOKABLE,
     ARGUMENTS,
-    RECEIVER
   }
 
   private enum FrameSlots {
@@ -63,7 +62,6 @@ public class StackUtils {
   // TODO - clean
   public static void initializeStackSlots(final VirtualFrame frame,
       final FrameSlot executionStackSlot,
-      final FrameSlot frameOnStackMarkerSlot,
       final SMethod method) {
     int stackLength = (int) method.getMaximumLengthOfStack();
     SAbstractObject[] stack = new SAbstractObject[stackLength];
@@ -82,8 +80,15 @@ public class StackUtils {
 
     frame.setObject(executionStackSlot, stack);
     resetStackPointer(frame, method);
+  }
+
+  // TODO - needs to init frame marker for bootstrap
+  public static FrameOnStackMarker initializeStackMarkerSlot(VirtualFrame frame,
+      FrameSlot frameOnStackMarkerSlot) {
     FrameOnStackMarker marker = new FrameOnStackMarker();
     frame.setObject(frameOnStackMarkerSlot, marker);
+
+    return marker;
   }
 
   /***
@@ -92,10 +97,6 @@ public class StackUtils {
 
   public static SMethod getCurrentMethod(final VirtualFrame frame) {
     return (SMethod) frame.getArguments()[FrameArguments.INVOKABLE.ordinal()];
-  }
-
-  public static SAbstractObject getCurrentReceiver(VirtualFrame frame) {
-    return (SAbstractObject) frame.getArguments()[FrameArguments.RECEIVER.ordinal()];
   }
 
   public static SAbstractObject[] getCurrentArguments(VirtualFrame frame) {
@@ -202,15 +203,6 @@ public class StackUtils {
     push(frame, result);
   }
 
-  // TODO - delete
-  // public static SAbstractObject getArgumentFrom(VirtualFrame truffleFrame, int index,
-  // int contextLevel) {
-  // VirtualFrame context = getContext(truffleFrame, contextLevel);
-  //
-  // // Get the argument with the given index
-  // return getCurrentArguments(context)[index];
-  // }
-
   public static SAbstractObject getArgumentFromStack(VirtualFrame frame, int index,
       int contextLevel) throws FrameSlotTypeException {
     VirtualFrame context = getContext(frame, contextLevel);
@@ -284,55 +276,11 @@ public class StackUtils {
       final SAbstractObject value) throws FrameSlotTypeException {
     VirtualFrame context = getContext(frame, contextLevel);
 
-    // TODO - check if I had to get the stack slot of the context (believe so)
+    // TODO - add a test for this case
     // FrameSlot currentStackSlot = getCurrentMethod(frame).getStackSlot();
     FrameSlot currentStackSlot = getCurrentMethod(context).getStackSlot();
 
     setStackElement(context, currentStackSlot, index, value);
-  }
-
-  public static void copyArgumentsFrom(final VirtualFrame frame,
-      final FrameSlot executionStackSlot,
-      final SMethod method) throws FrameSlotTypeException {
-    // copy arguments from frame:
-    // - arguments are at the top of the stack of frame.
-    // - copy them into the argument area of the current frame
-    int numArgs = method.getNumberOfArguments();
-    for (int i = 0; i < numArgs; ++i) {
-      SAbstractObject value =
-          getStackElement(frame, numArgs - 1 - i);
-      setStackElement(frame, executionStackSlot, i, value);
-    }
-  }
-
-  public static SAbstractObject[] fetchArguments(final VirtualFrame truffleFrame,
-      int numArgs) throws FrameSlotTypeException {
-    SAbstractObject localArgs[] = new SAbstractObject[numArgs];
-    for (int i = 0; i < numArgs; ++i) {
-      SAbstractObject value =
-          getRelativeStackElement(truffleFrame, numArgs - 1 - i);
-      localArgs[i] = value;
-    }
-    return localArgs;
-  }
-
-  public static boolean isOnStack(VirtualFrame truffleFrame, FrameSlot onStackSlot)
-      throws FrameSlotTypeException {
-    return truffleFrame.getBoolean(onStackSlot);
-  }
-
-  public static boolean areStackEqual(final VirtualFrame truffleFrame, final Frame frame)
-      throws FrameSlotTypeException {
-    int stackSize = getCurrentStack(truffleFrame).length;
-    boolean result = true;
-
-    assert stackSize == frame.getStack().length;
-
-    for (int i = 0; i < stackSize; i++) {
-      result = result && getStackElement(truffleFrame, i).equals(frame.getStack()[i]);
-    }
-
-    return result;
   }
 
 }
