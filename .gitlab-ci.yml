@@ -13,7 +13,7 @@ before_script:
 
 build_and_test_job:
   stage: build-and-test
-  tags: [benchmarks]
+  tags: [ benchmarks ]
   script:
     - ant checkstyle
     - ant eclipseformat-check
@@ -21,16 +21,18 @@ build_and_test_job:
 
 benchmark_job:
   stage: benchmark
-  tags: [benchmarks]
+  tags: [ benchmarks ]
   allow_failure: true
   script:
     - ant compile
-    - rebench --experiment="CI Benchmark Run Pipeline ID $CI_PIPELINE_ID" --branch="$CI_COMMIT_REF_NAME" -c codespeed.conf GraalSOM
+    - rebench --experiment="CI ID $CI_PIPELINE_ID" --branch="$CI_COMMIT_REF_NAME" -c codespeed.conf GraalSOM
+    - rebench --experiment="CI ID $CI_PIPELINE_ID" --report-completion codespeed.conf
 
 benchmark_job_interp:
   stage: benchmark
-  tags: [benchmarks]
+  tags: [ benchmarks ]
   allow_failure: true
   script:
     - ant compile
-    - rebench --experiment="CI Benchmark Run Pipeline ID $CI_PIPELINE_ID" --branch="$CI_COMMIT_REF_NAME" -c codespeed.conf GraalSOM-interp
+    - rebench --experiment="CI ID $CI_PIPELINE_ID" --branch="$CI_COMMIT_REF_NAME" -c codespeed.conf GraalSOM-interp
+    - rebench --experiment="CI ID $CI_PIPELINE_ID" --report-completion codespeed.conf
