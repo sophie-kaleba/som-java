@@ -23,7 +23,7 @@ public class Launcher {
     Context context;
     PrintStream err = System.err;
 
-    Context.Builder builder = Context.newBuilder();
+    Context.Builder builder = Context.newBuilder().allowExperimentalOptions(true);
     builder.arguments(GraalSOMLanguage.ID, arguments);
     context = builder.build();
 
