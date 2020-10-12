@@ -66,7 +66,6 @@ public final class Method extends Invokable {
           SAbstractObject result = e.getResult();
           return result;
         }
-        marker.frameNoLongerOnStack();
         throw e;
       } catch (ProgramDefinitionError | FrameSlotTypeException exception) {
         CompilerDirectives.transferToInterpreterAndInvalidate();
