@@ -25,7 +25,6 @@
 package som.vmobjects;
 
 import com.oracle.truffle.api.frame.FrameSlotTypeException;
-import com.oracle.truffle.api.frame.MaterializedFrame;
 import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.interop.TruffleObject;
 
@@ -37,15 +36,6 @@ import som.vm.Universe;
 public abstract class SAbstractObject implements TruffleObject {
 
   public abstract SClass getSOMClass(Universe universe);
-
-  public MaterializedFrame getMaterializedContext() {
-    return null;
-  }
-
-  // TODO - this is a silly hack, should get rid of it
-  public int getContextLevel() {
-    return 0;
-  }
 
   public void send(final String selectorString, final SAbstractObject[] arguments,
       final Universe universe, final Interpreter interpreter,

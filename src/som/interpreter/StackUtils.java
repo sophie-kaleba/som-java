@@ -27,6 +27,7 @@ package som.interpreter;
 import com.oracle.truffle.api.frame.FrameSlot;
 import com.oracle.truffle.api.frame.FrameSlotTypeException;
 import com.oracle.truffle.api.frame.VirtualFrame;
+import com.oracle.truffle.api.nodes.ExplodeLoop;
 
 import som.vm.Universe;
 import som.vmobjects.SAbstractObject;
@@ -49,13 +50,7 @@ public class StackUtils {
   private enum FrameArguments {
     INTERPRETER,
     INVOKABLE,
-    ARGUMENTS,
-  }
-
-  private enum FrameSlots {
-    STACK,
-    STACK_POINTER,
-    ON_STACK_MARKER
+    ARGUMENTS
   }
 
   public static void initializeStackSlots(final VirtualFrame frame,
@@ -219,26 +214,13 @@ public class StackUtils {
     setStackElement(context, currentStackSlot, index, value);
   }
 
-  // TODO - might be merged with determineContext
+  @ExplodeLoop
   public static VirtualFrame getContext(VirtualFrame frame, int contextLevel) {
 
     while (contextLevel > 0) {
       SBlock receiver = (SBlock) getCurrentArguments(frame)[0];
       frame = receiver.getMaterializedContext();
       contextLevel--;
-    }
-
-    return frame;
-  }
-
-  protected static VirtualFrame determineContext(VirtualFrame frame) {
-    SAbstractObject self = getCurrentArguments(frame)[0];
-    int i = self.getContextLevel();
-
-    while (i > 0) {
-      frame = self.getMaterializedContext();
-      self = getCurrentArguments(frame)[0];
-      i--;
     }
 
     return frame;

@@ -84,7 +84,7 @@ public class Interpreter {
   private void doPushField(final int bytecodeIndex,
       final SMethod method, final VirtualFrame frame) throws FrameSlotTypeException {
     int fieldIndex = method.getBytecode(bytecodeIndex + 1);
-    SAbstractObject value = ((SObject) getSelf(frame)).getField(fieldIndex);
+    SAbstractObject value = ((SObject) getSelf(frame, method)).getField(fieldIndex);
 
     StackUtils.push(frame, value);
   }
@@ -122,7 +122,7 @@ public class Interpreter {
       // Send 'unknownGlobal:' to self
       // TODO - reconsider
       CompilerDirectives.transferToInterpreter();
-      getSelf(frame).sendUnknownGlobal(globalName, universe, this, frame);
+      getSelf(frame, method).sendUnknownGlobal(globalName, universe, this, frame);
     }
   }
 
@@ -160,7 +160,7 @@ public class Interpreter {
       final SMethod method, final VirtualFrame frame) throws FrameSlotTypeException {
     int fieldIndex = method.getBytecode(bytecodeIndex + 1);
 
-    ((SObject) getSelf(frame)).setField(fieldIndex, StackUtils.pop(frame));
+    ((SObject) getSelf(frame, method)).setField(fieldIndex, StackUtils.pop(frame));
   }
 
   private void doSuperSend(final int bytecodeIndex,
@@ -189,17 +189,19 @@ public class Interpreter {
     return StackUtils.pop(frame);
   }
 
-  private SAbstractObject doReturnNonLocal(final VirtualFrame frame)
+  private SAbstractObject doReturnNonLocal(final VirtualFrame frame, final SMethod method)
       throws ReturnException, FrameSlotTypeException {
 
     SAbstractObject value = StackUtils.pop(frame);
 
-    VirtualFrame context = StackUtils.determineContext(frame);
+    VirtualFrame context = StackUtils.getContext(frame, method.getContextLevel());
+
     FrameOnStackMarker marker = StackUtils.getCurrentOnStackMarker(context);
 
     // TODO - when the body was commented, the tests for NLR were still passing, this need
     // further investigation
     if (!marker.isOnStack()) {
+      CompilerDirectives.transferToInterpreter();
       // Try to recover by sending 'escapedBlock:' to the sending object
       // this can get a bit nasty when using nested blocks. In this case
       // the "sender" will be the surrounding block and not the object
@@ -353,7 +355,7 @@ public class Interpreter {
         }
 
         case RETURN_NON_LOCAL: {
-          return doReturnNonLocal(truffleFrame);
+          return doReturnNonLocal(truffleFrame, method);
         }
 
         default:
@@ -363,10 +365,10 @@ public class Interpreter {
     }
   }
 
-  public SAbstractObject getSelf(final VirtualFrame frame)
+  public SAbstractObject getSelf(final VirtualFrame frame, final SMethod method)
       throws FrameSlotTypeException {
     // Get the self object from the interpreter
-    VirtualFrame outerContext = StackUtils.determineContext(frame);
+    VirtualFrame outerContext = StackUtils.getContext(frame, method.getContextLevel());
     return StackUtils.getArgument(outerContext, 0, 0);
   }
 
