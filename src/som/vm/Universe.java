@@ -509,13 +509,11 @@ public final class Universe {
     return result;
   }
 
-  @TruffleBoundary
   public SBlock newBlock(final SMethod method, final int arguments,
-      final MaterializedFrame materializedFrame)
+      final MaterializedFrame frame)
       throws ProgramDefinitionError {
     // Allocate a new block and set its class to be the block class
-    SBlock result = new SBlock(method, getBlockClass(arguments), materializedFrame);
-    return result;
+    return new SBlock(method, getBlockClass(arguments), frame);
   }
 
   public SClass newClass(final SClass classClass) {
