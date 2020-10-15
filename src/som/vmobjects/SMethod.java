@@ -31,7 +31,6 @@ import com.oracle.truffle.api.CompilerAsserts;
 import com.oracle.truffle.api.CompilerDirectives.CompilationFinal;
 import com.oracle.truffle.api.Truffle;
 import com.oracle.truffle.api.TruffleLanguage;
-import com.oracle.truffle.api.frame.FrameSlot;
 import com.oracle.truffle.api.frame.FrameSlotTypeException;
 import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.nodes.DirectCallNode;
@@ -184,18 +183,6 @@ public class SMethod extends SAbstractObject implements SInvokable {
   public String toString() {
     return "Method(" + getHolder().getName().getEmbeddedString() + ">>"
         + getSignature().toString() + ")";
-  }
-
-  public final FrameSlot getStackSlot() {
-    return method.executionStackSlot;
-  }
-
-  public final FrameSlot getStackPointerSlot() {
-    return method.stackPointerSlot;
-  }
-
-  public final FrameSlot getFrameOnStackMarkerSlot() {
-    return method.frameOnStackMarkerSlot;
   }
 
   @Override

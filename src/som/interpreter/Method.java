@@ -4,8 +4,6 @@ import com.oracle.truffle.api.CompilerAsserts;
 import com.oracle.truffle.api.CompilerDirectives;
 import com.oracle.truffle.api.CompilerDirectives.CompilationFinal;
 import com.oracle.truffle.api.TruffleLanguage;
-import com.oracle.truffle.api.frame.FrameDescriptor;
-import com.oracle.truffle.api.frame.FrameSlot;
 import com.oracle.truffle.api.frame.FrameSlotTypeException;
 import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.nodes.DirectCallNode;
@@ -22,9 +20,6 @@ public final class Method extends Invokable {
 
   @CompilationFinal(dimensions = 1) final byte[] bytecodes;
   private final SMethod                          method;
-  public final FrameSlot                         executionStackSlot;
-  public final FrameSlot                         stackPointerSlot;
-  public final FrameSlot                         frameOnStackMarkerSlot;
 
   private final @Children DirectCallNode[] inlineCacheDirectCallNodes;
 
@@ -33,15 +28,10 @@ public final class Method extends Invokable {
   private final @CompilationFinal(dimensions = 1) ValueProfile[] receiverProfiles;
 
   public Method(final TruffleLanguage<?> language, final int numberOfBytecodes,
-      final SMethod method, final FrameDescriptor frameDescriptor,
-      final FrameSlot executionStackSlot, final FrameSlot stackPointerSlot,
-      final FrameSlot onStackSlot) {
-    super(language, frameDescriptor);
+      final SMethod method) {
+    super(language, StackUtils.FRAME_DESCRIPTOR);
     this.bytecodes = new byte[numberOfBytecodes];
     this.method = method;
-    this.executionStackSlot = executionStackSlot;
-    this.stackPointerSlot = stackPointerSlot;
-    this.frameOnStackMarkerSlot = onStackSlot;
     inlineCacheClass = new SClass[numberOfBytecodes];
     inlineCacheInvokable = new SInvokable[numberOfBytecodes];
     inlineCacheDirectCallNodes = new DirectCallNode[numberOfBytecodes];
@@ -53,9 +43,9 @@ public final class Method extends Invokable {
       throws ReturnException {
     Interpreter interpreter = (Interpreter) frame.getArguments()[0];
 
-    StackUtils.initializeStackSlots(frame, this.executionStackSlot, this.method);
+    StackUtils.initializeStackSlots(frame, this.method);
     FrameOnStackMarker marker =
-        StackUtils.initializeStackMarkerSlot(frame, this.frameOnStackMarkerSlot);
+        StackUtils.initializeStackMarkerSlot(frame);
 
     while (true) {
       try {

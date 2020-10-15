@@ -196,7 +196,7 @@ public class Interpreter {
 
     VirtualFrame context = StackUtils.getContext(frame, method.getContextLevel());
 
-    FrameOnStackMarker marker = StackUtils.getCurrentOnStackMarker(context);
+    FrameOnStackMarker marker = StackUtils.getOnStackMarker(context);
 
     // TODO - when the body was commented, the tests for NLR were still passing, this need
     // further investigation

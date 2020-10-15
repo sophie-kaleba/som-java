@@ -345,11 +345,10 @@ public final class Universe {
 
   public static VirtualFrame createBootstrapFrame(String[] args,
       SMethod bootstrapMethod) {
-    FrameDescriptor fd = bootstrapMethod.getMethod().getFrameDescriptor();
     Object[] frameArguments = new Object[] {null, bootstrapMethod, args};
 
     VirtualFrame bootstrapFrame =
-        Truffle.getRuntime().createVirtualFrame(frameArguments, fd);
+        Truffle.getRuntime().createVirtualFrame(frameArguments, StackUtils.FRAME_DESCRIPTOR);
 
     int stackLength = (int) bootstrapMethod.getMaximumLengthOfStack();
     SAbstractObject[] stack = new SAbstractObject[stackLength];
@@ -357,10 +356,9 @@ public final class Universe {
       stack[i] = Universe.current().nilObject;
     }
 
-    bootstrapFrame.setObject(bootstrapMethod.getStackSlot(), stack);
+    bootstrapFrame.setObject(StackUtils.STACK_SLOT, stack);
     StackUtils.resetStackPointer(bootstrapFrame, bootstrapMethod);
-    StackUtils.initializeStackMarkerSlot(bootstrapFrame,
-        bootstrapMethod.getFrameOnStackMarkerSlot());
+    StackUtils.initializeStackMarkerSlot(bootstrapFrame);
 
     return bootstrapFrame;
   }
@@ -555,13 +553,16 @@ public final class Universe {
     return result;
   }
 
-  public Method newMethod(SMethod method, int numberOfBytecodes) {
+  public FrameDescriptor newFrameDescriptor() {
     FrameDescriptor frameDescriptor = new FrameDescriptor();
-    FrameSlot stack = frameDescriptor.addFrameSlot("stack", FrameSlotKind.Object);
-    FrameSlot stackPointer = frameDescriptor.addFrameSlot("stackPointer", FrameSlotKind.Int);
-    FrameSlot onStack = frameDescriptor.addFrameSlot("onStack", FrameSlotKind.Object);
-    return new Method(language, numberOfBytecodes, method, frameDescriptor, stack,
-        stackPointer, onStack);
+    frameDescriptor.addFrameSlot("stack", FrameSlotKind.Object);
+    frameDescriptor.addFrameSlot("stackPointer", FrameSlotKind.Int);
+    frameDescriptor.addFrameSlot("onStack", FrameSlotKind.Object);
+    return frameDescriptor;
+  }
+
+  public Method newMethod(SMethod method, int numberOfBytecodes) {
+    return new Method(language, numberOfBytecodes, method);
   }
 
   public SObject newInstance(final SClass instanceClass) {
