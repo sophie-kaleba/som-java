@@ -9,6 +9,7 @@ import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.nodes.DirectCallNode;
 import com.oracle.truffle.api.profiles.ValueProfile;
 
+import som.GraalSOMLanguage;
 import som.compiler.ProgramDefinitionError;
 import som.vmobjects.SAbstractObject;
 import som.vmobjects.SClass;
@@ -41,7 +42,6 @@ public final class Method extends Invokable {
   @Override
   public Object execute(final VirtualFrame frame)
       throws ReturnException {
-    Interpreter interpreter = (Interpreter) frame.getArguments()[0];
 
     StackUtils.initializeStackSlots(frame, this.method);
     FrameOnStackMarker marker =
@@ -49,7 +49,8 @@ public final class Method extends Invokable {
 
     while (true) {
       try {
-        SAbstractObject result = interpreter.start(frame, this.method);
+        SAbstractObject result =
+            GraalSOMLanguage.getCurrentContext().getInterpreter().start(frame, this.method);
         return result;
       } catch (ReturnException e) {
         if (e.hasReachedTarget(marker)) {

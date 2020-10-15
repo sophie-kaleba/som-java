@@ -114,7 +114,7 @@ public class SBlock extends SAbstractObject {
 
       SAbstractObject result =
           (SAbstractObject) indirectCallNode.call(selfT.getMethod().getCallTarget(),
-              interpreter, selfT.getMethod(),
+              selfT.getMethod(),
               arguments);
 
       StackUtils.popArgumentsAndPushResult(truffleFrame, result, selfT.method);

@@ -36,7 +36,6 @@ import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.nodes.DirectCallNode;
 import com.oracle.truffle.api.nodes.IndirectCallNode;
 
-import som.GraalSOMLanguage;
 import som.interpreter.Interpreter;
 import som.interpreter.Method;
 import som.interpreter.StackUtils;
@@ -72,7 +71,7 @@ public class SMethod extends SAbstractObject implements SInvokable {
         this.literals[i++] = l;
       }
     }
-    this.method = GraalSOMLanguage.getCurrentContext().newMethod(this, numberOfBytecodes);
+    this.method = new Method(language, numberOfBytecodes, this);
     this.callTarget = Truffle.getRuntime().createCallTarget(method);
   }
 
@@ -159,7 +158,7 @@ public class SMethod extends SAbstractObject implements SInvokable {
 
     IndirectCallNode indirectCallNode = interpreter.getIndirectCallNode();
     SAbstractObject result =
-        (SAbstractObject) indirectCallNode.call(callTarget, interpreter, this,
+        (SAbstractObject) indirectCallNode.call(callTarget, this,
             arguments);
 
     StackUtils.popArgumentsAndPushResult(frame, result, this);
@@ -173,7 +172,7 @@ public class SMethod extends SAbstractObject implements SInvokable {
 
     SAbstractObject[] arguments = StackUtils.getArguments(frame, this);
 
-    SAbstractObject result = (SAbstractObject) directCallNode.call(interpreter, this,
+    SAbstractObject result = (SAbstractObject) directCallNode.call(this,
         arguments);
 
     StackUtils.popArgumentsAndPushResult(frame, result, this);
