@@ -265,7 +265,7 @@ public class MethodGenerationContext {
     return true;
   }
 
-  private final int getOuterSelfContextLevel() {
+  private int getOuterSelfContextLevel() {
     int level = 0;
     MethodGenerationContext ctx = outerGenc;
     while (ctx != null) {
