@@ -44,9 +44,7 @@ import som.GraalSOMLanguage;
 import som.compiler.Disassembler;
 import som.compiler.ProgramDefinitionError;
 import som.compiler.SourcecodeCompiler;
-import som.interpreter.Frame;
 import som.interpreter.Interpreter;
-import som.interpreter.Method;
 import som.interpreter.StackUtils;
 import som.vmobjects.*;
 
@@ -319,8 +317,8 @@ public final class Universe {
     if (arguments.length == 0) {
       Shell shell = new Shell(this, interpreter);
       SMethod bootstrapMethod = createBootstrapMethod();
+      VirtualFrame bootstrapFrame = createBootstrapFrame(null, bootstrapMethod);
       shell.setBootstrapMethod(bootstrapMethod);
-      Frame bootstrapFrame = this.newFrame(null, bootstrapMethod, null);
       return shell.start(bootstrapFrame);
     }
 
@@ -523,25 +521,6 @@ public final class Universe {
     return result;
   }
 
-  public Frame newFrame(final Frame previousFrame, final SMethod method,
-      final Frame context) {
-
-    // Compute the maximum number of stack locations (including arguments,
-    // locals and extra buffer to support doesNotUnderstand) and set the number
-    // of indexable fields accordingly
-    long length = method.getNumberOfArguments()
-        + method.getNumberOfLocals().getEmbeddedInteger()
-        + method.getMaximumNumberOfStackElements().getEmbeddedInteger() + 2;
-
-    Frame result = new Frame(nilObject, previousFrame, context, method, length);
-
-    // Reset the stack pointer and the bytecode index
-    result.resetStackPointer();
-
-    // Return the freshly allocated frame
-    return result;
-  }
-
   public SMethod newSMethod(final SSymbol signature, final int numberOfBytecodes,
       final int numberOfLiterals, final SInteger numberOfLocals,
       final SInteger maxNumStackElements, final List<SAbstractObject> literals,
@@ -559,10 +538,6 @@ public final class Universe {
     frameDescriptor.addFrameSlot("stackPointer", FrameSlotKind.Int);
     frameDescriptor.addFrameSlot("onStack", FrameSlotKind.Object);
     return frameDescriptor;
-  }
-
-  public Method newMethod(SMethod method, int numberOfBytecodes) {
-    return new Method(language, numberOfBytecodes, method);
   }
 
   public SObject newInstance(final SClass instanceClass) {

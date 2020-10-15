@@ -28,8 +28,10 @@ package som.vm;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 
-import som.interpreter.Frame;
+import com.oracle.truffle.api.frame.VirtualFrame;
+
 import som.interpreter.Interpreter;
+import som.interpreter.StackUtils;
 import som.vmobjects.SAbstractObject;
 import som.vmobjects.SClass;
 import som.vmobjects.SInvokable;
@@ -53,7 +55,7 @@ public class Shell {
     bootstrapMethod = method;
   }
 
-  public SAbstractObject start(Frame frame) {
+  public SAbstractObject start(VirtualFrame frame) {
 
     BufferedReader in;
     String stmt;
@@ -90,10 +92,12 @@ public class Shell {
 
           // Create and push a new instance of our class on the stack
           myObject = universe.newInstance(myClass);
-          frame.push(myObject);
+          StackUtils.push(frame, myObject);
+          // frame.push(myObject);
 
           // Push the old value of "it" on the stack
-          frame.push(it);
+          StackUtils.push(frame, it);
+          // frame.push(it);
 
           // Lookup the run: method
           SInvokable initialize = myClass.lookupInvokable(
@@ -101,14 +105,15 @@ public class Shell {
 
           // TODO - make the shell use truffle frames
           // Invoke the run method
-          // initialize.indirectInvoke(frame, interpreter);
+          initialize.indirectInvoke(frame, interpreter);
 
           // Save the result of the run method
-          it = frame.pop();
+          it = StackUtils.pop(frame);
+          // it = frame.pop();
         }
       } catch (Exception e) {
         Universe.errorPrintln("Caught exception: " + e.getMessage());
-        Universe.errorPrintln("" + frame.getPreviousFrame());
+        // Universe.errorPrintln("" + frame.getPreviousFrame());
       }
     }
   }
