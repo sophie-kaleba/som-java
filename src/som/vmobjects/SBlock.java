@@ -100,24 +100,24 @@ public class SBlock extends SAbstractObject {
     }
 
     @Override
-    public void invoke(final VirtualFrame truffleFrame,
+    public void invoke(final VirtualFrame frame,
         final Interpreter interpreter) throws FrameSlotTypeException {
 
       // Get the block (the receiver) from the stack
       SBlock selfT =
-          (SBlock) StackUtils.getRelativeStackElement(truffleFrame, numberOfArguments - 1);
+          (SBlock) StackUtils.getRelativeStackElement(frame, numberOfArguments - 1);
 
       // Push a new frame and set its context to be the one specified in
       // the block
       IndirectCallNode indirectCallNode = interpreter.getIndirectCallNode();
-      SAbstractObject[] arguments = StackUtils.getArguments(truffleFrame, selfT.method);
+      SAbstractObject[] arguments = StackUtils.getArguments(frame, selfT.method);
 
       SAbstractObject result =
           (SAbstractObject) indirectCallNode.call(selfT.getMethod().getCallTarget(),
               selfT.getMethod(),
               arguments);
 
-      StackUtils.popArgumentsAndPushResult(truffleFrame, result, selfT.method);
+      StackUtils.popArgumentsAndPushResult(frame, result, selfT.method);
 
     }
 

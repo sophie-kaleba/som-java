@@ -31,7 +31,12 @@ import som.compiler.ProgramDefinitionError;
 import som.interpreter.Interpreter;
 import som.interpreter.StackUtils;
 import som.vm.Universe;
-import som.vmobjects.*;
+import som.vmobjects.SAbstractObject;
+import som.vmobjects.SClass;
+import som.vmobjects.SInteger;
+import som.vmobjects.SPrimitive;
+import som.vmobjects.SString;
+import som.vmobjects.SSymbol;
 
 
 public class SystemPrimitives extends Primitives {
@@ -43,11 +48,11 @@ public class SystemPrimitives extends Primitives {
   public void installPrimitives() {
     installInstancePrimitive(new SPrimitive("load:", universe) {
 
-      public void invoke(final VirtualFrame truffleFrame,
+      public void invoke(final VirtualFrame frame,
           final Interpreter interpreter) throws FrameSlotTypeException {
 
-        SSymbol argument = (SSymbol) StackUtils.pop(truffleFrame);
-        StackUtils.pop(truffleFrame); // TODO - not required? why?
+        SSymbol argument = (SSymbol) StackUtils.pop(frame);
+        StackUtils.pop(frame); // TODO - not required? why?
 
         SClass result = null;
 
@@ -56,15 +61,15 @@ public class SystemPrimitives extends Primitives {
         } catch (ProgramDefinitionError e) {
           universe.errorExit(e.toString());
         }
-        StackUtils.push(truffleFrame, result != null ? result : universe.nilObject);
+        StackUtils.push(frame, result != null ? result : universe.nilObject);
       }
     });
 
     installInstancePrimitive(new SPrimitive("exit:", universe) {
 
-      public void invoke(final VirtualFrame truffleFrame,
+      public void invoke(final VirtualFrame frame,
           final Interpreter interpreter) throws FrameSlotTypeException {
-        SInteger error = (SInteger) StackUtils.pop(truffleFrame);
+        SInteger error = (SInteger) StackUtils.pop(frame);
 
         universe.exit(error.getEmbeddedInteger());
       }
@@ -72,24 +77,24 @@ public class SystemPrimitives extends Primitives {
 
     installInstancePrimitive(new SPrimitive("global:", universe) {
 
-      public void invoke(final VirtualFrame truffleFrame,
+      public void invoke(final VirtualFrame frame,
           final Interpreter interpreter) throws FrameSlotTypeException {
 
-        SSymbol argument = (SSymbol) StackUtils.pop(truffleFrame);
-        StackUtils.pop(truffleFrame); // TODO - not required? why?
+        SSymbol argument = (SSymbol) StackUtils.pop(frame);
+        StackUtils.pop(frame); // TODO - not required? why?
 
         SAbstractObject result = universe.getGlobal(argument);
-        StackUtils.push(truffleFrame, result != null ? result : universe.nilObject);
+        StackUtils.push(frame, result != null ? result : universe.nilObject);
       }
     });
 
     installInstancePrimitive(new SPrimitive("global:put:", universe) {
 
-      public void invoke(final VirtualFrame truffleFrame,
+      public void invoke(final VirtualFrame frame,
           final Interpreter interpreter) throws FrameSlotTypeException {
 
-        SAbstractObject value = StackUtils.pop(truffleFrame);
-        SSymbol argument = (SSymbol) StackUtils.pop(truffleFrame);
+        SAbstractObject value = StackUtils.pop(frame);
+        SSymbol argument = (SSymbol) StackUtils.pop(frame);
 
         universe.setGlobal(argument, value);
       }
@@ -97,9 +102,9 @@ public class SystemPrimitives extends Primitives {
 
     installInstancePrimitive(new SPrimitive("printString:", universe) {
 
-      public void invoke(final VirtualFrame truffleFrame,
+      public void invoke(final VirtualFrame frame,
           final Interpreter interpreter) throws FrameSlotTypeException {
-        SString argument = (SString) StackUtils.pop(truffleFrame);
+        SString argument = (SString) StackUtils.pop(frame);
 
         Universe.print(argument.getEmbeddedString());
       }
@@ -107,7 +112,7 @@ public class SystemPrimitives extends Primitives {
 
     installInstancePrimitive(new SPrimitive("printNewline", universe) {
 
-      public void invoke(final VirtualFrame truffleFrame,
+      public void invoke(final VirtualFrame frame,
           final Interpreter interpreter) {
         Universe.println("");
       }
@@ -117,42 +122,42 @@ public class SystemPrimitives extends Primitives {
     startTime = startMicroTime / 1000L;
     installInstancePrimitive(new SPrimitive("time", universe) {
 
-      public void invoke(final VirtualFrame truffleFrame,
+      public void invoke(final VirtualFrame frame,
           final Interpreter interpreter) throws FrameSlotTypeException {
 
-        StackUtils.pop(truffleFrame); // ignore TODO- why?
+        StackUtils.pop(frame); // ignore TODO- why?
 
         int time = (int) (System.currentTimeMillis() - startTime);
         SInteger value = universe.newInteger(time);
 
-        StackUtils.push(truffleFrame, value);
+        StackUtils.push(frame, value);
 
       }
     });
 
     installInstancePrimitive(new SPrimitive("ticks", universe) {
 
-      public void invoke(final VirtualFrame truffleFrame,
+      public void invoke(final VirtualFrame frame,
           final Interpreter interpreter) throws FrameSlotTypeException {
 
-        StackUtils.pop(truffleFrame);
+        StackUtils.pop(frame);
 
         int time = (int) (System.nanoTime() / 1000L - startMicroTime);
         SInteger value = universe.newInteger(time);
 
-        StackUtils.push(truffleFrame, value);
+        StackUtils.push(frame, value);
 
       }
     });
 
     installInstancePrimitive(new SPrimitive("fullGC", universe) {
 
-      public void invoke(final VirtualFrame truffleFrame,
+      public void invoke(final VirtualFrame frame,
           final Interpreter interpreter) throws FrameSlotTypeException {
 
-        StackUtils.pop(truffleFrame);
+        StackUtils.pop(frame);
         System.gc();
-        StackUtils.push(truffleFrame, universe.trueObject);
+        StackUtils.push(frame, universe.trueObject);
 
       }
     });

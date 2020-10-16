@@ -45,28 +45,28 @@ public class ArrayPrimitives extends Primitives {
   public void installPrimitives() {
     installInstancePrimitive(new SPrimitive("at:", universe) {
 
-      public void invoke(VirtualFrame truffleFrame,
+      public void invoke(VirtualFrame frame,
           final Interpreter interpreter) throws FrameSlotTypeException {
 
-        SInteger index = (SInteger) StackUtils.pop(truffleFrame);
+        SInteger index = (SInteger) StackUtils.pop(frame);
 
-        SArray self = (SArray) StackUtils.pop(truffleFrame);
+        SArray self = (SArray) StackUtils.pop(frame);
 
         SAbstractObject fields = self.getIndexableField(index.getEmbeddedInteger() - 1);
 
-        StackUtils.push(truffleFrame, fields);
+        StackUtils.push(frame, fields);
 
       }
     });
 
     installInstancePrimitive(new SPrimitive("at:put:", universe) {
 
-      public void invoke(VirtualFrame truffleFrame,
+      public void invoke(VirtualFrame frame,
           final Interpreter interpreter) throws FrameSlotTypeException {
 
-        SAbstractObject value = StackUtils.pop(truffleFrame);
-        SInteger index = (SInteger) StackUtils.pop(truffleFrame);
-        SArray self = (SArray) StackUtils.getRelativeStackElement(truffleFrame, 0);
+        SAbstractObject value = StackUtils.pop(frame);
+        SInteger index = (SInteger) StackUtils.pop(frame);
+        SArray self = (SArray) StackUtils.getRelativeStackElement(frame, 0);
         self.setIndexableField(index.getEmbeddedInteger() - 1, value);
 
       }
@@ -74,30 +74,30 @@ public class ArrayPrimitives extends Primitives {
 
     installInstancePrimitive(new SPrimitive("length", universe) {
 
-      public void invoke(VirtualFrame truffleFrame,
+      public void invoke(VirtualFrame frame,
           final Interpreter interpreter) throws FrameSlotTypeException {
 
-        SArray self = (SArray) StackUtils.pop(truffleFrame);
+        SArray self = (SArray) StackUtils.pop(frame);
 
         SInteger fields = universe.newInteger(self.getNumberOfIndexableFields());
 
-        StackUtils.push(truffleFrame, fields);
+        StackUtils.push(frame, fields);
 
       }
     });
 
     installClassPrimitive(new SPrimitive("new:", universe) {
 
-      public void invoke(VirtualFrame truffleFrame,
+      public void invoke(VirtualFrame frame,
           final Interpreter interpreter) throws FrameSlotTypeException {
 
-        SInteger length = (SInteger) StackUtils.pop(truffleFrame);
+        SInteger length = (SInteger) StackUtils.pop(frame);
 
-        StackUtils.pop(truffleFrame);
+        StackUtils.pop(frame);
 
         SArray array = universe.newArray(length.getEmbeddedInteger());
 
-        StackUtils.push(truffleFrame, array);
+        StackUtils.push(frame, array);
 
       }
     });

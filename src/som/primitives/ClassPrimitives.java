@@ -30,7 +30,12 @@ import com.oracle.truffle.api.frame.VirtualFrame;
 import som.interpreter.Interpreter;
 import som.interpreter.StackUtils;
 import som.vm.Universe;
-import som.vmobjects.*;
+import som.vmobjects.SAbstractObject;
+import som.vmobjects.SArray;
+import som.vmobjects.SClass;
+import som.vmobjects.SObject;
+import som.vmobjects.SPrimitive;
+import som.vmobjects.SSymbol;
 
 
 public class ClassPrimitives extends Primitives {
@@ -44,68 +49,68 @@ public class ClassPrimitives extends Primitives {
     installInstancePrimitive(new SPrimitive("new", universe) {
 
       @Override
-      public void invoke(VirtualFrame truffleFrame,
+      public void invoke(VirtualFrame frame,
           final Interpreter interpreter) throws FrameSlotTypeException {
-        SClass selfT = (SClass) StackUtils.pop(truffleFrame);
+        SClass selfT = (SClass) StackUtils.pop(frame);
 
         SAbstractObject instance = universe.newInstance(selfT);
 
-        StackUtils.push(truffleFrame, instance);
+        StackUtils.push(frame, instance);
       }
     });
 
     installInstancePrimitive(new SPrimitive("name", universe) {
 
       @Override
-      public void invoke(VirtualFrame truffleFrame,
+      public void invoke(VirtualFrame frame,
           final Interpreter interpreter) throws FrameSlotTypeException {
 
-        SClass selfT = (SClass) StackUtils.pop(truffleFrame);
+        SClass selfT = (SClass) StackUtils.pop(frame);
 
         SSymbol name = selfT.getName();
 
-        StackUtils.push(truffleFrame, name);
+        StackUtils.push(frame, name);
       }
     });
 
     installInstancePrimitive(new SPrimitive("superclass", universe) {
 
       @Override
-      public void invoke(VirtualFrame truffleFrame,
+      public void invoke(VirtualFrame frame,
           final Interpreter interpreter) throws FrameSlotTypeException {
 
-        SClass selfT = (SClass) StackUtils.pop(truffleFrame);
+        SClass selfT = (SClass) StackUtils.pop(frame);
 
         SObject superClass = selfT.getSuperClass();
 
-        StackUtils.push(truffleFrame, superClass);
+        StackUtils.push(frame, superClass);
       }
     });
 
     installInstancePrimitive(new SPrimitive("fields", universe) {
 
       @Override
-      public void invoke(VirtualFrame truffleFrame,
+      public void invoke(VirtualFrame frame,
           final Interpreter interpreter) throws FrameSlotTypeException {
 
-        SClass selfT = (SClass) StackUtils.pop(truffleFrame);
+        SClass selfT = (SClass) StackUtils.pop(frame);
 
         SArray instanceFields = selfT.getInstanceFields();
 
-        StackUtils.push(truffleFrame, instanceFields);
+        StackUtils.push(frame, instanceFields);
       }
     });
 
     installInstancePrimitive(new SPrimitive("methods", universe) {
 
       @Override
-      public void invoke(VirtualFrame truffleFrame,
+      public void invoke(VirtualFrame frame,
           final Interpreter interpreter) throws FrameSlotTypeException {
 
-        SClass selfT = (SClass) StackUtils.pop(truffleFrame);
+        SClass selfT = (SClass) StackUtils.pop(frame);
 
         SArray instanceInvokable = selfT.getInstanceInvokables();
-        StackUtils.push(truffleFrame, instanceInvokable);
+        StackUtils.push(frame, instanceInvokable);
       }
     });
   }

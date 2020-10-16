@@ -31,7 +31,12 @@ import com.oracle.truffle.api.frame.VirtualFrame;
 import som.interpreter.Interpreter;
 import som.interpreter.StackUtils;
 import som.vm.Universe;
-import som.vmobjects.*;
+import som.vmobjects.SAbstractObject;
+import som.vmobjects.SDouble;
+import som.vmobjects.SInteger;
+import som.vmobjects.SNumber;
+import som.vmobjects.SPrimitive;
+import som.vmobjects.SString;
 
 
 public class DoublePrimitives extends Primitives {
@@ -45,185 +50,185 @@ public class DoublePrimitives extends Primitives {
     installInstancePrimitive(new SPrimitive("asString", universe) {
       @Override
       @CompilerDirectives.TruffleBoundary
-      public void invoke(final VirtualFrame truffleFrame,
+      public void invoke(final VirtualFrame frame,
           final Interpreter interpreter) throws FrameSlotTypeException {
-        SDouble selfT = (SDouble) StackUtils.pop(truffleFrame);
+        SDouble selfT = (SDouble) StackUtils.pop(frame);
 
         SString value = selfT.primAsString(universe);
-        StackUtils.push(truffleFrame, value);
+        StackUtils.push(frame, value);
       }
     });
 
     installInstancePrimitive(new SPrimitive("asInteger", universe) {
       @Override
-      public void invoke(final VirtualFrame truffleFrame,
+      public void invoke(final VirtualFrame frame,
           final Interpreter interpreter) throws FrameSlotTypeException {
 
-        SDouble selfT = (SDouble) StackUtils.pop(truffleFrame);
+        SDouble selfT = (SDouble) StackUtils.pop(frame);
 
         SInteger value = selfT.primAsInteger(universe);
 
-        StackUtils.push(truffleFrame, value);
+        StackUtils.push(frame, value);
       }
     });
 
     installInstancePrimitive(new SPrimitive("sqrt", universe) {
       @Override
-      public void invoke(final VirtualFrame truffleFrame,
+      public void invoke(final VirtualFrame frame,
           final Interpreter interpreter) throws FrameSlotTypeException {
 
-        SDouble selfT = (SDouble) StackUtils.pop(truffleFrame);
+        SDouble selfT = (SDouble) StackUtils.pop(frame);
 
         SAbstractObject value = selfT.primSqrt(universe);
-        StackUtils.push(truffleFrame, value);
+        StackUtils.push(frame, value);
       }
     });
 
     installInstancePrimitive(new SPrimitive("+", universe) {
       @Override
-      public void invoke(final VirtualFrame truffleFrame,
+      public void invoke(final VirtualFrame frame,
           final Interpreter interpreter) throws FrameSlotTypeException {
 
-        SNumber op1 = (SNumber) StackUtils.pop(truffleFrame);
-        SDouble op2 = (SDouble) StackUtils.pop(truffleFrame);
+        SNumber op1 = (SNumber) StackUtils.pop(frame);
+        SDouble op2 = (SDouble) StackUtils.pop(frame);
 
         SAbstractObject value = op2.primAdd(op1, universe);
-        StackUtils.push(truffleFrame, value);
+        StackUtils.push(frame, value);
       }
     });
 
     installInstancePrimitive(new SPrimitive("-", universe) {
       @Override
-      public void invoke(final VirtualFrame truffleFrame,
+      public void invoke(final VirtualFrame frame,
           final Interpreter interpreter) throws FrameSlotTypeException {
 
-        SNumber op1 = (SNumber) StackUtils.pop(truffleFrame);
-        SDouble op2 = (SDouble) StackUtils.pop(truffleFrame);
+        SNumber op1 = (SNumber) StackUtils.pop(frame);
+        SDouble op2 = (SDouble) StackUtils.pop(frame);
 
         SAbstractObject value = op2.primSubtract(op1, universe);
 
-        StackUtils.push(truffleFrame, value);
+        StackUtils.push(frame, value);
       }
     });
 
     installInstancePrimitive(new SPrimitive("*", universe) {
       @Override
-      public void invoke(final VirtualFrame truffleFrame,
+      public void invoke(final VirtualFrame frame,
           final Interpreter interpreter) throws FrameSlotTypeException {
 
-        SNumber op1 = (SNumber) StackUtils.pop(truffleFrame);
-        SDouble op2 = (SDouble) StackUtils.pop(truffleFrame);
+        SNumber op1 = (SNumber) StackUtils.pop(frame);
+        SDouble op2 = (SDouble) StackUtils.pop(frame);
 
         SAbstractObject value = op2.primMultiply(op1, universe);
-        StackUtils.push(truffleFrame, value);
+        StackUtils.push(frame, value);
       }
     });
 
     installInstancePrimitive(new SPrimitive("//", universe) {
       @Override
-      public void invoke(final VirtualFrame truffleFrame,
+      public void invoke(final VirtualFrame frame,
           final Interpreter interpreter) throws FrameSlotTypeException {
 
-        SNumber op1 = (SNumber) StackUtils.pop(truffleFrame);
-        SDouble op2 = (SDouble) StackUtils.pop(truffleFrame);
+        SNumber op1 = (SNumber) StackUtils.pop(frame);
+        SDouble op2 = (SDouble) StackUtils.pop(frame);
 
         SAbstractObject value = op2.primDoubleDivide(op1, universe);
-        StackUtils.push(truffleFrame, value);
+        StackUtils.push(frame, value);
       }
     });
 
     installInstancePrimitive(new SPrimitive("%", universe) {
       @Override
-      public void invoke(final VirtualFrame truffleFrame,
+      public void invoke(final VirtualFrame frame,
           final Interpreter interpreter) throws FrameSlotTypeException {
 
-        SNumber op1 = (SNumber) StackUtils.pop(truffleFrame);
-        SDouble op2 = (SDouble) StackUtils.pop(truffleFrame);
+        SNumber op1 = (SNumber) StackUtils.pop(frame);
+        SDouble op2 = (SDouble) StackUtils.pop(frame);
 
         SAbstractObject value = op2.primModulo(op1, universe);
-        StackUtils.push(truffleFrame, value);
+        StackUtils.push(frame, value);
       }
     });
 
     installInstancePrimitive(new SPrimitive("=", universe) {
       @Override
-      public void invoke(final VirtualFrame truffleFrame,
+      public void invoke(final VirtualFrame frame,
           final Interpreter interpreter) throws FrameSlotTypeException {
 
-        SNumber op1 = (SNumber) StackUtils.pop(truffleFrame);
-        SDouble op2 = (SDouble) StackUtils.pop(truffleFrame);
+        SNumber op1 = (SNumber) StackUtils.pop(frame);
+        SDouble op2 = (SDouble) StackUtils.pop(frame);
 
         SAbstractObject value = op2.primEqual(op1, universe);
-        StackUtils.push(truffleFrame, value);
+        StackUtils.push(frame, value);
       }
     });
 
     installInstancePrimitive(new SPrimitive("<", universe) {
       @Override
-      public void invoke(final VirtualFrame truffleFrame,
+      public void invoke(final VirtualFrame frame,
           final Interpreter interpreter) throws FrameSlotTypeException {
 
-        SNumber op1 = (SNumber) StackUtils.pop(truffleFrame);
-        SDouble op2 = (SDouble) StackUtils.pop(truffleFrame);
+        SNumber op1 = (SNumber) StackUtils.pop(frame);
+        SDouble op2 = (SDouble) StackUtils.pop(frame);
 
         SAbstractObject value = op2.primLessThan(op1, universe);
 
-        StackUtils.push(truffleFrame, value);
+        StackUtils.push(frame, value);
       }
     });
 
     installInstancePrimitive(new SPrimitive("round", universe) {
       @Override
-      public void invoke(final VirtualFrame truffleFrame,
+      public void invoke(final VirtualFrame frame,
           final Interpreter interpreter) throws FrameSlotTypeException {
 
-        SDouble rcvr = (SDouble) StackUtils.pop(truffleFrame);
+        SDouble rcvr = (SDouble) StackUtils.pop(frame);
 
         long result = Math.round(rcvr.getEmbeddedDouble());
         SInteger value = universe.newInteger(result);
 
-        StackUtils.push(truffleFrame, value);
+        StackUtils.push(frame, value);
       }
     });
 
     installInstancePrimitive(new SPrimitive("sin", universe) {
       @Override
-      public void invoke(final VirtualFrame truffleFrame,
+      public void invoke(final VirtualFrame frame,
           final Interpreter interpreter) throws FrameSlotTypeException {
 
-        SDouble rcvr = (SDouble) StackUtils.pop(truffleFrame);
+        SDouble rcvr = (SDouble) StackUtils.pop(frame);
 
         double result = Math.sin(rcvr.getEmbeddedDouble());
         SDouble value = universe.newDouble(result);
 
-        StackUtils.push(truffleFrame, value);
+        StackUtils.push(frame, value);
       }
     });
 
     installInstancePrimitive(new SPrimitive("cos", universe) {
       @Override
-      public void invoke(final VirtualFrame truffleFrame,
+      public void invoke(final VirtualFrame frame,
           final Interpreter interpreter) throws FrameSlotTypeException {
 
-        SDouble rcvr = (SDouble) StackUtils.pop(truffleFrame);
+        SDouble rcvr = (SDouble) StackUtils.pop(frame);
 
         double result = Math.cos(rcvr.getEmbeddedDouble());
         SDouble value = universe.newDouble(result);
 
-        StackUtils.push(truffleFrame, value);
+        StackUtils.push(frame, value);
       }
     });
 
     installClassPrimitive(new SPrimitive("PositiveInfinity", universe) {
       @Override
-      public void invoke(final VirtualFrame truffleFrame,
+      public void invoke(final VirtualFrame frame,
           final Interpreter interpreter) throws FrameSlotTypeException {
 
-        StackUtils.pop(truffleFrame);
+        StackUtils.pop(frame);
 
         SDouble value = universe.newDouble(Double.POSITIVE_INFINITY);
 
-        StackUtils.push(truffleFrame, value);
+        StackUtils.push(frame, value);
       }
     });
   }

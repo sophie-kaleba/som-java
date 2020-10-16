@@ -47,31 +47,31 @@ public class SymbolPrimitives extends Primitives {
     installInstancePrimitive(new SPrimitive("asString", universe) {
 
       @Override
-      public void invoke(final VirtualFrame truffleFrame,
+      public void invoke(final VirtualFrame frame,
           final Interpreter interpreter) throws FrameSlotTypeException {
-        SSymbol self = (SSymbol) StackUtils.pop(truffleFrame);
+        SSymbol self = (SSymbol) StackUtils.pop(frame);
 
         SString value = universe.newString(self.getEmbeddedString());
 
-        StackUtils.push(truffleFrame, value);
+        StackUtils.push(frame, value);
       }
     });
 
     installInstancePrimitive(new SPrimitive("=", universe) {
 
       @Override
-      public void invoke(final VirtualFrame truffleFrame,
+      public void invoke(final VirtualFrame frame,
           final Interpreter interpreter) throws FrameSlotTypeException {
 
-        SAbstractObject op1 = StackUtils.pop(truffleFrame);
-        SSymbol op2 = (SSymbol) StackUtils.pop(truffleFrame); // self
+        SAbstractObject op1 = StackUtils.pop(frame);
+        SSymbol op2 = (SSymbol) StackUtils.pop(frame); // self
 
         if (op1 == op2) {
 
-          StackUtils.push(truffleFrame, universe.trueObject);
+          StackUtils.push(frame, universe.trueObject);
         } else {
 
-          StackUtils.push(truffleFrame, universe.falseObject);
+          StackUtils.push(frame, universe.falseObject);
         }
       }
     }, true);

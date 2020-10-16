@@ -39,28 +39,28 @@ public abstract class SAbstractObject implements TruffleObject {
 
   public void send(final String selectorString, final SAbstractObject[] arguments,
       final Universe universe, final Interpreter interpreter,
-      VirtualFrame truffleFrame) throws FrameSlotTypeException {
+      VirtualFrame frame) throws FrameSlotTypeException {
     // Turn the selector string into a selector
     SSymbol selector = universe.symbolFor(selectorString);
 
     // Push the receiver onto the stack
-    StackUtils.push(truffleFrame, this);
+    StackUtils.push(frame, this);
 
     // Push the arguments onto the stack
     for (SAbstractObject arg : arguments) {
-      StackUtils.push(truffleFrame, arg);
+      StackUtils.push(frame, arg);
     }
 
     // Lookup the invokable
     SInvokable invokable = getSOMClass(universe).lookupInvokable(selector);
 
     // Invoke the invokable
-    invokable.indirectInvoke(truffleFrame, interpreter);
+    invokable.indirectInvoke(frame, interpreter);
   }
 
   public void sendDoesNotUnderstand(final SSymbol selector,
       final Universe universe, final Interpreter interpreter,
-      VirtualFrame truffleFrame) throws FrameSlotTypeException {
+      VirtualFrame frame) throws FrameSlotTypeException {
     // Compute the number of arguments
     int numberOfArguments = selector.getNumberOfSignatureArguments();
 
@@ -70,27 +70,27 @@ public abstract class SAbstractObject implements TruffleObject {
 
     // Remove all arguments and put them in the freshly allocated array
     for (int i = numberOfArguments - 2; i >= 0; i--) {
-      argumentsArray.setIndexableField(i, StackUtils.pop(truffleFrame));
+      argumentsArray.setIndexableField(i, StackUtils.pop(frame));
     }
 
-    StackUtils.pop(truffleFrame);
+    StackUtils.pop(frame);
 
     SAbstractObject[] args = {selector, argumentsArray};
-    send("doesNotUnderstand:arguments:", args, universe, interpreter, truffleFrame);
+    send("doesNotUnderstand:arguments:", args, universe, interpreter, frame);
   }
 
   public void sendUnknownGlobal(final SSymbol globalName,
       final Universe universe, final Interpreter interpreter,
-      VirtualFrame truffleFrame) throws FrameSlotTypeException {
+      VirtualFrame frame) throws FrameSlotTypeException {
     SAbstractObject[] arguments = {globalName};
-    send("unknownGlobal:", arguments, universe, interpreter, truffleFrame);
+    send("unknownGlobal:", arguments, universe, interpreter, frame);
   }
 
   public void sendEscapedBlock(final SBlock block, final Universe universe,
-      final Interpreter interpreter, VirtualFrame truffleFrame)
+      final Interpreter interpreter, VirtualFrame frame)
       throws FrameSlotTypeException {
     SAbstractObject[] arguments = {block};
-    send("escapedBlock:", arguments, universe, interpreter, truffleFrame);
+    send("escapedBlock:", arguments, universe, interpreter, frame);
   }
 
   @Override

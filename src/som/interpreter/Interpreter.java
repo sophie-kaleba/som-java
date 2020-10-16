@@ -25,7 +25,23 @@
 
 package som.interpreter;
 
-import static som.interpreter.Bytecodes.*;
+import static som.interpreter.Bytecodes.DUP;
+import static som.interpreter.Bytecodes.HALT;
+import static som.interpreter.Bytecodes.POP;
+import static som.interpreter.Bytecodes.POP_ARGUMENT;
+import static som.interpreter.Bytecodes.POP_FIELD;
+import static som.interpreter.Bytecodes.POP_LOCAL;
+import static som.interpreter.Bytecodes.PUSH_ARGUMENT;
+import static som.interpreter.Bytecodes.PUSH_BLOCK;
+import static som.interpreter.Bytecodes.PUSH_CONSTANT;
+import static som.interpreter.Bytecodes.PUSH_FIELD;
+import static som.interpreter.Bytecodes.PUSH_GLOBAL;
+import static som.interpreter.Bytecodes.PUSH_LOCAL;
+import static som.interpreter.Bytecodes.RETURN_LOCAL;
+import static som.interpreter.Bytecodes.RETURN_NON_LOCAL;
+import static som.interpreter.Bytecodes.SEND;
+import static som.interpreter.Bytecodes.SUPER_SEND;
+import static som.interpreter.Bytecodes.getBytecodeLength;
 
 import com.oracle.truffle.api.CompilerAsserts;
 import com.oracle.truffle.api.CompilerDirectives;
@@ -39,7 +55,13 @@ import com.oracle.truffle.api.profiles.ValueProfile;
 
 import som.compiler.ProgramDefinitionError;
 import som.vm.Universe;
-import som.vmobjects.*;
+import som.vmobjects.SAbstractObject;
+import som.vmobjects.SBlock;
+import som.vmobjects.SClass;
+import som.vmobjects.SInvokable;
+import som.vmobjects.SMethod;
+import som.vmobjects.SObject;
+import som.vmobjects.SSymbol;
 
 
 public class Interpreter {
@@ -82,7 +104,7 @@ public class Interpreter {
   }
 
   private void doPushField(final int bytecodeIndex,
-      final SMethod method, final VirtualFrame frame) throws FrameSlotTypeException {
+      final VirtualFrame frame, final SMethod method) throws FrameSlotTypeException {
     int fieldIndex = method.getBytecode(bytecodeIndex + 1);
     SAbstractObject value = ((SObject) getSelf(frame, method)).getField(fieldIndex);
 
@@ -90,7 +112,7 @@ public class Interpreter {
   }
 
   private void doPushBlock(final int bytecodeIndex,
-      final SMethod method, final VirtualFrame frame)
+      final VirtualFrame frame, final SMethod method)
       throws ProgramDefinitionError, FrameSlotTypeException {
 
     SMethod blockMethod = (SMethod) method.getConstant(bytecodeIndex);
@@ -157,7 +179,7 @@ public class Interpreter {
   }
 
   private void doPopField(final int bytecodeIndex,
-      final SMethod method, final VirtualFrame frame) throws FrameSlotTypeException {
+      final VirtualFrame frame, final SMethod method) throws FrameSlotTypeException {
     int fieldIndex = method.getBytecode(bytecodeIndex + 1);
 
     ((SObject) getSelf(frame, method)).setField(fieldIndex, StackUtils.pop(frame));
@@ -217,8 +239,8 @@ public class Interpreter {
       // frame.getPreviousFrame().getOuterContext(universe.nilObject).getArgument(0, 0);
       //
       // // ... and execute the escapedBlock message instead
-      // sender.sendEscapedBlock(blockT, universe, this, truffleFrame);
-      // return StackUtils.pop(truffleFrame);
+      // sender.sendEscapedBlock(blockT, universe, this, frame);
+      // return StackUtils.pop(frame);
     }
 
     // throw the exception to pass around the context and pop the right frames
@@ -249,7 +271,7 @@ public class Interpreter {
   }
 
   @ExplodeLoop(kind = ExplodeLoop.LoopExplosionKind.MERGE_EXPLODE)
-  public SAbstractObject start(final VirtualFrame truffleFrame,
+  public SAbstractObject start(final VirtualFrame frame,
       final SMethod method)
       throws ReturnException, ProgramDefinitionError, FrameSlotTypeException {
 
@@ -272,90 +294,90 @@ public class Interpreter {
       // Handle the current bytecode
       switch (bytecode) {
         case HALT: {
-          return StackUtils.getRelativeStackElement(truffleFrame, 0);
+          return StackUtils.getRelativeStackElement(frame, 0);
         }
 
         case DUP: {
-          doDup(truffleFrame);
+          doDup(frame);
           break;
         }
 
         case PUSH_LOCAL: {
-          doPushLocal(currentBytecodeIndex, truffleFrame, method);
+          doPushLocal(currentBytecodeIndex, frame, method);
           break;
         }
 
         case PUSH_ARGUMENT: {
-          doPushArgument(currentBytecodeIndex, truffleFrame, method);
+          doPushArgument(currentBytecodeIndex, frame, method);
           break;
         }
 
         case PUSH_FIELD: {
-          doPushField(currentBytecodeIndex, method, truffleFrame);
+          doPushField(currentBytecodeIndex, frame, method);
           break;
         }
 
         case PUSH_BLOCK: {
-          doPushBlock(currentBytecodeIndex, method, truffleFrame);
+          doPushBlock(currentBytecodeIndex, frame, method);
           break;
         }
 
         case PUSH_CONSTANT: {
-          doPushConstant(currentBytecodeIndex, truffleFrame, method);
+          doPushConstant(currentBytecodeIndex, frame, method);
           break;
         }
 
         case PUSH_GLOBAL: {
-          doPushGlobal(currentBytecodeIndex, truffleFrame, method);
+          doPushGlobal(currentBytecodeIndex, frame, method);
           break;
         }
 
         case POP: {
-          doPop(truffleFrame);
+          doPop(frame);
           break;
         }
 
         case POP_LOCAL: {
-          doPopLocal(currentBytecodeIndex, truffleFrame, method);
+          doPopLocal(currentBytecodeIndex, frame, method);
           break;
         }
 
         case POP_ARGUMENT: {
-          doPopArgument(currentBytecodeIndex, truffleFrame, method);
+          doPopArgument(currentBytecodeIndex, frame, method);
           break;
         }
 
         case POP_FIELD: {
-          doPopField(currentBytecodeIndex, method, truffleFrame);
+          doPopField(currentBytecodeIndex, frame, method);
           break;
         }
 
         case SEND: {
           try {
-            doSend(currentBytecodeIndex, truffleFrame, method);
+            doSend(currentBytecodeIndex, frame, method);
           } catch (RestartLoopException e) {
             bytecodeIndex = 0;
-            StackUtils.resetStackPointer(truffleFrame, method);
+            StackUtils.resetStackPointer(frame, method);
           }
           break;
         }
 
         case SUPER_SEND: {
           try {
-            doSuperSend(currentBytecodeIndex, truffleFrame, method);
+            doSuperSend(currentBytecodeIndex, frame, method);
           } catch (RestartLoopException e) {
             bytecodeIndex = 0;
-            StackUtils.resetStackPointer(truffleFrame, method);
+            StackUtils.resetStackPointer(frame, method);
           }
           break;
         }
 
         case RETURN_LOCAL: {
-          return doReturnLocal(truffleFrame);
+          return doReturnLocal(frame);
         }
 
         case RETURN_NON_LOCAL: {
-          return doReturnNonLocal(truffleFrame, method);
+          return doReturnNonLocal(frame, method);
         }
 
         default:

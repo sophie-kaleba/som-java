@@ -31,7 +31,11 @@ import com.oracle.truffle.api.frame.VirtualFrame;
 import som.interpreter.Interpreter;
 import som.interpreter.StackUtils;
 import som.vm.Universe;
-import som.vmobjects.*;
+import som.vmobjects.SAbstractObject;
+import som.vmobjects.SInteger;
+import som.vmobjects.SPrimitive;
+import som.vmobjects.SString;
+import som.vmobjects.SSymbol;
 
 
 public class StringPrimitives extends Primitives {
@@ -45,91 +49,91 @@ public class StringPrimitives extends Primitives {
     installInstancePrimitive(new SPrimitive("concatenate:", universe) {
 
       @Override
-      public void invoke(final VirtualFrame truffleFrame,
+      public void invoke(final VirtualFrame frame,
           final Interpreter interpreter) throws FrameSlotTypeException {
 
-        SString argument = (SString) StackUtils.pop(truffleFrame);
-        SString self = (SString) StackUtils.pop(truffleFrame);
+        SString argument = (SString) StackUtils.pop(frame);
+        SString self = (SString) StackUtils.pop(frame);
 
         SString value = universe.newString(self.getEmbeddedString()
             + argument.getEmbeddedString());
 
-        StackUtils.push(truffleFrame, value);
+        StackUtils.push(frame, value);
       }
     });
 
     installInstancePrimitive(new SPrimitive("asSymbol", universe) {
 
       @Override
-      public void invoke(final VirtualFrame truffleFrame,
+      public void invoke(final VirtualFrame frame,
           final Interpreter interpreter) throws FrameSlotTypeException {
 
-        SString self = (SString) StackUtils.pop(truffleFrame);
+        SString self = (SString) StackUtils.pop(frame);
 
         SSymbol value = universe.symbolFor(self.getEmbeddedString());
 
-        StackUtils.push(truffleFrame, value);
+        StackUtils.push(frame, value);
       }
     });
 
     installInstancePrimitive(new SPrimitive("length", universe) {
 
       @Override
-      public void invoke(final VirtualFrame truffleFrame,
+      public void invoke(final VirtualFrame frame,
           final Interpreter interpreter) throws FrameSlotTypeException {
 
-        SString self = (SString) StackUtils.pop(truffleFrame);
+        SString self = (SString) StackUtils.pop(frame);
 
         SInteger value = universe.newInteger(self.getEmbeddedString().length());
 
-        StackUtils.push(truffleFrame, value);
+        StackUtils.push(frame, value);
       }
     });
 
     installInstancePrimitive(new SPrimitive("=", universe) {
 
       @Override
-      public void invoke(final VirtualFrame truffleFrame,
+      public void invoke(final VirtualFrame frame,
           final Interpreter interpreter) throws FrameSlotTypeException {
 
-        SAbstractObject op1 = StackUtils.pop(truffleFrame);
-        SString op2 = (SString) StackUtils.pop(truffleFrame); // self
+        SAbstractObject op1 = StackUtils.pop(frame);
+        SString op2 = (SString) StackUtils.pop(frame); // self
 
         if (op1.getSOMClass(universe) == universe.stringClass) {
           SString s = (SString) op1;
           if (s.getEmbeddedString().equals(op2.getEmbeddedString())) {
 
-            StackUtils.push(truffleFrame, universe.trueObject);
+            StackUtils.push(frame, universe.trueObject);
             return;
           }
         }
 
-        StackUtils.push(truffleFrame, universe.falseObject);
+        StackUtils.push(frame, universe.falseObject);
       }
     });
 
     installInstancePrimitive(new SPrimitive("primSubstringFrom:to:", universe) {
 
       @Override
-      public void invoke(final VirtualFrame truffleFrame,
+      public void invoke(final VirtualFrame frame,
           final Interpreter interpreter) throws FrameSlotTypeException {
 
-        SInteger end = (SInteger) StackUtils.pop(truffleFrame);
-        SInteger start = (SInteger) StackUtils.pop(truffleFrame);
+        SInteger end = (SInteger) StackUtils.pop(frame);
+        SInteger start = (SInteger) StackUtils.pop(frame);
 
-        SString self = (SString) StackUtils.pop(truffleFrame);
+        SString self = (SString) StackUtils.pop(frame);
 
         try {
           SString value = universe.newString(self.getEmbeddedString().substring(
               (int) start.getEmbeddedInteger() - 1,
               (int) end.getEmbeddedInteger()));
 
-          StackUtils.push(truffleFrame, value);
+          StackUtils.push(frame, value);
         } catch (IndexOutOfBoundsException e) {
           SString error = universe.newString(new java.lang.String(
               "Error - index out of bounds"));
 
-          StackUtils.push(truffleFrame, error);
+          StackUtils.push(frame, error);
         }
       }
     });
@@ -137,39 +141,39 @@ public class StringPrimitives extends Primitives {
     installInstancePrimitive(new SPrimitive("hashcode", universe) {
 
       @Override
-      public void invoke(final VirtualFrame truffleFrame,
+      public void invoke(final VirtualFrame frame,
           final Interpreter interpreter) throws FrameSlotTypeException {
-        SString self = (SString) StackUtils.pop(truffleFrame);
+        SString self = (SString) StackUtils.pop(frame);
 
         SInteger value = universe.newInteger(self.getEmbeddedString().hashCode());
 
-        StackUtils.push(truffleFrame, value);
+        StackUtils.push(frame, value);
       }
     });
 
     installInstancePrimitive(new SPrimitive("isWhiteSpace", universe) {
 
       @Override
-      public void invoke(final VirtualFrame truffleFrame,
+      public void invoke(final VirtualFrame frame,
           final Interpreter interpreter) throws FrameSlotTypeException {
 
-        SString self = (SString) StackUtils.pop(truffleFrame);
+        SString self = (SString) StackUtils.pop(frame);
         String embedded = self.getEmbeddedString();
 
         for (int i = 0; i < embedded.length(); i++) {
           if (!Character.isWhitespace(embedded.charAt(i))) {
 
-            StackUtils.push(truffleFrame, universe.falseObject);
+            StackUtils.push(frame, universe.falseObject);
             return;
           }
         }
 
         if (embedded.length() > 0) {
 
-          StackUtils.push(truffleFrame, universe.trueObject);
+          StackUtils.push(frame, universe.trueObject);
         } else {
 
-          StackUtils.push(truffleFrame, universe.falseObject);
+          StackUtils.push(frame, universe.falseObject);
         }
       }
     });
@@ -177,26 +181,26 @@ public class StringPrimitives extends Primitives {
     installInstancePrimitive(new SPrimitive("isLetters", universe) {
 
       @Override
-      public void invoke(final VirtualFrame truffleFrame,
+      public void invoke(final VirtualFrame frame,
           final Interpreter interpreter) throws FrameSlotTypeException {
 
-        SString self = (SString) StackUtils.pop(truffleFrame);
+        SString self = (SString) StackUtils.pop(frame);
         String embedded = self.getEmbeddedString();
 
         for (int i = 0; i < embedded.length(); i++) {
           if (!Character.isLetter(embedded.charAt(i))) {
 
-            StackUtils.push(truffleFrame, universe.falseObject);
+            StackUtils.push(frame, universe.falseObject);
             return;
           }
         }
 
         if (embedded.length() > 0) {
 
-          StackUtils.push(truffleFrame, universe.trueObject);
+          StackUtils.push(frame, universe.trueObject);
         } else {
 
-          StackUtils.push(truffleFrame, universe.falseObject);
+          StackUtils.push(frame, universe.falseObject);
         }
       }
     });
@@ -204,26 +208,26 @@ public class StringPrimitives extends Primitives {
     installInstancePrimitive(new SPrimitive("isDigits", universe) {
 
       @Override
-      public void invoke(final VirtualFrame truffleFrame,
+      public void invoke(final VirtualFrame frame,
           final Interpreter interpreter) throws FrameSlotTypeException {
 
-        SString self = (SString) StackUtils.pop(truffleFrame);
+        SString self = (SString) StackUtils.pop(frame);
         String embedded = self.getEmbeddedString();
 
         for (int i = 0; i < embedded.length(); i++) {
           if (!Character.isDigit(embedded.charAt(i))) {
 
-            StackUtils.push(truffleFrame, universe.falseObject);
+            StackUtils.push(frame, universe.falseObject);
             return;
           }
         }
 
         if (embedded.length() > 0) {
 
-          StackUtils.push(truffleFrame, universe.trueObject);
+          StackUtils.push(frame, universe.trueObject);
         } else {
 
-          StackUtils.push(truffleFrame, universe.falseObject);
+          StackUtils.push(frame, universe.falseObject);
         }
       }
     });

@@ -19,12 +19,12 @@ public class PrimitivePrimitives extends Primitives {
     installInstancePrimitive(new SPrimitive("holder", universe) {
 
       @Override
-      public void invoke(final VirtualFrame truffleFrame,
+      public void invoke(final VirtualFrame frame,
           final Interpreter interpreter) throws FrameSlotTypeException {
 
-        SPrimitive self = (SPrimitive) StackUtils.pop(truffleFrame);
+        SPrimitive self = (SPrimitive) StackUtils.pop(frame);
 
-        StackUtils.push(truffleFrame, self.getHolder());
+        StackUtils.push(frame, self.getHolder());
 
       }
     });
@@ -32,12 +32,12 @@ public class PrimitivePrimitives extends Primitives {
     installInstancePrimitive(new SPrimitive("signature", universe) {
 
       @Override
-      public void invoke(final VirtualFrame truffleFrame,
+      public void invoke(final VirtualFrame frame,
           final Interpreter interpreter) throws FrameSlotTypeException {
 
-        SPrimitive self = (SPrimitive) StackUtils.pop(truffleFrame);
+        SPrimitive self = (SPrimitive) StackUtils.pop(frame);
 
-        StackUtils.push(truffleFrame, self.getSignature());
+        StackUtils.push(frame, self.getSignature());
 
       }
     });

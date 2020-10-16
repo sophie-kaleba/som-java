@@ -22,26 +22,26 @@ public class MethodPrimitives extends Primitives {
     installInstancePrimitive(new SPrimitive("holder", universe) {
 
       @Override
-      public void invoke(final VirtualFrame truffleFrame,
+      public void invoke(final VirtualFrame frame,
           final Interpreter interpreter) throws FrameSlotTypeException {
-        SMethod self = (SMethod) StackUtils.pop(truffleFrame);
+        SMethod self = (SMethod) StackUtils.pop(frame);
 
         SClass sclass = self.getHolder();
 
-        StackUtils.push(truffleFrame, sclass);
+        StackUtils.push(frame, sclass);
       }
     });
 
     installInstancePrimitive(new SPrimitive("signature", universe) {
 
       @Override
-      public void invoke(final VirtualFrame truffleFrame,
+      public void invoke(final VirtualFrame frame,
           final Interpreter interpreter) throws FrameSlotTypeException {
-        SMethod self = (SMethod) StackUtils.pop(truffleFrame);
+        SMethod self = (SMethod) StackUtils.pop(frame);
 
         SSymbol signature = self.getSignature();
 
-        StackUtils.push(truffleFrame, signature);
+        StackUtils.push(frame, signature);
       }
     });
   }

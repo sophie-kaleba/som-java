@@ -32,7 +32,13 @@ import com.oracle.truffle.api.frame.VirtualFrame;
 import som.interpreter.Interpreter;
 import som.interpreter.StackUtils;
 import som.vm.Universe;
-import som.vmobjects.*;
+import som.vmobjects.SAbstractObject;
+import som.vmobjects.SBigInteger;
+import som.vmobjects.SInteger;
+import som.vmobjects.SNumber;
+import som.vmobjects.SObject;
+import som.vmobjects.SPrimitive;
+import som.vmobjects.SString;
 
 
 public class IntegerPrimitives extends Primitives {
@@ -45,296 +51,296 @@ public class IntegerPrimitives extends Primitives {
   public void installPrimitives() {
     installInstancePrimitive(new SPrimitive("asString", universe) {
       @Override
-      public void invoke(final VirtualFrame truffleFrame,
+      public void invoke(final VirtualFrame frame,
           final Interpreter interpreter) throws FrameSlotTypeException {
 
-        SNumber self = (SNumber) StackUtils.pop(truffleFrame);
+        SNumber self = (SNumber) StackUtils.pop(frame);
 
         SString value = self.primAsString(universe);
 
-        StackUtils.push(truffleFrame, value);
+        StackUtils.push(frame, value);
 
       }
     });
 
     installInstancePrimitive(new SPrimitive("sqrt", universe) {
       @Override
-      public void invoke(final VirtualFrame truffleFrame,
+      public void invoke(final VirtualFrame frame,
           final Interpreter interpreter) throws FrameSlotTypeException {
 
-        SInteger self = (SInteger) StackUtils.pop(truffleFrame);
+        SInteger self = (SInteger) StackUtils.pop(frame);
 
         SNumber result = self.primSqrt(universe);
 
-        StackUtils.push(truffleFrame, result);
+        StackUtils.push(frame, result);
 
       }
     });
 
     installInstancePrimitive(new SPrimitive("atRandom", universe) {
       @Override
-      public void invoke(final VirtualFrame truffleFrame,
+      public void invoke(final VirtualFrame frame,
           final Interpreter interpreter) throws FrameSlotTypeException {
 
-        SInteger self = (SInteger) StackUtils.pop(truffleFrame);
+        SInteger self = (SInteger) StackUtils.pop(frame);
 
         SInteger randomInt = universe.newInteger(
             (long) (self.getEmbeddedInteger() * Math.random()));
 
-        StackUtils.push(truffleFrame, randomInt);
+        StackUtils.push(frame, randomInt);
 
       }
     });
 
     installInstancePrimitive(new SPrimitive("+", universe) {
       @Override
-      public void invoke(final VirtualFrame truffleFrame,
+      public void invoke(final VirtualFrame frame,
           final Interpreter interpreter) throws FrameSlotTypeException {
 
-        SNumber right = (SNumber) StackUtils.pop(truffleFrame);
-        SNumber left = (SNumber) StackUtils.pop(truffleFrame);
+        SNumber right = (SNumber) StackUtils.pop(frame);
+        SNumber left = (SNumber) StackUtils.pop(frame);
 
         SNumber result = left.primAdd(right, universe);
 
-        StackUtils.push(truffleFrame, result);
+        StackUtils.push(frame, result);
 
       }
     });
 
     installInstancePrimitive(new SPrimitive("-", universe) {
       @Override
-      public void invoke(final VirtualFrame truffleFrame,
+      public void invoke(final VirtualFrame frame,
           final Interpreter interpreter) throws FrameSlotTypeException {
 
-        SNumber right = (SNumber) StackUtils.pop(truffleFrame);
-        SNumber left = (SNumber) StackUtils.pop(truffleFrame);
+        SNumber right = (SNumber) StackUtils.pop(frame);
+        SNumber left = (SNumber) StackUtils.pop(frame);
 
         SNumber result = left.primSubtract(right, universe);
 
-        StackUtils.push(truffleFrame, result);
+        StackUtils.push(frame, result);
 
       }
     });
 
     installInstancePrimitive(new SPrimitive("*", universe) {
       @Override
-      public void invoke(final VirtualFrame truffleFrame,
+      public void invoke(final VirtualFrame frame,
           final Interpreter interpreter) throws FrameSlotTypeException {
 
-        SNumber right = (SNumber) StackUtils.pop(truffleFrame);
-        SNumber left = (SNumber) StackUtils.pop(truffleFrame);
+        SNumber right = (SNumber) StackUtils.pop(frame);
+        SNumber left = (SNumber) StackUtils.pop(frame);
 
         SNumber result = left.primMultiply(right, universe);
 
-        StackUtils.push(truffleFrame, result);
+        StackUtils.push(frame, result);
 
       }
     });
 
     installInstancePrimitive(new SPrimitive("//", universe) {
       @Override
-      public void invoke(final VirtualFrame truffleFrame,
+      public void invoke(final VirtualFrame frame,
           final Interpreter interpreter) throws FrameSlotTypeException {
 
-        SNumber right = (SNumber) StackUtils.pop(truffleFrame);
-        SNumber left = (SNumber) StackUtils.pop(truffleFrame);
+        SNumber right = (SNumber) StackUtils.pop(frame);
+        SNumber left = (SNumber) StackUtils.pop(frame);
 
         SNumber result = left.primDoubleDivide(right, universe);
 
-        StackUtils.push(truffleFrame, result);
+        StackUtils.push(frame, result);
 
       }
     });
 
     installInstancePrimitive(new SPrimitive("/", universe) {
       @Override
-      public void invoke(final VirtualFrame truffleFrame,
+      public void invoke(final VirtualFrame frame,
           final Interpreter interpreter) throws FrameSlotTypeException {
 
-        SNumber right = (SNumber) StackUtils.pop(truffleFrame);
-        SNumber left = (SNumber) StackUtils.pop(truffleFrame);
+        SNumber right = (SNumber) StackUtils.pop(frame);
+        SNumber left = (SNumber) StackUtils.pop(frame);
 
         SNumber result = left.primIntegerDivide(right, universe);
 
-        StackUtils.push(truffleFrame, result);
+        StackUtils.push(frame, result);
 
       }
     });
 
     installInstancePrimitive(new SPrimitive("%", universe) {
       @Override
-      public void invoke(final VirtualFrame truffleFrame,
+      public void invoke(final VirtualFrame frame,
           final Interpreter interpreter) throws FrameSlotTypeException {
 
-        SNumber right = (SNumber) StackUtils.pop(truffleFrame);
-        SNumber left = (SNumber) StackUtils.pop(truffleFrame);
+        SNumber right = (SNumber) StackUtils.pop(frame);
+        SNumber left = (SNumber) StackUtils.pop(frame);
 
         SNumber result = left.primModulo(right, universe);
 
-        StackUtils.push(truffleFrame, result);
+        StackUtils.push(frame, result);
 
       }
     });
 
     installInstancePrimitive(new SPrimitive("rem:", universe) {
       @Override
-      public void invoke(final VirtualFrame truffleFrame,
+      public void invoke(final VirtualFrame frame,
           final Interpreter interpreter) throws FrameSlotTypeException {
 
-        SNumber right = (SNumber) StackUtils.pop(truffleFrame);
-        SInteger left = (SInteger) StackUtils.pop(truffleFrame);
+        SNumber right = (SNumber) StackUtils.pop(frame);
+        SInteger left = (SInteger) StackUtils.pop(frame);
 
         SInteger result = left.primRemainder(right, universe);
 
-        StackUtils.push(truffleFrame, result);
+        StackUtils.push(frame, result);
 
       }
     });
 
     installInstancePrimitive(new SPrimitive("&", universe) {
       @Override
-      public void invoke(final VirtualFrame truffleFrame,
+      public void invoke(final VirtualFrame frame,
           final Interpreter interpreter) throws FrameSlotTypeException {
 
-        SNumber right = (SNumber) StackUtils.pop(truffleFrame);
-        SNumber left = (SNumber) StackUtils.pop(truffleFrame);
+        SNumber right = (SNumber) StackUtils.pop(frame);
+        SNumber left = (SNumber) StackUtils.pop(frame);
 
         SNumber result = left.primBitAnd(right, universe);
 
-        StackUtils.push(truffleFrame, result);
+        StackUtils.push(frame, result);
 
       }
     });
 
     installInstancePrimitive(new SPrimitive("=", universe) {
       @Override
-      public void invoke(final VirtualFrame truffleFrame,
+      public void invoke(final VirtualFrame frame,
           final Interpreter interpreter) throws FrameSlotTypeException {
 
-        SAbstractObject right = StackUtils.pop(truffleFrame);
-        SNumber left = (SNumber) StackUtils.pop(truffleFrame);
+        SAbstractObject right = StackUtils.pop(frame);
+        SNumber left = (SNumber) StackUtils.pop(frame);
 
         SObject result = left.primEqual(right, universe);
 
-        StackUtils.push(truffleFrame, result);
+        StackUtils.push(frame, result);
 
       }
     });
 
     installInstancePrimitive(new SPrimitive("<", universe) {
       @Override
-      public void invoke(final VirtualFrame truffleFrame,
+      public void invoke(final VirtualFrame frame,
           final Interpreter interpreter) throws FrameSlotTypeException {
 
-        SNumber right = (SNumber) StackUtils.pop(truffleFrame);
-        SNumber left = (SNumber) StackUtils.pop(truffleFrame);
+        SNumber right = (SNumber) StackUtils.pop(frame);
+        SNumber left = (SNumber) StackUtils.pop(frame);
 
         SObject result = left.primLessThan(right, universe);
 
-        StackUtils.push(truffleFrame, result);
+        StackUtils.push(frame, result);
 
       }
     });
 
     installInstancePrimitive(new SPrimitive("<<", universe) {
       @Override
-      public void invoke(final VirtualFrame truffleFrame,
+      public void invoke(final VirtualFrame frame,
           final Interpreter interpreter) throws FrameSlotTypeException {
 
-        SNumber right = (SNumber) StackUtils.pop(truffleFrame);
+        SNumber right = (SNumber) StackUtils.pop(frame);
 
-        SNumber left = (SNumber) StackUtils.pop(truffleFrame);
+        SNumber left = (SNumber) StackUtils.pop(frame);
 
         SNumber value = left.primLeftShift(right, universe);
 
-        StackUtils.push(truffleFrame, value);
+        StackUtils.push(frame, value);
 
       }
     });
 
     installInstancePrimitive(new SPrimitive("bitXor:", universe) {
       @Override
-      public void invoke(final VirtualFrame truffleFrame,
+      public void invoke(final VirtualFrame frame,
           final Interpreter interpreter) throws FrameSlotTypeException {
 
-        SNumber right = (SNumber) StackUtils.pop(truffleFrame);
+        SNumber right = (SNumber) StackUtils.pop(frame);
 
-        SNumber left = (SNumber) StackUtils.pop(truffleFrame);
+        SNumber left = (SNumber) StackUtils.pop(frame);
 
         SNumber xored = left.primBitXor(right, universe);
 
-        StackUtils.push(truffleFrame, xored);
+        StackUtils.push(frame, xored);
 
       }
     });
 
     installInstancePrimitive(new SPrimitive("as32BitSignedValue", universe) {
       @Override
-      public void invoke(final VirtualFrame truffleFrame,
+      public void invoke(final VirtualFrame frame,
           final Interpreter interpreter) throws FrameSlotTypeException {
 
-        SInteger rcvr = (SInteger) StackUtils.pop(truffleFrame);
+        SInteger rcvr = (SInteger) StackUtils.pop(frame);
 
         SInteger asSigned32 = universe.newInteger((int) rcvr.getEmbeddedInteger());
 
-        StackUtils.push(truffleFrame, asSigned32);
+        StackUtils.push(frame, asSigned32);
 
       }
     });
 
     installInstancePrimitive(new SPrimitive("as32BitUnsignedValue", universe) {
       @Override
-      public void invoke(final VirtualFrame truffleFrame,
+      public void invoke(final VirtualFrame frame,
           final Interpreter interpreter) throws FrameSlotTypeException {
 
-        SInteger rcvr = (SInteger) StackUtils.pop(truffleFrame);
+        SInteger rcvr = (SInteger) StackUtils.pop(frame);
 
         SInteger as32Int =
             universe.newInteger(Integer.toUnsignedLong((int) rcvr.getEmbeddedInteger()));
 
-        StackUtils.push(truffleFrame, as32Int);
+        StackUtils.push(frame, as32Int);
 
       }
     });
 
     installInstancePrimitive(new SPrimitive(">>>", universe) {
       @Override
-      public void invoke(final VirtualFrame truffleFrame,
+      public void invoke(final VirtualFrame frame,
           final Interpreter interpreter) throws FrameSlotTypeException {
 
-        SInteger right = (SInteger) StackUtils.pop(truffleFrame);
+        SInteger right = (SInteger) StackUtils.pop(frame);
 
-        SInteger rcvr = (SInteger) StackUtils.pop(truffleFrame);
+        SInteger rcvr = (SInteger) StackUtils.pop(frame);
 
         SInteger shiftedInteger =
             universe.newInteger(rcvr.getEmbeddedInteger() >>> right.getEmbeddedInteger());
 
-        StackUtils.push(truffleFrame, shiftedInteger);
+        StackUtils.push(frame, shiftedInteger);
 
       }
     });
 
     installClassPrimitive(new SPrimitive("fromString:", universe) {
       @Override
-      public void invoke(final VirtualFrame truffleFrame,
+      public void invoke(final VirtualFrame frame,
           final Interpreter interpreter) throws FrameSlotTypeException {
 
-        SString param = (SString) StackUtils.pop(truffleFrame);
+        SString param = (SString) StackUtils.pop(frame);
 
-        StackUtils.pop(truffleFrame);
+        StackUtils.pop(frame);
 
         try {
           long result = Long.parseLong(param.getEmbeddedString());
 
           SInteger integer = universe.newInteger(result);
 
-          StackUtils.push(truffleFrame, integer);
+          StackUtils.push(frame, integer);
 
         } catch (NumberFormatException e) {
           BigInteger result = new BigInteger(param.getEmbeddedString());
 
           SBigInteger bigInteger = new SBigInteger(result);
-          StackUtils.push(truffleFrame, bigInteger);
+          StackUtils.push(frame, bigInteger);
         }
 
       }

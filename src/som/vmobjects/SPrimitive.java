@@ -67,7 +67,7 @@ public abstract class SPrimitive extends SAbstractObject implements SInvokable {
     return false;
   }
 
-  public abstract void invoke(VirtualFrame truffleFrame,
+  public abstract void invoke(VirtualFrame frame,
       Interpreter interpreter) throws FrameSlotTypeException;
 
   public void indirectInvoke(VirtualFrame frame, Interpreter interpreter) {
@@ -98,7 +98,7 @@ public abstract class SPrimitive extends SAbstractObject implements SInvokable {
     return (new SPrimitive(signatureString, universe) {
 
       @Override
-      public void invoke(VirtualFrame truffleFrame,
+      public void invoke(VirtualFrame frame,
           final Interpreter interpreter) {
         // Write a warning to the screen
         Universe.println("Warning: undefined primitive "
