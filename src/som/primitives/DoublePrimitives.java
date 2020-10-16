@@ -25,7 +25,6 @@
 package som.primitives;
 
 import com.oracle.truffle.api.CompilerDirectives;
-import com.oracle.truffle.api.frame.FrameSlotTypeException;
 import com.oracle.truffle.api.frame.VirtualFrame;
 
 import som.interpreter.Interpreter;
@@ -51,7 +50,7 @@ public class DoublePrimitives extends Primitives {
       @Override
       @CompilerDirectives.TruffleBoundary
       public void invoke(final VirtualFrame frame,
-          final Interpreter interpreter) throws FrameSlotTypeException {
+          final Interpreter interpreter) {
         SDouble selfT = (SDouble) StackUtils.pop(frame);
 
         SString value = selfT.primAsString(universe);
@@ -62,7 +61,7 @@ public class DoublePrimitives extends Primitives {
     installInstancePrimitive(new SPrimitive("asInteger", universe) {
       @Override
       public void invoke(final VirtualFrame frame,
-          final Interpreter interpreter) throws FrameSlotTypeException {
+          final Interpreter interpreter) {
 
         SDouble selfT = (SDouble) StackUtils.pop(frame);
 
@@ -75,7 +74,7 @@ public class DoublePrimitives extends Primitives {
     installInstancePrimitive(new SPrimitive("sqrt", universe) {
       @Override
       public void invoke(final VirtualFrame frame,
-          final Interpreter interpreter) throws FrameSlotTypeException {
+          final Interpreter interpreter) {
 
         SDouble selfT = (SDouble) StackUtils.pop(frame);
 
@@ -87,7 +86,7 @@ public class DoublePrimitives extends Primitives {
     installInstancePrimitive(new SPrimitive("+", universe) {
       @Override
       public void invoke(final VirtualFrame frame,
-          final Interpreter interpreter) throws FrameSlotTypeException {
+          final Interpreter interpreter) {
 
         SNumber op1 = (SNumber) StackUtils.pop(frame);
         SDouble op2 = (SDouble) StackUtils.pop(frame);
@@ -100,7 +99,7 @@ public class DoublePrimitives extends Primitives {
     installInstancePrimitive(new SPrimitive("-", universe) {
       @Override
       public void invoke(final VirtualFrame frame,
-          final Interpreter interpreter) throws FrameSlotTypeException {
+          final Interpreter interpreter) {
 
         SNumber op1 = (SNumber) StackUtils.pop(frame);
         SDouble op2 = (SDouble) StackUtils.pop(frame);
@@ -114,7 +113,7 @@ public class DoublePrimitives extends Primitives {
     installInstancePrimitive(new SPrimitive("*", universe) {
       @Override
       public void invoke(final VirtualFrame frame,
-          final Interpreter interpreter) throws FrameSlotTypeException {
+          final Interpreter interpreter) {
 
         SNumber op1 = (SNumber) StackUtils.pop(frame);
         SDouble op2 = (SDouble) StackUtils.pop(frame);
@@ -127,7 +126,7 @@ public class DoublePrimitives extends Primitives {
     installInstancePrimitive(new SPrimitive("//", universe) {
       @Override
       public void invoke(final VirtualFrame frame,
-          final Interpreter interpreter) throws FrameSlotTypeException {
+          final Interpreter interpreter) {
 
         SNumber op1 = (SNumber) StackUtils.pop(frame);
         SDouble op2 = (SDouble) StackUtils.pop(frame);
@@ -140,7 +139,7 @@ public class DoublePrimitives extends Primitives {
     installInstancePrimitive(new SPrimitive("%", universe) {
       @Override
       public void invoke(final VirtualFrame frame,
-          final Interpreter interpreter) throws FrameSlotTypeException {
+          final Interpreter interpreter) {
 
         SNumber op1 = (SNumber) StackUtils.pop(frame);
         SDouble op2 = (SDouble) StackUtils.pop(frame);
@@ -153,7 +152,7 @@ public class DoublePrimitives extends Primitives {
     installInstancePrimitive(new SPrimitive("=", universe) {
       @Override
       public void invoke(final VirtualFrame frame,
-          final Interpreter interpreter) throws FrameSlotTypeException {
+          final Interpreter interpreter) {
 
         SNumber op1 = (SNumber) StackUtils.pop(frame);
         SDouble op2 = (SDouble) StackUtils.pop(frame);
@@ -166,7 +165,7 @@ public class DoublePrimitives extends Primitives {
     installInstancePrimitive(new SPrimitive("<", universe) {
       @Override
       public void invoke(final VirtualFrame frame,
-          final Interpreter interpreter) throws FrameSlotTypeException {
+          final Interpreter interpreter) {
 
         SNumber op1 = (SNumber) StackUtils.pop(frame);
         SDouble op2 = (SDouble) StackUtils.pop(frame);
@@ -180,7 +179,7 @@ public class DoublePrimitives extends Primitives {
     installInstancePrimitive(new SPrimitive("round", universe) {
       @Override
       public void invoke(final VirtualFrame frame,
-          final Interpreter interpreter) throws FrameSlotTypeException {
+          final Interpreter interpreter) {
 
         SDouble rcvr = (SDouble) StackUtils.pop(frame);
 
@@ -194,7 +193,7 @@ public class DoublePrimitives extends Primitives {
     installInstancePrimitive(new SPrimitive("sin", universe) {
       @Override
       public void invoke(final VirtualFrame frame,
-          final Interpreter interpreter) throws FrameSlotTypeException {
+          final Interpreter interpreter) {
 
         SDouble rcvr = (SDouble) StackUtils.pop(frame);
 
@@ -208,7 +207,7 @@ public class DoublePrimitives extends Primitives {
     installInstancePrimitive(new SPrimitive("cos", universe) {
       @Override
       public void invoke(final VirtualFrame frame,
-          final Interpreter interpreter) throws FrameSlotTypeException {
+          final Interpreter interpreter) {
 
         SDouble rcvr = (SDouble) StackUtils.pop(frame);
 
@@ -222,7 +221,7 @@ public class DoublePrimitives extends Primitives {
     installClassPrimitive(new SPrimitive("PositiveInfinity", universe) {
       @Override
       public void invoke(final VirtualFrame frame,
-          final Interpreter interpreter) throws FrameSlotTypeException {
+          final Interpreter interpreter) {
 
         StackUtils.pop(frame);
 

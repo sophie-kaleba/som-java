@@ -24,7 +24,6 @@
 
 package som.vmobjects;
 
-import com.oracle.truffle.api.frame.FrameSlotTypeException;
 import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.nodes.DirectCallNode;
 
@@ -37,11 +36,10 @@ public interface SInvokable {
   boolean isPrimitive();
 
   // Invoke this invokable object in a given frame
-  void indirectInvoke(VirtualFrame frame, Interpreter interpreter)
-      throws FrameSlotTypeException;
+  void indirectInvoke(VirtualFrame frame, Interpreter interpreter);
 
   void directInvoke(VirtualFrame frame, Interpreter interpreter,
-      DirectCallNode callNode) throws FrameSlotTypeException;
+      DirectCallNode callNode);
 
   // Get the signature for this invokable object
   SSymbol getSignature();

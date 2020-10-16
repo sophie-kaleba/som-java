@@ -24,7 +24,6 @@
 
 package som.vmobjects;
 
-import com.oracle.truffle.api.frame.FrameSlotTypeException;
 import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.interop.TruffleObject;
 
@@ -39,7 +38,7 @@ public abstract class SAbstractObject implements TruffleObject {
 
   public void send(final String selectorString, final SAbstractObject[] arguments,
       final Universe universe, final Interpreter interpreter,
-      VirtualFrame frame) throws FrameSlotTypeException {
+      VirtualFrame frame) {
     // Turn the selector string into a selector
     SSymbol selector = universe.symbolFor(selectorString);
 
@@ -60,7 +59,7 @@ public abstract class SAbstractObject implements TruffleObject {
 
   public void sendDoesNotUnderstand(final SSymbol selector,
       final Universe universe, final Interpreter interpreter,
-      VirtualFrame frame) throws FrameSlotTypeException {
+      VirtualFrame frame) {
     // Compute the number of arguments
     int numberOfArguments = selector.getNumberOfSignatureArguments();
 
@@ -81,14 +80,13 @@ public abstract class SAbstractObject implements TruffleObject {
 
   public void sendUnknownGlobal(final SSymbol globalName,
       final Universe universe, final Interpreter interpreter,
-      VirtualFrame frame) throws FrameSlotTypeException {
+      VirtualFrame frame) {
     SAbstractObject[] arguments = {globalName};
     send("unknownGlobal:", arguments, universe, interpreter, frame);
   }
 
   public void sendEscapedBlock(final SBlock block, final Universe universe,
-      final Interpreter interpreter, VirtualFrame frame)
-      throws FrameSlotTypeException {
+      final Interpreter interpreter, VirtualFrame frame) {
     SAbstractObject[] arguments = {block};
     send("escapedBlock:", arguments, universe, interpreter, frame);
   }

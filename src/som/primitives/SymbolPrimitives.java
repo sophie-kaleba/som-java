@@ -24,7 +24,6 @@
 
 package som.primitives;
 
-import com.oracle.truffle.api.frame.FrameSlotTypeException;
 import com.oracle.truffle.api.frame.VirtualFrame;
 
 import som.interpreter.Interpreter;
@@ -48,7 +47,7 @@ public class SymbolPrimitives extends Primitives {
 
       @Override
       public void invoke(final VirtualFrame frame,
-          final Interpreter interpreter) throws FrameSlotTypeException {
+          final Interpreter interpreter) {
         SSymbol self = (SSymbol) StackUtils.pop(frame);
 
         SString value = universe.newString(self.getEmbeddedString());
@@ -61,7 +60,7 @@ public class SymbolPrimitives extends Primitives {
 
       @Override
       public void invoke(final VirtualFrame frame,
-          final Interpreter interpreter) throws FrameSlotTypeException {
+          final Interpreter interpreter) {
 
         SAbstractObject op1 = StackUtils.pop(frame);
         SSymbol op2 = (SSymbol) StackUtils.pop(frame); // self

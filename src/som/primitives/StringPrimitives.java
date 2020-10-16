@@ -25,7 +25,6 @@
 
 package som.primitives;
 
-import com.oracle.truffle.api.frame.FrameSlotTypeException;
 import com.oracle.truffle.api.frame.VirtualFrame;
 
 import som.interpreter.Interpreter;
@@ -50,7 +49,7 @@ public class StringPrimitives extends Primitives {
 
       @Override
       public void invoke(final VirtualFrame frame,
-          final Interpreter interpreter) throws FrameSlotTypeException {
+          final Interpreter interpreter) {
 
         SString argument = (SString) StackUtils.pop(frame);
         SString self = (SString) StackUtils.pop(frame);
@@ -66,7 +65,7 @@ public class StringPrimitives extends Primitives {
 
       @Override
       public void invoke(final VirtualFrame frame,
-          final Interpreter interpreter) throws FrameSlotTypeException {
+          final Interpreter interpreter) {
 
         SString self = (SString) StackUtils.pop(frame);
 
@@ -80,7 +79,7 @@ public class StringPrimitives extends Primitives {
 
       @Override
       public void invoke(final VirtualFrame frame,
-          final Interpreter interpreter) throws FrameSlotTypeException {
+          final Interpreter interpreter) {
 
         SString self = (SString) StackUtils.pop(frame);
 
@@ -94,7 +93,7 @@ public class StringPrimitives extends Primitives {
 
       @Override
       public void invoke(final VirtualFrame frame,
-          final Interpreter interpreter) throws FrameSlotTypeException {
+          final Interpreter interpreter) {
 
         SAbstractObject op1 = StackUtils.pop(frame);
         SString op2 = (SString) StackUtils.pop(frame); // self
@@ -116,7 +115,7 @@ public class StringPrimitives extends Primitives {
 
       @Override
       public void invoke(final VirtualFrame frame,
-          final Interpreter interpreter) throws FrameSlotTypeException {
+          final Interpreter interpreter) {
 
         SInteger end = (SInteger) StackUtils.pop(frame);
         SInteger start = (SInteger) StackUtils.pop(frame);
@@ -142,7 +141,7 @@ public class StringPrimitives extends Primitives {
 
       @Override
       public void invoke(final VirtualFrame frame,
-          final Interpreter interpreter) throws FrameSlotTypeException {
+          final Interpreter interpreter) {
         SString self = (SString) StackUtils.pop(frame);
 
         SInteger value = universe.newInteger(self.getEmbeddedString().hashCode());
@@ -155,7 +154,7 @@ public class StringPrimitives extends Primitives {
 
       @Override
       public void invoke(final VirtualFrame frame,
-          final Interpreter interpreter) throws FrameSlotTypeException {
+          final Interpreter interpreter) {
 
         SString self = (SString) StackUtils.pop(frame);
         String embedded = self.getEmbeddedString();
@@ -182,7 +181,7 @@ public class StringPrimitives extends Primitives {
 
       @Override
       public void invoke(final VirtualFrame frame,
-          final Interpreter interpreter) throws FrameSlotTypeException {
+          final Interpreter interpreter) {
 
         SString self = (SString) StackUtils.pop(frame);
         String embedded = self.getEmbeddedString();
@@ -209,7 +208,7 @@ public class StringPrimitives extends Primitives {
 
       @Override
       public void invoke(final VirtualFrame frame,
-          final Interpreter interpreter) throws FrameSlotTypeException {
+          final Interpreter interpreter) {
 
         SString self = (SString) StackUtils.pop(frame);
         String embedded = self.getEmbeddedString();

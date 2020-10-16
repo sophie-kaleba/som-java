@@ -24,9 +24,12 @@
 
 package som.interpreter;
 
+import java.util.Arrays;
+
+import com.oracle.truffle.api.CompilerAsserts;
 import com.oracle.truffle.api.frame.FrameDescriptor;
 import com.oracle.truffle.api.frame.FrameSlot;
-import com.oracle.truffle.api.frame.FrameSlotTypeException;
+import com.oracle.truffle.api.frame.FrameUtil;
 import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.nodes.ExplodeLoop;
 
@@ -59,18 +62,16 @@ public class StackUtils {
   private static final FrameSlot STACK_POINTER_SLOT   =
       FRAME_DESCRIPTOR.findFrameSlot("stackPointer");
   public static final FrameSlot  STACK_SLOT           =
-      FRAME_DESCRIPTOR.findFrameSlot("stack");;
+      FRAME_DESCRIPTOR.findFrameSlot("stack");
   private static final FrameSlot ON_STACK_MARKER_SLOT =
-      FRAME_DESCRIPTOR.findFrameSlot("onStack");;
+      FRAME_DESCRIPTOR.findFrameSlot("onStack");
 
   public static void initializeStackSlots(final VirtualFrame frame,
       final SMethod method) {
 
     int stackLength = (int) method.getMaximumLengthOfStack();
     SAbstractObject[] stack = new SAbstractObject[stackLength];
-    for (int i = 0; i < stackLength; i++) {
-      stack[i] = Universe.current().nilObject;
-    }
+    Arrays.fill(stack, Universe.current().nilObject);
 
     // TODO - getting the arguments from the frame to put them on stack...
     // could likely do both when putting them in the stack in the first place
@@ -92,17 +93,16 @@ public class StackUtils {
   /***
    * CURRENT STATE OF THE FRAME.
    */
-  public static int getStackPointer(VirtualFrame frame) throws FrameSlotTypeException {
-    return frame.getInt(STACK_POINTER_SLOT);
+  public static int getStackPointer(VirtualFrame frame) {
+    return FrameUtil.getIntSafe(frame, STACK_POINTER_SLOT);
   }
 
-  public static SAbstractObject[] getStack(VirtualFrame frame) throws FrameSlotTypeException {
-    return (SAbstractObject[]) frame.getObject(STACK_SLOT);
+  public static SAbstractObject[] getStack(VirtualFrame frame) {
+    return (SAbstractObject[]) FrameUtil.getObjectSafe(frame, STACK_SLOT);
   }
 
-  public static FrameOnStackMarker getOnStackMarker(VirtualFrame frame)
-      throws FrameSlotTypeException {
-    return (FrameOnStackMarker) frame.getObject(ON_STACK_MARKER_SLOT);
+  public static FrameOnStackMarker getOnStackMarker(VirtualFrame frame) {
+    return (FrameOnStackMarker) FrameUtil.getObjectSafe(frame, ON_STACK_MARKER_SLOT);
   }
 
   public static SMethod getMethod(final VirtualFrame frame) {
@@ -113,12 +113,11 @@ public class StackUtils {
     return (SAbstractObject[]) frame.getArguments()[FrameArguments.ARGUMENTS.ordinal()];
   }
 
-  public static SAbstractObject[] getArguments(VirtualFrame frame, SMethod method)
-      throws FrameSlotTypeException {
+  public static SAbstractObject[] getArguments(VirtualFrame frame, SMethod method) {
     int numArgs = method.getNumberOfArguments();
     SAbstractObject[] arguments = new SAbstractObject[numArgs];
     for (int i = 0; i < numArgs; ++i) {
-      arguments[i] = StackUtils.getRelativeStackElement(frame, numArgs - 1 - i);
+      arguments[i] = getRelativeStackElement(frame, numArgs - 1 - i);
     }
     return arguments;
   }
@@ -145,28 +144,25 @@ public class StackUtils {
   /**
    * will return top of stack if index is 0.
    */
-  public static SAbstractObject getRelativeStackElement(VirtualFrame frame, int index)
-      throws FrameSlotTypeException {
+  public static SAbstractObject getRelativeStackElement(VirtualFrame frame, int index) {
     return getStack(frame)[getStackPointer(frame) - index];
   }
 
   private static SAbstractObject getStackElement(VirtualFrame frame,
-      int index)
-      throws FrameSlotTypeException {
+      int index) {
     return getStack(frame)[index];
   }
 
   // TODO - modify the value on the spot rather than setting the whole stack again
   private static void setStackElement(VirtualFrame frame,
-      int index, SAbstractObject value)
-      throws FrameSlotTypeException {
+      int index, SAbstractObject value) {
 
     SAbstractObject[] stack = getStack(frame);
     stack[index] = value;
     frame.setObject(STACK_SLOT, stack);
   }
 
-  public static SAbstractObject pop(VirtualFrame frame) throws FrameSlotTypeException {
+  public static SAbstractObject pop(VirtualFrame frame) {
     int currentStackPointer = getStackPointer(frame);
 
     SAbstractObject result = getStackElement(frame, currentStackPointer);
@@ -175,7 +171,7 @@ public class StackUtils {
   }
 
   public static void push(VirtualFrame frame,
-      SAbstractObject value) throws FrameSlotTypeException {
+      SAbstractObject value) {
 
     int currentStackPointer = getStackPointer(frame) + 1;
 
@@ -184,7 +180,7 @@ public class StackUtils {
   }
 
   public static void popArgumentsAndPushResult(VirtualFrame frame,
-      final SAbstractObject result, SMethod method) throws FrameSlotTypeException {
+      final SAbstractObject result, SMethod method) {
     int numberOfArguments = method.getNumberOfArguments();
 
     for (int i = 0; i < numberOfArguments; i++) {
@@ -196,15 +192,16 @@ public class StackUtils {
 
   public static SAbstractObject getArgument(final VirtualFrame frame,
       final int index,
-      final int contextLevel)
-      throws FrameSlotTypeException {
+      final int contextLevel) {
     VirtualFrame context = getContext(frame, contextLevel);
     return getStackElement(context, index);
   }
 
   public static void setArgument(final VirtualFrame frame,
       final int index, final int contextLevel,
-      final SAbstractObject value) throws FrameSlotTypeException {
+      final SAbstractObject value) {
+    CompilerAsserts.partialEvaluationConstant(contextLevel);
+
     VirtualFrame context = getContext(frame, contextLevel);
 
     // TODO - add a test for this commented case
@@ -225,8 +222,7 @@ public class StackUtils {
   }
 
   public static SAbstractObject getLocal(final VirtualFrame frame,
-      final int index, final int contextLevel)
-      throws FrameSlotTypeException {
+      final int index, final int contextLevel) {
     VirtualFrame context = getContext(frame, contextLevel);
     SMethod contextMethod = getMethod(context);
     int localOffset = contextMethod.getNumberOfArguments();
@@ -236,8 +232,7 @@ public class StackUtils {
 
   public static void setLocal(final VirtualFrame frame,
       final int index,
-      final int contextLevel, SAbstractObject value)
-      throws FrameSlotTypeException {
+      final int contextLevel, SAbstractObject value) {
     VirtualFrame context = getContext(frame, contextLevel);
     int localOffset = getMethod(context).getNumberOfArguments();
 

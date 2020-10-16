@@ -4,7 +4,6 @@ import com.oracle.truffle.api.CompilerAsserts;
 import com.oracle.truffle.api.CompilerDirectives;
 import com.oracle.truffle.api.CompilerDirectives.CompilationFinal;
 import com.oracle.truffle.api.TruffleLanguage;
-import com.oracle.truffle.api.frame.FrameSlotTypeException;
 import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.nodes.DirectCallNode;
 import com.oracle.truffle.api.profiles.ValueProfile;
@@ -58,7 +57,7 @@ public final class Method extends Invokable {
           return result;
         }
         throw e;
-      } catch (ProgramDefinitionError | FrameSlotTypeException exception) {
+      } catch (ProgramDefinitionError exception) {
         CompilerDirectives.transferToInterpreterAndInvalidate();
         exception.printStackTrace();
         System.exit(1);

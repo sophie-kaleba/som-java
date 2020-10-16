@@ -24,7 +24,6 @@
 
 package som.vmobjects;
 
-import com.oracle.truffle.api.frame.FrameSlotTypeException;
 import com.oracle.truffle.api.frame.MaterializedFrame;
 import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.nodes.IndirectCallNode;
@@ -81,8 +80,9 @@ public class SBlock extends SAbstractObject {
 
     @Override
     public void invoke(final VirtualFrame frame,
-        final Interpreter interpreter) throws FrameSlotTypeException {
+        final Interpreter interpreter) {
 
+      // TODO - see whether I can get the method considered as PE constant
       // Get the block (the receiver) from the stack
       SBlock selfT =
           (SBlock) StackUtils.getRelativeStackElement(frame, numberOfArguments - 1);

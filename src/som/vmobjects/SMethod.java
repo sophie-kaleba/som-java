@@ -31,7 +31,6 @@ import com.oracle.truffle.api.CompilerAsserts;
 import com.oracle.truffle.api.CompilerDirectives.CompilationFinal;
 import com.oracle.truffle.api.Truffle;
 import com.oracle.truffle.api.TruffleLanguage;
-import com.oracle.truffle.api.frame.FrameSlotTypeException;
 import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.nodes.DirectCallNode;
 import com.oracle.truffle.api.nodes.IndirectCallNode;
@@ -152,7 +151,7 @@ public class SMethod extends SAbstractObject implements SInvokable {
 
   @Override
   public void indirectInvoke(VirtualFrame frame,
-      final Interpreter interpreter) throws FrameSlotTypeException {
+      final Interpreter interpreter) {
 
     SAbstractObject[] arguments = StackUtils.getArguments(frame, this);
 
@@ -165,8 +164,7 @@ public class SMethod extends SAbstractObject implements SInvokable {
   }
 
   public void directInvoke(VirtualFrame frame,
-      final Interpreter interpreter, DirectCallNode directCallNode)
-      throws FrameSlotTypeException {
+      final Interpreter interpreter, DirectCallNode directCallNode) {
 
     CompilerAsserts.partialEvaluationConstant(directCallNode);
 

@@ -25,7 +25,6 @@
 
 package som.primitives;
 
-import com.oracle.truffle.api.frame.FrameSlotTypeException;
 import com.oracle.truffle.api.frame.VirtualFrame;
 
 import som.interpreter.Interpreter;
@@ -53,7 +52,7 @@ public class ObjectPrimitives extends Primitives {
     installInstancePrimitive(new SPrimitive("==", universe) {
       @Override
       public void invoke(final VirtualFrame frame,
-          final Interpreter interpreter) throws FrameSlotTypeException {
+          final Interpreter interpreter) {
 
         SAbstractObject op1 = StackUtils.pop(frame);
         SAbstractObject op2 = StackUtils.pop(frame);
@@ -70,7 +69,7 @@ public class ObjectPrimitives extends Primitives {
     installInstancePrimitive(new SPrimitive("hashcode", universe) {
       @Override
       public void invoke(final VirtualFrame frame,
-          final Interpreter interpreter) throws FrameSlotTypeException {
+          final Interpreter interpreter) {
         SAbstractObject self = StackUtils.pop(frame);
 
         SInteger hashCode = universe.newInteger(self.hashCode());
@@ -82,7 +81,7 @@ public class ObjectPrimitives extends Primitives {
     installInstancePrimitive(new SPrimitive("objectSize", universe) {
       @Override
       public void invoke(final VirtualFrame frame,
-          final Interpreter interpreter) throws FrameSlotTypeException {
+          final Interpreter interpreter) {
 
         SAbstractObject self = StackUtils.pop(frame);
 
@@ -105,7 +104,7 @@ public class ObjectPrimitives extends Primitives {
     installInstancePrimitive(new SPrimitive("perform:", universe) {
       @Override
       public void invoke(final VirtualFrame frame,
-          final Interpreter interpreter) throws FrameSlotTypeException {
+          final Interpreter interpreter) {
 
         SAbstractObject arg = StackUtils.pop(frame);
         SAbstractObject self = StackUtils.getRelativeStackElement(frame, 0);
@@ -119,7 +118,7 @@ public class ObjectPrimitives extends Primitives {
     installInstancePrimitive(new SPrimitive("perform:inSuperclass:", universe) {
       @Override
       public void invoke(final VirtualFrame frame,
-          final Interpreter interpreter) throws FrameSlotTypeException {
+          final Interpreter interpreter) {
 
         SAbstractObject arg2 = StackUtils.pop(frame);
         SAbstractObject arg = StackUtils.pop(frame);
@@ -136,7 +135,7 @@ public class ObjectPrimitives extends Primitives {
     installInstancePrimitive(new SPrimitive("perform:withArguments:", universe) {
       @Override
       public void invoke(final VirtualFrame frame,
-          final Interpreter interpreter) throws FrameSlotTypeException {
+          final Interpreter interpreter) {
 
         SAbstractObject arg2 = StackUtils.pop(frame);
         SAbstractObject arg = StackUtils.pop(frame);
@@ -157,7 +156,7 @@ public class ObjectPrimitives extends Primitives {
     installInstancePrimitive(new SPrimitive("instVarAt:", universe) {
       @Override
       public void invoke(final VirtualFrame frame,
-          final Interpreter interpreter) throws FrameSlotTypeException {
+          final Interpreter interpreter) {
 
         SAbstractObject arg = StackUtils.pop(frame);
         SObject self = (SObject) StackUtils.pop(frame);
@@ -170,7 +169,7 @@ public class ObjectPrimitives extends Primitives {
     installInstancePrimitive(new SPrimitive("instVarAt:put:", universe) {
       @Override
       public void invoke(final VirtualFrame frame,
-          final Interpreter interpreter) throws FrameSlotTypeException {
+          final Interpreter interpreter) {
 
         SAbstractObject val = StackUtils.pop(frame);
         SAbstractObject arg = StackUtils.pop(frame);
@@ -185,7 +184,7 @@ public class ObjectPrimitives extends Primitives {
     installInstancePrimitive(new SPrimitive("class", universe) {
       @Override
       public void invoke(final VirtualFrame frame,
-          final Interpreter interpreter) throws FrameSlotTypeException {
+          final Interpreter interpreter) {
         SAbstractObject self = StackUtils.pop(frame);
 
         StackUtils.push(frame, self.getSOMClass(universe));

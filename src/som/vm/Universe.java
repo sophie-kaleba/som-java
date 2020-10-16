@@ -40,7 +40,6 @@ import com.oracle.truffle.api.Truffle;
 import com.oracle.truffle.api.TruffleLanguage;
 import com.oracle.truffle.api.frame.FrameDescriptor;
 import com.oracle.truffle.api.frame.FrameSlotKind;
-import com.oracle.truffle.api.frame.FrameSlotTypeException;
 import com.oracle.truffle.api.frame.MaterializedFrame;
 import com.oracle.truffle.api.frame.VirtualFrame;
 
@@ -115,7 +114,7 @@ public final class Universe {
   }
 
   public SAbstractObject interpret(String[] arguments)
-      throws ProgramDefinitionError, FrameSlotTypeException {
+      throws ProgramDefinitionError {
     // Check for command line switches
     arguments = handleArguments(arguments);
 
@@ -307,7 +306,7 @@ public final class Universe {
    * @throws ProgramDefinitionError
    */
   public SAbstractObject interpret(final String className,
-      final String selector) throws ProgramDefinitionError, FrameSlotTypeException {
+      final String selector) throws ProgramDefinitionError {
     setupClassPath(this.testClasspath);
     initializeObjectSystem();
 
@@ -325,7 +324,7 @@ public final class Universe {
   }
 
   private SAbstractObject initialize(final String[] arguments)
-      throws ProgramDefinitionError, FrameSlotTypeException {
+      throws ProgramDefinitionError {
     SAbstractObject objectSystem = initializeObjectSystem();
 
     // Start the shell if no filename is given
@@ -376,8 +375,7 @@ public final class Universe {
   }
 
   public SAbstractObject interpretMethod(final SAbstractObject receiver,
-      final SInvokable invokable, final SArray arguments, final String[] args)
-      throws FrameSlotTypeException {
+      final SInvokable invokable, final SArray arguments, final String[] args) {
     SMethod bootstrapMethod = createBootstrapMethod();
 
     // Create a fake bootstrap frame with the system object on the stack

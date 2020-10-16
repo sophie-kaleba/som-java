@@ -24,7 +24,6 @@
 
 package som.primitives;
 
-import com.oracle.truffle.api.frame.FrameSlotTypeException;
 import com.oracle.truffle.api.frame.VirtualFrame;
 
 import som.interpreter.Interpreter;
@@ -50,7 +49,7 @@ public class ClassPrimitives extends Primitives {
 
       @Override
       public void invoke(VirtualFrame frame,
-          final Interpreter interpreter) throws FrameSlotTypeException {
+          final Interpreter interpreter) {
         SClass selfT = (SClass) StackUtils.pop(frame);
 
         SAbstractObject instance = universe.newInstance(selfT);
@@ -63,7 +62,7 @@ public class ClassPrimitives extends Primitives {
 
       @Override
       public void invoke(VirtualFrame frame,
-          final Interpreter interpreter) throws FrameSlotTypeException {
+          final Interpreter interpreter) {
 
         SClass selfT = (SClass) StackUtils.pop(frame);
 
@@ -77,7 +76,7 @@ public class ClassPrimitives extends Primitives {
 
       @Override
       public void invoke(VirtualFrame frame,
-          final Interpreter interpreter) throws FrameSlotTypeException {
+          final Interpreter interpreter) {
 
         SClass selfT = (SClass) StackUtils.pop(frame);
 
@@ -91,7 +90,7 @@ public class ClassPrimitives extends Primitives {
 
       @Override
       public void invoke(VirtualFrame frame,
-          final Interpreter interpreter) throws FrameSlotTypeException {
+          final Interpreter interpreter) {
 
         SClass selfT = (SClass) StackUtils.pop(frame);
 
@@ -105,7 +104,7 @@ public class ClassPrimitives extends Primitives {
 
       @Override
       public void invoke(VirtualFrame frame,
-          final Interpreter interpreter) throws FrameSlotTypeException {
+          final Interpreter interpreter) {
 
         SClass selfT = (SClass) StackUtils.pop(frame);
 

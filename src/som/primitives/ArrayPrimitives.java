@@ -24,7 +24,6 @@
 
 package som.primitives;
 
-import com.oracle.truffle.api.frame.FrameSlotTypeException;
 import com.oracle.truffle.api.frame.VirtualFrame;
 
 import som.interpreter.Interpreter;
@@ -46,7 +45,7 @@ public class ArrayPrimitives extends Primitives {
     installInstancePrimitive(new SPrimitive("at:", universe) {
 
       public void invoke(VirtualFrame frame,
-          final Interpreter interpreter) throws FrameSlotTypeException {
+          final Interpreter interpreter) {
 
         SInteger index = (SInteger) StackUtils.pop(frame);
 
@@ -62,7 +61,7 @@ public class ArrayPrimitives extends Primitives {
     installInstancePrimitive(new SPrimitive("at:put:", universe) {
 
       public void invoke(VirtualFrame frame,
-          final Interpreter interpreter) throws FrameSlotTypeException {
+          final Interpreter interpreter) {
 
         SAbstractObject value = StackUtils.pop(frame);
         SInteger index = (SInteger) StackUtils.pop(frame);
@@ -75,7 +74,7 @@ public class ArrayPrimitives extends Primitives {
     installInstancePrimitive(new SPrimitive("length", universe) {
 
       public void invoke(VirtualFrame frame,
-          final Interpreter interpreter) throws FrameSlotTypeException {
+          final Interpreter interpreter) {
 
         SArray self = (SArray) StackUtils.pop(frame);
 
@@ -89,7 +88,7 @@ public class ArrayPrimitives extends Primitives {
     installClassPrimitive(new SPrimitive("new:", universe) {
 
       public void invoke(VirtualFrame frame,
-          final Interpreter interpreter) throws FrameSlotTypeException {
+          final Interpreter interpreter) {
 
         SInteger length = (SInteger) StackUtils.pop(frame);
 

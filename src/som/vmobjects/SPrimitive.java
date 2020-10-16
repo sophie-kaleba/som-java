@@ -25,7 +25,6 @@
 
 package som.vmobjects;
 
-import com.oracle.truffle.api.frame.FrameSlotTypeException;
 import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.nodes.DirectCallNode;
 
@@ -68,23 +67,15 @@ public abstract class SPrimitive extends SAbstractObject implements SInvokable {
   }
 
   public abstract void invoke(VirtualFrame frame,
-      Interpreter interpreter) throws FrameSlotTypeException;
+      Interpreter interpreter);
 
   public void indirectInvoke(VirtualFrame frame, Interpreter interpreter) {
-    try {
-      invoke(frame, interpreter);
-    } catch (FrameSlotTypeException e) {
-      e.printStackTrace();
-    }
+    invoke(frame, interpreter);
   }
 
   public void directInvoke(VirtualFrame frame, Interpreter interpreter,
       DirectCallNode callNode) {
-    try {
-      invoke(frame, interpreter);
-    } catch (FrameSlotTypeException e) {
-      e.printStackTrace();
-    }
+    invoke(frame, interpreter);
   }
 
   @Override

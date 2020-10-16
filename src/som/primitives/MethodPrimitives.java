@@ -1,6 +1,5 @@
 package som.primitives;
 
-import com.oracle.truffle.api.frame.FrameSlotTypeException;
 import com.oracle.truffle.api.frame.VirtualFrame;
 
 import som.interpreter.Interpreter;
@@ -23,7 +22,7 @@ public class MethodPrimitives extends Primitives {
 
       @Override
       public void invoke(final VirtualFrame frame,
-          final Interpreter interpreter) throws FrameSlotTypeException {
+          final Interpreter interpreter) {
         SMethod self = (SMethod) StackUtils.pop(frame);
 
         SClass sclass = self.getHolder();
@@ -36,7 +35,7 @@ public class MethodPrimitives extends Primitives {
 
       @Override
       public void invoke(final VirtualFrame frame,
-          final Interpreter interpreter) throws FrameSlotTypeException {
+          final Interpreter interpreter) {
         SMethod self = (SMethod) StackUtils.pop(frame);
 
         SSymbol signature = self.getSignature();

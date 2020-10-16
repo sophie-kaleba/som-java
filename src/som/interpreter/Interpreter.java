@@ -46,7 +46,6 @@ import static som.interpreter.Bytecodes.getBytecodeLength;
 import com.oracle.truffle.api.CompilerAsserts;
 import com.oracle.truffle.api.CompilerDirectives;
 import com.oracle.truffle.api.Truffle;
-import com.oracle.truffle.api.frame.FrameSlotTypeException;
 import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.nodes.DirectCallNode;
 import com.oracle.truffle.api.nodes.ExplodeLoop;
@@ -74,8 +73,7 @@ public class Interpreter {
     this.universe = universe;
   }
 
-  private void doDup(final VirtualFrame frame)
-      throws FrameSlotTypeException {
+  private void doDup(final VirtualFrame frame) {
     SAbstractObject value = StackUtils.getRelativeStackElement(frame, 0);
 
     StackUtils.push(frame, value);
@@ -83,28 +81,26 @@ public class Interpreter {
 
   private void doPushLocal(final int bytecodeIndex,
       final VirtualFrame frame,
-      final SMethod method) throws FrameSlotTypeException {
+      final SMethod method) {
 
     SAbstractObject value = StackUtils.getLocal(frame,
         method.getBytecode(bytecodeIndex + 1),
         method.getBytecode(bytecodeIndex + 2));
 
     StackUtils.push(frame, value);
-
   }
 
   private void doPushArgument(final int bytecodeIndex, final VirtualFrame frame,
-      final SMethod method) throws FrameSlotTypeException {
+      final SMethod method) {
     SAbstractObject value =
         StackUtils.getArgument(frame, method.getBytecode(bytecodeIndex + 1),
             method.getBytecode(bytecodeIndex + 2));
 
     StackUtils.push(frame, value);
-
   }
 
   private void doPushField(final int bytecodeIndex,
-      final VirtualFrame frame, final SMethod method) throws FrameSlotTypeException {
+      final VirtualFrame frame, final SMethod method) {
     int fieldIndex = method.getBytecode(bytecodeIndex + 1);
     SAbstractObject value = ((SObject) getSelf(frame, method)).getField(fieldIndex);
 
@@ -113,7 +109,7 @@ public class Interpreter {
 
   private void doPushBlock(final int bytecodeIndex,
       final VirtualFrame frame, final SMethod method)
-      throws ProgramDefinitionError, FrameSlotTypeException {
+      throws ProgramDefinitionError {
 
     SMethod blockMethod = (SMethod) method.getConstant(bytecodeIndex);
     SBlock block = universe.newBlock(blockMethod,
@@ -124,7 +120,7 @@ public class Interpreter {
 
   private void doPushConstant(final int bytecodeIndex,
       final VirtualFrame frame,
-      final SMethod method) throws FrameSlotTypeException {
+      final SMethod method) {
 
     StackUtils.push(frame,
         method.getConstant(bytecodeIndex));
@@ -132,7 +128,7 @@ public class Interpreter {
 
   private void doPushGlobal(final int bytecodeIndex,
       final VirtualFrame frame,
-      final SMethod method) throws FrameSlotTypeException {
+      final SMethod method) {
 
     SSymbol globalName = (SSymbol) method.getConstant(bytecodeIndex);
     SAbstractObject global = universe.getGlobal(globalName);
@@ -148,38 +144,32 @@ public class Interpreter {
     }
   }
 
-  private void doPop(final VirtualFrame frame)
-      throws FrameSlotTypeException {
-
+  private void doPop(final VirtualFrame frame) {
     StackUtils.pop(frame);
-
   }
 
   private void doPopLocal(final int bytecodeIndex, final VirtualFrame frame,
-      final SMethod method) throws FrameSlotTypeException {
-
+      final SMethod method) {
     SAbstractObject value = StackUtils.pop(frame);
 
     StackUtils.setLocal(frame,
         method.getBytecode(bytecodeIndex + 1), method.getBytecode(bytecodeIndex + 2),
         value);
-
   }
 
   private void doPopArgument(final int bytecodeIndex,
       final VirtualFrame frame,
-      final SMethod method) throws FrameSlotTypeException {
+      final SMethod method) {
 
     SAbstractObject value = StackUtils.pop(frame);
 
     StackUtils.setArgument(frame,
         method.getBytecode(bytecodeIndex + 1), method.getBytecode(bytecodeIndex + 2),
         value);
-
   }
 
   private void doPopField(final int bytecodeIndex,
-      final VirtualFrame frame, final SMethod method) throws FrameSlotTypeException {
+      final VirtualFrame frame, final SMethod method) {
     int fieldIndex = method.getBytecode(bytecodeIndex + 1);
 
     ((SObject) getSelf(frame, method)).setField(fieldIndex, StackUtils.pop(frame));
@@ -187,7 +177,7 @@ public class Interpreter {
 
   private void doSuperSend(final int bytecodeIndex,
       final VirtualFrame frame,
-      final SMethod method) throws FrameSlotTypeException {
+      final SMethod method) {
     SSymbol signature = (SSymbol) method.getConstant(bytecodeIndex);
 
     SClass holderSuper = (SClass) method.getHolder().getSuperClass();
@@ -206,13 +196,12 @@ public class Interpreter {
     }
   }
 
-  private SAbstractObject doReturnLocal(final VirtualFrame frame)
-      throws FrameSlotTypeException {
+  private SAbstractObject doReturnLocal(final VirtualFrame frame) {
     return StackUtils.pop(frame);
   }
 
   private SAbstractObject doReturnNonLocal(final VirtualFrame frame, final SMethod method)
-      throws ReturnException, FrameSlotTypeException {
+      throws ReturnException {
 
     SAbstractObject value = StackUtils.pop(frame);
 
@@ -249,7 +238,7 @@ public class Interpreter {
 
   private void doSend(final int bytecodeIndex,
       final VirtualFrame frame,
-      final SMethod method) throws FrameSlotTypeException {
+      final SMethod method) {
     SSymbol signature = (SSymbol) method.getConstant(bytecodeIndex);
 
     int numberOfArguments = signature.getNumberOfSignatureArguments();
@@ -267,13 +256,12 @@ public class Interpreter {
     send(signature,
         receiverClassValueProfile.profile(receiver).getSOMClass(universe),
         bytecodeIndex, frame, method);
-
   }
 
   @ExplodeLoop(kind = ExplodeLoop.LoopExplosionKind.MERGE_EXPLODE)
   public SAbstractObject start(final VirtualFrame frame,
       final SMethod method)
-      throws ReturnException, ProgramDefinitionError, FrameSlotTypeException {
+      throws ReturnException, ProgramDefinitionError {
 
     int bytecodeIndex = 0;
 
@@ -387,8 +375,7 @@ public class Interpreter {
     }
   }
 
-  public SAbstractObject getSelf(final VirtualFrame frame, final SMethod method)
-      throws FrameSlotTypeException {
+  public SAbstractObject getSelf(final VirtualFrame frame, final SMethod method) {
     // Get the self object from the interpreter
     VirtualFrame outerContext = StackUtils.getContext(frame, method.getContextLevel());
     return StackUtils.getArgument(outerContext, 0, 0);
@@ -396,7 +383,7 @@ public class Interpreter {
 
   private void send(final SSymbol selector, final SClass receiverClass,
       final int bytecodeIndex, final VirtualFrame frame,
-      final SMethod method) throws FrameSlotTypeException {
+      final SMethod method) {
     // First try the inline cache
     SInvokable invokableWithoutCacheHit = null;
 
@@ -442,11 +429,10 @@ public class Interpreter {
     }
     CompilerDirectives.transferToInterpreterAndInvalidate();
     invokeWithoutCacheHit(selector, frame, invokableWithoutCacheHit);
-
   }
 
   private void invokeWithoutCacheHit(SSymbol selector, VirtualFrame frame,
-      SInvokable invokableWithoutCacheHit) throws FrameSlotTypeException {
+      SInvokable invokableWithoutCacheHit) {
     if (invokableWithoutCacheHit != null) {
       invokableWithoutCacheHit.indirectInvoke(frame, this);
     } else {
