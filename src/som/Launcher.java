@@ -6,7 +6,6 @@ import java.io.PrintStream;
 import org.graalvm.polyglot.Context;
 import org.graalvm.polyglot.PolyglotException;
 import org.graalvm.polyglot.Source;
-import org.graalvm.polyglot.Value;
 
 
 public class Launcher {
@@ -29,7 +28,7 @@ public class Launcher {
 
     // Try to evaluate the source code
     try {
-      Value result = context.eval(source);
+      context.eval(source);
       return 0;
     } catch (PolyglotException ex) {
       if (ex.isInternalError()) {

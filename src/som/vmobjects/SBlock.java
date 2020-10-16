@@ -24,8 +24,6 @@
 
 package som.vmobjects;
 
-import java.util.Objects;
-
 import com.oracle.truffle.api.frame.FrameSlotTypeException;
 import com.oracle.truffle.api.frame.MaterializedFrame;
 import com.oracle.truffle.api.frame.VirtualFrame;
@@ -70,24 +68,6 @@ public class SBlock extends SAbstractObject {
   public static SPrimitive getEvaluationPrimitive(int numberOfArguments,
       final Universe universe) {
     return new Evaluation(numberOfArguments, universe);
-  }
-
-  @Override
-  public boolean equals(Object o) {
-    if (this == o) {
-      return true;
-    }
-    if (o == null || getClass() != o.getClass()) {
-      return false;
-    }
-    SBlock sBlock = (SBlock) o;
-    return Objects.equals(method, sBlock.method) &&
-        Objects.equals(blockClass, sBlock.blockClass);
-  }
-
-  @Override
-  public int hashCode() {
-    return Objects.hash(method, blockClass, materializedContext);
   }
 
   public static class Evaluation extends SPrimitive {

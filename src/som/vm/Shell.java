@@ -35,10 +35,8 @@ import som.interpreter.StackUtils;
 import som.vmobjects.SAbstractObject;
 import som.vmobjects.SClass;
 import som.vmobjects.SInvokable;
-import som.vmobjects.SMethod;
 
 
-// TODO - adapt the shell to truffle frames
 public class Shell {
 
   private final Universe    universe;
@@ -47,12 +45,6 @@ public class Shell {
   public Shell(final Universe universe, final Interpreter interpreter) {
     this.universe = universe;
     this.interpreter = interpreter;
-  }
-
-  private SMethod bootstrapMethod;
-
-  public void setBootstrapMethod(SMethod method) {
-    bootstrapMethod = method;
   }
 
   public SAbstractObject start(VirtualFrame frame) {
@@ -93,27 +85,22 @@ public class Shell {
           // Create and push a new instance of our class on the stack
           myObject = universe.newInstance(myClass);
           StackUtils.push(frame, myObject);
-          // frame.push(myObject);
 
           // Push the old value of "it" on the stack
           StackUtils.push(frame, it);
-          // frame.push(it);
 
           // Lookup the run: method
           SInvokable initialize = myClass.lookupInvokable(
               universe.symbolFor("run:"));
 
-          // TODO - make the shell use truffle frames
           // Invoke the run method
           initialize.indirectInvoke(frame, interpreter);
 
           // Save the result of the run method
           it = StackUtils.pop(frame);
-          // it = frame.pop();
         }
       } catch (Exception e) {
         Universe.errorPrintln("Caught exception: " + e.getMessage());
-        // Universe.errorPrintln("" + frame.getPreviousFrame());
       }
     }
   }

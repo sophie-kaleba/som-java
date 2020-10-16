@@ -158,7 +158,7 @@ public class StackUtils {
 
   // TODO - modify the value on the spot rather than setting the whole stack again
   private static void setStackElement(VirtualFrame frame,
-      final FrameSlot executionStackSlot, int index, SAbstractObject value)
+      int index, SAbstractObject value)
       throws FrameSlotTypeException {
 
     SAbstractObject[] stack = getStack(frame);
@@ -179,7 +179,7 @@ public class StackUtils {
 
     int currentStackPointer = getStackPointer(frame) + 1;
 
-    setStackElement(frame, STACK_SLOT, currentStackPointer, value);
+    setStackElement(frame, currentStackPointer, value);
     setStackPointer(frame, currentStackPointer);
   }
 
@@ -209,7 +209,7 @@ public class StackUtils {
 
     // TODO - add a test for this commented case
     // FrameSlot currentStackSlot = getCurrentMethod(frame).getStackSlot();
-    setStackElement(context, STACK_SLOT, index, value);
+    setStackElement(context, index, value);
   }
 
   @ExplodeLoop
@@ -241,7 +241,7 @@ public class StackUtils {
     VirtualFrame context = getContext(frame, contextLevel);
     int localOffset = getMethod(context).getNumberOfArguments();
 
-    setStackElement(context, STACK_SLOT, localOffset + index, value);
+    setStackElement(context, localOffset + index, value);
   }
 
 }
