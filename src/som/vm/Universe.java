@@ -320,7 +320,7 @@ public final class Universe {
       throw new RuntimeException("Lookup of " + className + ">>#" + selector + " failed");
     }
 
-    return interpretMethod(clazz, initialize, null, null);
+    return interpretMethod(clazz, initialize, null);
   }
 
   private SAbstractObject initialize(final String[] arguments)
@@ -331,7 +331,7 @@ public final class Universe {
     if (arguments.length == 0) {
       Shell shell = new Shell(this, interpreter);
       SMethod bootstrapMethod = createBootstrapMethod();
-      VirtualFrame bootstrapFrame = createBootstrapFrame(null, null, bootstrapMethod, null);
+      VirtualFrame bootstrapFrame = createBootstrapFrame(null, null, bootstrapMethod);
       return shell.start(bootstrapFrame);
     }
 
@@ -342,7 +342,7 @@ public final class Universe {
     SArray argumentsArray = newArray(arguments);
 
     return interpretMethod(objectSystem, initialize,
-        argumentsArray, arguments);
+        argumentsArray);
   }
 
   public SMethod createBootstrapMethod() {
@@ -354,16 +354,14 @@ public final class Universe {
     return bootstrapMethod;
   }
 
-  // TODO - fix
-  public static VirtualFrame createBootstrapFrame(SAbstractObject receiver, String[] args,
-      SMethod bootstrapMethod, SArray somArgs) {
-
-    SAbstractObject[] arguments = new SAbstractObject[] {receiver, somArgs};
+  public static VirtualFrame createBootstrapFrame(SAbstractObject receiver, SArray args,
+      SMethod bootstrapMethod) {
+    Object[] arguments = new Object[] {receiver, args};
 
     VirtualFrame bootstrapFrame =
         Truffle.getRuntime().createVirtualFrame(arguments, StackUtils.FRAME_DESCRIPTOR);
 
-    int stackLength = (int) bootstrapMethod.getMaximumLengthOfStack();
+    int stackLength = bootstrapMethod.getMaximumLengthOfStack();
     SAbstractObject[] stack = new SAbstractObject[stackLength];
     for (int i = 0; i < stackLength; i++) {
       stack[i] = Universe.current().nilObject;
@@ -377,12 +375,12 @@ public final class Universe {
   }
 
   public SAbstractObject interpretMethod(final SAbstractObject receiver,
-      final SInvokable invokable, final SArray arguments, final String[] args) {
+      final SInvokable invokable, final SArray arguments) {
     SMethod bootstrapMethod = createBootstrapMethod();
 
     // Create a fake bootstrap frame with the system object on the stack
     VirtualFrame bootstrapFrame =
-        createBootstrapFrame(receiver, args, bootstrapMethod, arguments);
+        createBootstrapFrame(receiver, arguments, bootstrapMethod);
     StackUtils.push(bootstrapFrame, receiver);
 
     if (arguments != null) {
@@ -390,9 +388,7 @@ public final class Universe {
     }
 
     invokable.indirectInvoke(bootstrapFrame, interpreter);
-
     return StackUtils.getRelativeStackElement(bootstrapFrame, 0);
-
   }
 
   @TruffleBoundary
