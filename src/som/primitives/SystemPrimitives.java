@@ -49,12 +49,9 @@ public class SystemPrimitives extends Primitives {
 
       public void invoke(final VirtualFrame frame,
           final Interpreter interpreter) {
-
         SSymbol argument = (SSymbol) StackUtils.pop(frame);
         StackUtils.pop(frame);
-
         SClass result = null;
-
         try {
           result = universe.loadClass(argument);
         } catch (ProgramDefinitionError e) {
@@ -69,7 +66,6 @@ public class SystemPrimitives extends Primitives {
       public void invoke(final VirtualFrame frame,
           final Interpreter interpreter) {
         SInteger error = (SInteger) StackUtils.pop(frame);
-
         universe.exit(error.getEmbeddedInteger());
       }
     });
@@ -78,10 +74,8 @@ public class SystemPrimitives extends Primitives {
 
       public void invoke(final VirtualFrame frame,
           final Interpreter interpreter) {
-
         SSymbol argument = (SSymbol) StackUtils.pop(frame);
         StackUtils.pop(frame);
-
         SAbstractObject result = universe.getGlobal(argument);
         StackUtils.push(frame, result != null ? result : universe.nilObject);
       }
@@ -91,10 +85,8 @@ public class SystemPrimitives extends Primitives {
 
       public void invoke(final VirtualFrame frame,
           final Interpreter interpreter) {
-
         SAbstractObject value = StackUtils.pop(frame);
         SSymbol argument = (SSymbol) StackUtils.pop(frame);
-
         universe.setGlobal(argument, value);
       }
     });
@@ -104,7 +96,6 @@ public class SystemPrimitives extends Primitives {
       public void invoke(final VirtualFrame frame,
           final Interpreter interpreter) {
         SString argument = (SString) StackUtils.pop(frame);
-
         Universe.print(argument.getEmbeddedString());
       }
     });
@@ -123,14 +114,9 @@ public class SystemPrimitives extends Primitives {
 
       public void invoke(final VirtualFrame frame,
           final Interpreter interpreter) {
-
         StackUtils.pop(frame);
-
         int time = (int) (System.currentTimeMillis() - startTime);
-        SInteger value = universe.newInteger(time);
-
-        StackUtils.push(frame, value);
-
+        StackUtils.push(frame, universe.newInteger(time));
       }
     });
 
@@ -138,14 +124,9 @@ public class SystemPrimitives extends Primitives {
 
       public void invoke(final VirtualFrame frame,
           final Interpreter interpreter) {
-
         StackUtils.pop(frame);
-
         int time = (int) (System.nanoTime() / 1000L - startMicroTime);
-        SInteger value = universe.newInteger(time);
-
-        StackUtils.push(frame, value);
-
+        StackUtils.push(frame, universe.newInteger(time));
       }
     });
 
@@ -153,14 +134,11 @@ public class SystemPrimitives extends Primitives {
 
       public void invoke(final VirtualFrame frame,
           final Interpreter interpreter) {
-
         StackUtils.pop(frame);
         System.gc();
         StackUtils.push(frame, universe.trueObject);
-
       }
     });
-
   }
 
   private long startTime;

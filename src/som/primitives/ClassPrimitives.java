@@ -29,12 +29,8 @@ import com.oracle.truffle.api.frame.VirtualFrame;
 import som.interpreter.Interpreter;
 import som.interpreter.StackUtils;
 import som.vm.Universe;
-import som.vmobjects.SAbstractObject;
-import som.vmobjects.SArray;
 import som.vmobjects.SClass;
-import som.vmobjects.SObject;
 import som.vmobjects.SPrimitive;
-import som.vmobjects.SSymbol;
 
 
 public class ClassPrimitives extends Primitives {
@@ -51,10 +47,7 @@ public class ClassPrimitives extends Primitives {
       public void invoke(VirtualFrame frame,
           final Interpreter interpreter) {
         SClass selfT = (SClass) StackUtils.pop(frame);
-
-        SAbstractObject instance = universe.newInstance(selfT);
-
-        StackUtils.push(frame, instance);
+        StackUtils.push(frame, universe.newInstance(selfT));
       }
     });
 
@@ -63,12 +56,8 @@ public class ClassPrimitives extends Primitives {
       @Override
       public void invoke(VirtualFrame frame,
           final Interpreter interpreter) {
-
         SClass selfT = (SClass) StackUtils.pop(frame);
-
-        SSymbol name = selfT.getName();
-
-        StackUtils.push(frame, name);
+        StackUtils.push(frame, selfT.getName());
       }
     });
 
@@ -77,12 +66,8 @@ public class ClassPrimitives extends Primitives {
       @Override
       public void invoke(VirtualFrame frame,
           final Interpreter interpreter) {
-
         SClass selfT = (SClass) StackUtils.pop(frame);
-
-        SObject superClass = selfT.getSuperClass();
-
-        StackUtils.push(frame, superClass);
+        StackUtils.push(frame, selfT.getSuperClass());
       }
     });
 
@@ -91,12 +76,8 @@ public class ClassPrimitives extends Primitives {
       @Override
       public void invoke(VirtualFrame frame,
           final Interpreter interpreter) {
-
         SClass selfT = (SClass) StackUtils.pop(frame);
-
-        SArray instanceFields = selfT.getInstanceFields();
-
-        StackUtils.push(frame, instanceFields);
+        StackUtils.push(frame, selfT.getInstanceFields());
       }
     });
 
@@ -105,11 +86,8 @@ public class ClassPrimitives extends Primitives {
       @Override
       public void invoke(VirtualFrame frame,
           final Interpreter interpreter) {
-
         SClass selfT = (SClass) StackUtils.pop(frame);
-
-        SArray instanceInvokable = selfT.getInstanceInvokables();
-        StackUtils.push(frame, instanceInvokable);
+        StackUtils.push(frame, selfT.getInstanceInvokables());
       }
     });
   }

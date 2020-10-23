@@ -53,13 +53,11 @@ public class ObjectPrimitives extends Primitives {
       @Override
       public void invoke(final VirtualFrame frame,
           final Interpreter interpreter) {
-
         SAbstractObject op1 = StackUtils.pop(frame);
         SAbstractObject op2 = StackUtils.pop(frame);
 
         if (op1 == op2) {
           StackUtils.push(frame, universe.trueObject);
-
         } else {
           StackUtils.push(frame, universe.falseObject);
         }
@@ -71,10 +69,7 @@ public class ObjectPrimitives extends Primitives {
       public void invoke(final VirtualFrame frame,
           final Interpreter interpreter) {
         SAbstractObject self = StackUtils.pop(frame);
-
-        SInteger hashCode = universe.newInteger(self.hashCode());
-
-        StackUtils.push(frame, hashCode);
+        StackUtils.push(frame, universe.newInteger(self.hashCode()));
       }
     });
 
@@ -82,7 +77,6 @@ public class ObjectPrimitives extends Primitives {
       @Override
       public void invoke(final VirtualFrame frame,
           final Interpreter interpreter) {
-
         SAbstractObject self = StackUtils.pop(frame);
 
         // each object holds its class as an implicit member that contributes to its size
@@ -93,11 +87,7 @@ public class ObjectPrimitives extends Primitives {
         if (self instanceof SObject) {
           size += ((SObject) self).getNumberOfFields();
         }
-
-        SInteger value = universe.newInteger(size);
-
-        StackUtils.push(frame, value);
-
+        StackUtils.push(frame, universe.newInteger(size));
       }
     });
 
@@ -105,7 +95,6 @@ public class ObjectPrimitives extends Primitives {
       @Override
       public void invoke(final VirtualFrame frame,
           final Interpreter interpreter) {
-
         SAbstractObject arg = StackUtils.pop(frame);
         SAbstractObject self = StackUtils.getRelativeStackElement(frame, 0);
         SSymbol selector = (SSymbol) arg;
@@ -119,7 +108,6 @@ public class ObjectPrimitives extends Primitives {
       @Override
       public void invoke(final VirtualFrame frame,
           final Interpreter interpreter) {
-
         SAbstractObject arg2 = StackUtils.pop(frame);
         SAbstractObject arg = StackUtils.pop(frame);
 
@@ -127,7 +115,6 @@ public class ObjectPrimitives extends Primitives {
         SClass clazz = (SClass) arg2;
 
         SInvokable invokable = clazz.lookupInvokable(selector);
-
         invokable.indirectInvoke(frame, interpreter);
       }
     });
@@ -136,7 +123,6 @@ public class ObjectPrimitives extends Primitives {
       @Override
       public void invoke(final VirtualFrame frame,
           final Interpreter interpreter) {
-
         SAbstractObject arg2 = StackUtils.pop(frame);
         SAbstractObject arg = StackUtils.pop(frame);
         SAbstractObject self = StackUtils.getRelativeStackElement(frame, 0);
@@ -157,7 +143,6 @@ public class ObjectPrimitives extends Primitives {
       @Override
       public void invoke(final VirtualFrame frame,
           final Interpreter interpreter) {
-
         SAbstractObject arg = StackUtils.pop(frame);
         SObject self = (SObject) StackUtils.pop(frame);
         SInteger idx = (SInteger) arg;
@@ -170,7 +155,6 @@ public class ObjectPrimitives extends Primitives {
       @Override
       public void invoke(final VirtualFrame frame,
           final Interpreter interpreter) {
-
         SAbstractObject val = StackUtils.pop(frame);
         SAbstractObject arg = StackUtils.pop(frame);
         SObject self = (SObject) StackUtils.getRelativeStackElement(frame, 0);
@@ -186,9 +170,7 @@ public class ObjectPrimitives extends Primitives {
       public void invoke(final VirtualFrame frame,
           final Interpreter interpreter) {
         SAbstractObject self = StackUtils.pop(frame);
-
         StackUtils.push(frame, self.getSOMClass(universe));
-
       }
     });
 

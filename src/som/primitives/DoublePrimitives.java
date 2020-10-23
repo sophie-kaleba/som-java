@@ -30,12 +30,9 @@ import com.oracle.truffle.api.frame.VirtualFrame;
 import som.interpreter.Interpreter;
 import som.interpreter.StackUtils;
 import som.vm.Universe;
-import som.vmobjects.SAbstractObject;
 import som.vmobjects.SDouble;
-import som.vmobjects.SInteger;
 import som.vmobjects.SNumber;
 import som.vmobjects.SPrimitive;
-import som.vmobjects.SString;
 
 
 public class DoublePrimitives extends Primitives {
@@ -52,9 +49,7 @@ public class DoublePrimitives extends Primitives {
       public void invoke(final VirtualFrame frame,
           final Interpreter interpreter) {
         SDouble selfT = (SDouble) StackUtils.pop(frame);
-
-        SString value = selfT.primAsString(universe);
-        StackUtils.push(frame, value);
+        StackUtils.push(frame, selfT.primAsString(universe));
       }
     });
 
@@ -62,12 +57,8 @@ public class DoublePrimitives extends Primitives {
       @Override
       public void invoke(final VirtualFrame frame,
           final Interpreter interpreter) {
-
         SDouble selfT = (SDouble) StackUtils.pop(frame);
-
-        SInteger value = selfT.primAsInteger(universe);
-
-        StackUtils.push(frame, value);
+        StackUtils.push(frame, selfT.primAsInteger(universe));
       }
     });
 
@@ -75,11 +66,8 @@ public class DoublePrimitives extends Primitives {
       @Override
       public void invoke(final VirtualFrame frame,
           final Interpreter interpreter) {
-
         SDouble selfT = (SDouble) StackUtils.pop(frame);
-
-        SAbstractObject value = selfT.primSqrt(universe);
-        StackUtils.push(frame, value);
+        StackUtils.push(frame, selfT.primSqrt(universe));
       }
     });
 
@@ -87,12 +75,9 @@ public class DoublePrimitives extends Primitives {
       @Override
       public void invoke(final VirtualFrame frame,
           final Interpreter interpreter) {
-
         SNumber op1 = (SNumber) StackUtils.pop(frame);
         SDouble op2 = (SDouble) StackUtils.pop(frame);
-
-        SAbstractObject value = op2.primAdd(op1, universe);
-        StackUtils.push(frame, value);
+        StackUtils.push(frame, op2.primAdd(op1, universe));
       }
     });
 
@@ -100,13 +85,9 @@ public class DoublePrimitives extends Primitives {
       @Override
       public void invoke(final VirtualFrame frame,
           final Interpreter interpreter) {
-
         SNumber op1 = (SNumber) StackUtils.pop(frame);
         SDouble op2 = (SDouble) StackUtils.pop(frame);
-
-        SAbstractObject value = op2.primSubtract(op1, universe);
-
-        StackUtils.push(frame, value);
+        StackUtils.push(frame, op2.primSubtract(op1, universe));
       }
     });
 
@@ -114,12 +95,9 @@ public class DoublePrimitives extends Primitives {
       @Override
       public void invoke(final VirtualFrame frame,
           final Interpreter interpreter) {
-
         SNumber op1 = (SNumber) StackUtils.pop(frame);
         SDouble op2 = (SDouble) StackUtils.pop(frame);
-
-        SAbstractObject value = op2.primMultiply(op1, universe);
-        StackUtils.push(frame, value);
+        StackUtils.push(frame, op2.primMultiply(op1, universe));
       }
     });
 
@@ -127,12 +105,9 @@ public class DoublePrimitives extends Primitives {
       @Override
       public void invoke(final VirtualFrame frame,
           final Interpreter interpreter) {
-
         SNumber op1 = (SNumber) StackUtils.pop(frame);
         SDouble op2 = (SDouble) StackUtils.pop(frame);
-
-        SAbstractObject value = op2.primDoubleDivide(op1, universe);
-        StackUtils.push(frame, value);
+        StackUtils.push(frame, op2.primDoubleDivide(op1, universe));
       }
     });
 
@@ -140,12 +115,9 @@ public class DoublePrimitives extends Primitives {
       @Override
       public void invoke(final VirtualFrame frame,
           final Interpreter interpreter) {
-
         SNumber op1 = (SNumber) StackUtils.pop(frame);
         SDouble op2 = (SDouble) StackUtils.pop(frame);
-
-        SAbstractObject value = op2.primModulo(op1, universe);
-        StackUtils.push(frame, value);
+        StackUtils.push(frame, op2.primModulo(op1, universe));
       }
     });
 
@@ -153,12 +125,9 @@ public class DoublePrimitives extends Primitives {
       @Override
       public void invoke(final VirtualFrame frame,
           final Interpreter interpreter) {
-
         SNumber op1 = (SNumber) StackUtils.pop(frame);
         SDouble op2 = (SDouble) StackUtils.pop(frame);
-
-        SAbstractObject value = op2.primEqual(op1, universe);
-        StackUtils.push(frame, value);
+        StackUtils.push(frame, op2.primEqual(op1, universe));
       }
     });
 
@@ -166,13 +135,9 @@ public class DoublePrimitives extends Primitives {
       @Override
       public void invoke(final VirtualFrame frame,
           final Interpreter interpreter) {
-
         SNumber op1 = (SNumber) StackUtils.pop(frame);
         SDouble op2 = (SDouble) StackUtils.pop(frame);
-
-        SAbstractObject value = op2.primLessThan(op1, universe);
-
-        StackUtils.push(frame, value);
+        StackUtils.push(frame, op2.primLessThan(op1, universe));
       }
     });
 
@@ -180,13 +145,9 @@ public class DoublePrimitives extends Primitives {
       @Override
       public void invoke(final VirtualFrame frame,
           final Interpreter interpreter) {
-
         SDouble rcvr = (SDouble) StackUtils.pop(frame);
-
         long result = Math.round(rcvr.getEmbeddedDouble());
-        SInteger value = universe.newInteger(result);
-
-        StackUtils.push(frame, value);
+        StackUtils.push(frame, universe.newInteger(result));
       }
     });
 
@@ -194,13 +155,9 @@ public class DoublePrimitives extends Primitives {
       @Override
       public void invoke(final VirtualFrame frame,
           final Interpreter interpreter) {
-
         SDouble rcvr = (SDouble) StackUtils.pop(frame);
-
         double result = Math.sin(rcvr.getEmbeddedDouble());
-        SDouble value = universe.newDouble(result);
-
-        StackUtils.push(frame, value);
+        StackUtils.push(frame, universe.newDouble(result));
       }
     });
 
@@ -208,13 +165,9 @@ public class DoublePrimitives extends Primitives {
       @Override
       public void invoke(final VirtualFrame frame,
           final Interpreter interpreter) {
-
         SDouble rcvr = (SDouble) StackUtils.pop(frame);
-
         double result = Math.cos(rcvr.getEmbeddedDouble());
-        SDouble value = universe.newDouble(result);
-
-        StackUtils.push(frame, value);
+        StackUtils.push(frame, universe.newDouble(result));
       }
     });
 
@@ -222,12 +175,8 @@ public class DoublePrimitives extends Primitives {
       @Override
       public void invoke(final VirtualFrame frame,
           final Interpreter interpreter) {
-
         StackUtils.pop(frame);
-
-        SDouble value = universe.newDouble(Double.POSITIVE_INFINITY);
-
-        StackUtils.push(frame, value);
+        StackUtils.push(frame, universe.newDouble(Double.POSITIVE_INFINITY));
       }
     });
   }

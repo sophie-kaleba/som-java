@@ -31,7 +31,6 @@ import som.interpreter.StackUtils;
 import som.vm.Universe;
 import som.vmobjects.SAbstractObject;
 import som.vmobjects.SPrimitive;
-import som.vmobjects.SString;
 import som.vmobjects.SSymbol;
 
 
@@ -49,10 +48,7 @@ public class SymbolPrimitives extends Primitives {
       public void invoke(final VirtualFrame frame,
           final Interpreter interpreter) {
         SSymbol self = (SSymbol) StackUtils.pop(frame);
-
-        SString value = universe.newString(self.getEmbeddedString());
-
-        StackUtils.push(frame, value);
+        StackUtils.push(frame, universe.newString(self.getEmbeddedString()));
       }
     });
 
@@ -61,15 +57,12 @@ public class SymbolPrimitives extends Primitives {
       @Override
       public void invoke(final VirtualFrame frame,
           final Interpreter interpreter) {
-
         SAbstractObject op1 = StackUtils.pop(frame);
         SSymbol op2 = (SSymbol) StackUtils.pop(frame); // self
 
         if (op1 == op2) {
-
           StackUtils.push(frame, universe.trueObject);
         } else {
-
           StackUtils.push(frame, universe.falseObject);
         }
       }

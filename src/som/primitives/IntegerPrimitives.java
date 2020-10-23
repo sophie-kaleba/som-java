@@ -35,7 +35,6 @@ import som.vmobjects.SAbstractObject;
 import som.vmobjects.SBigInteger;
 import som.vmobjects.SInteger;
 import som.vmobjects.SNumber;
-import som.vmobjects.SObject;
 import som.vmobjects.SPrimitive;
 import som.vmobjects.SString;
 
@@ -52,13 +51,8 @@ public class IntegerPrimitives extends Primitives {
       @Override
       public void invoke(final VirtualFrame frame,
           final Interpreter interpreter) {
-
         SNumber self = (SNumber) StackUtils.pop(frame);
-
-        SString value = self.primAsString(universe);
-
-        StackUtils.push(frame, value);
-
+        StackUtils.push(frame, self.primAsString(universe));
       }
     });
 
@@ -66,13 +60,8 @@ public class IntegerPrimitives extends Primitives {
       @Override
       public void invoke(final VirtualFrame frame,
           final Interpreter interpreter) {
-
         SInteger self = (SInteger) StackUtils.pop(frame);
-
-        SNumber result = self.primSqrt(universe);
-
-        StackUtils.push(frame, result);
-
+        StackUtils.push(frame, self.primSqrt(universe));
       }
     });
 
@@ -80,14 +69,10 @@ public class IntegerPrimitives extends Primitives {
       @Override
       public void invoke(final VirtualFrame frame,
           final Interpreter interpreter) {
-
         SInteger self = (SInteger) StackUtils.pop(frame);
-
-        SInteger randomInt = universe.newInteger(
+        SInteger result = universe.newInteger(
             (long) (self.getEmbeddedInteger() * Math.random()));
-
-        StackUtils.push(frame, randomInt);
-
+        StackUtils.push(frame, result);
       }
     });
 
@@ -95,14 +80,9 @@ public class IntegerPrimitives extends Primitives {
       @Override
       public void invoke(final VirtualFrame frame,
           final Interpreter interpreter) {
-
         SNumber right = (SNumber) StackUtils.pop(frame);
         SNumber left = (SNumber) StackUtils.pop(frame);
-
-        SNumber result = left.primAdd(right, universe);
-
-        StackUtils.push(frame, result);
-
+        StackUtils.push(frame, left.primAdd(right, universe));
       }
     });
 
@@ -110,14 +90,9 @@ public class IntegerPrimitives extends Primitives {
       @Override
       public void invoke(final VirtualFrame frame,
           final Interpreter interpreter) {
-
         SNumber right = (SNumber) StackUtils.pop(frame);
         SNumber left = (SNumber) StackUtils.pop(frame);
-
-        SNumber result = left.primSubtract(right, universe);
-
-        StackUtils.push(frame, result);
-
+        StackUtils.push(frame, left.primSubtract(right, universe));
       }
     });
 
@@ -125,14 +100,9 @@ public class IntegerPrimitives extends Primitives {
       @Override
       public void invoke(final VirtualFrame frame,
           final Interpreter interpreter) {
-
         SNumber right = (SNumber) StackUtils.pop(frame);
         SNumber left = (SNumber) StackUtils.pop(frame);
-
-        SNumber result = left.primMultiply(right, universe);
-
-        StackUtils.push(frame, result);
-
+        StackUtils.push(frame, left.primMultiply(right, universe));
       }
     });
 
@@ -140,14 +110,9 @@ public class IntegerPrimitives extends Primitives {
       @Override
       public void invoke(final VirtualFrame frame,
           final Interpreter interpreter) {
-
         SNumber right = (SNumber) StackUtils.pop(frame);
         SNumber left = (SNumber) StackUtils.pop(frame);
-
-        SNumber result = left.primDoubleDivide(right, universe);
-
-        StackUtils.push(frame, result);
-
+        StackUtils.push(frame, left.primDoubleDivide(right, universe));
       }
     });
 
@@ -155,14 +120,9 @@ public class IntegerPrimitives extends Primitives {
       @Override
       public void invoke(final VirtualFrame frame,
           final Interpreter interpreter) {
-
         SNumber right = (SNumber) StackUtils.pop(frame);
         SNumber left = (SNumber) StackUtils.pop(frame);
-
-        SNumber result = left.primIntegerDivide(right, universe);
-
-        StackUtils.push(frame, result);
-
+        StackUtils.push(frame, left.primIntegerDivide(right, universe));
       }
     });
 
@@ -170,14 +130,9 @@ public class IntegerPrimitives extends Primitives {
       @Override
       public void invoke(final VirtualFrame frame,
           final Interpreter interpreter) {
-
         SNumber right = (SNumber) StackUtils.pop(frame);
         SNumber left = (SNumber) StackUtils.pop(frame);
-
-        SNumber result = left.primModulo(right, universe);
-
-        StackUtils.push(frame, result);
-
+        StackUtils.push(frame, left.primModulo(right, universe));
       }
     });
 
@@ -185,14 +140,9 @@ public class IntegerPrimitives extends Primitives {
       @Override
       public void invoke(final VirtualFrame frame,
           final Interpreter interpreter) {
-
         SNumber right = (SNumber) StackUtils.pop(frame);
         SInteger left = (SInteger) StackUtils.pop(frame);
-
-        SInteger result = left.primRemainder(right, universe);
-
-        StackUtils.push(frame, result);
-
+        StackUtils.push(frame, left.primRemainder(right, universe));
       }
     });
 
@@ -200,14 +150,9 @@ public class IntegerPrimitives extends Primitives {
       @Override
       public void invoke(final VirtualFrame frame,
           final Interpreter interpreter) {
-
         SNumber right = (SNumber) StackUtils.pop(frame);
         SNumber left = (SNumber) StackUtils.pop(frame);
-
-        SNumber result = left.primBitAnd(right, universe);
-
-        StackUtils.push(frame, result);
-
+        StackUtils.push(frame, left.primBitAnd(right, universe));
       }
     });
 
@@ -215,14 +160,9 @@ public class IntegerPrimitives extends Primitives {
       @Override
       public void invoke(final VirtualFrame frame,
           final Interpreter interpreter) {
-
         SAbstractObject right = StackUtils.pop(frame);
         SNumber left = (SNumber) StackUtils.pop(frame);
-
-        SObject result = left.primEqual(right, universe);
-
-        StackUtils.push(frame, result);
-
+        StackUtils.push(frame, left.primEqual(right, universe));
       }
     });
 
@@ -230,14 +170,9 @@ public class IntegerPrimitives extends Primitives {
       @Override
       public void invoke(final VirtualFrame frame,
           final Interpreter interpreter) {
-
         SNumber right = (SNumber) StackUtils.pop(frame);
         SNumber left = (SNumber) StackUtils.pop(frame);
-
-        SObject result = left.primLessThan(right, universe);
-
-        StackUtils.push(frame, result);
-
+        StackUtils.push(frame, left.primLessThan(right, universe));
       }
     });
 
@@ -245,15 +180,9 @@ public class IntegerPrimitives extends Primitives {
       @Override
       public void invoke(final VirtualFrame frame,
           final Interpreter interpreter) {
-
         SNumber right = (SNumber) StackUtils.pop(frame);
-
         SNumber left = (SNumber) StackUtils.pop(frame);
-
-        SNumber value = left.primLeftShift(right, universe);
-
-        StackUtils.push(frame, value);
-
+        StackUtils.push(frame, left.primLeftShift(right, universe));
       }
     });
 
@@ -261,15 +190,9 @@ public class IntegerPrimitives extends Primitives {
       @Override
       public void invoke(final VirtualFrame frame,
           final Interpreter interpreter) {
-
         SNumber right = (SNumber) StackUtils.pop(frame);
-
         SNumber left = (SNumber) StackUtils.pop(frame);
-
-        SNumber xored = left.primBitXor(right, universe);
-
-        StackUtils.push(frame, xored);
-
+        StackUtils.push(frame, left.primBitXor(right, universe));
       }
     });
 
@@ -277,13 +200,9 @@ public class IntegerPrimitives extends Primitives {
       @Override
       public void invoke(final VirtualFrame frame,
           final Interpreter interpreter) {
-
         SInteger rcvr = (SInteger) StackUtils.pop(frame);
-
-        SInteger asSigned32 = universe.newInteger((int) rcvr.getEmbeddedInteger());
-
-        StackUtils.push(frame, asSigned32);
-
+        SInteger result = universe.newInteger((int) rcvr.getEmbeddedInteger());
+        StackUtils.push(frame, result);
       }
     });
 
@@ -291,14 +210,11 @@ public class IntegerPrimitives extends Primitives {
       @Override
       public void invoke(final VirtualFrame frame,
           final Interpreter interpreter) {
-
         SInteger rcvr = (SInteger) StackUtils.pop(frame);
 
-        SInteger as32Int =
+        SInteger result =
             universe.newInteger(Integer.toUnsignedLong((int) rcvr.getEmbeddedInteger()));
-
-        StackUtils.push(frame, as32Int);
-
+        StackUtils.push(frame, result);
       }
     });
 
@@ -306,16 +222,12 @@ public class IntegerPrimitives extends Primitives {
       @Override
       public void invoke(final VirtualFrame frame,
           final Interpreter interpreter) {
-
         SInteger right = (SInteger) StackUtils.pop(frame);
-
         SInteger rcvr = (SInteger) StackUtils.pop(frame);
 
-        SInteger shiftedInteger =
+        SInteger result =
             universe.newInteger(rcvr.getEmbeddedInteger() >>> right.getEmbeddedInteger());
-
-        StackUtils.push(frame, shiftedInteger);
-
+        StackUtils.push(frame, result);
       }
     });
 
@@ -323,25 +235,16 @@ public class IntegerPrimitives extends Primitives {
       @Override
       public void invoke(final VirtualFrame frame,
           final Interpreter interpreter) {
-
         SString param = (SString) StackUtils.pop(frame);
-
         StackUtils.pop(frame);
 
         try {
           long result = Long.parseLong(param.getEmbeddedString());
-
-          SInteger integer = universe.newInteger(result);
-
-          StackUtils.push(frame, integer);
-
+          StackUtils.push(frame, universe.newInteger(result));
         } catch (NumberFormatException e) {
           BigInteger result = new BigInteger(param.getEmbeddedString());
-
-          SBigInteger bigInteger = new SBigInteger(result);
-          StackUtils.push(frame, bigInteger);
+          StackUtils.push(frame, new SBigInteger(result));
         }
-
       }
     });
   }

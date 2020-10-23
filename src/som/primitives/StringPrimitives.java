@@ -50,14 +50,11 @@ public class StringPrimitives extends Primitives {
       @Override
       public void invoke(final VirtualFrame frame,
           final Interpreter interpreter) {
-
         SString argument = (SString) StackUtils.pop(frame);
         SString self = (SString) StackUtils.pop(frame);
-
-        SString value = universe.newString(self.getEmbeddedString()
+        SString result = universe.newString(self.getEmbeddedString()
             + argument.getEmbeddedString());
-
-        StackUtils.push(frame, value);
+        StackUtils.push(frame, result);
       }
     });
 
@@ -66,12 +63,9 @@ public class StringPrimitives extends Primitives {
       @Override
       public void invoke(final VirtualFrame frame,
           final Interpreter interpreter) {
-
         SString self = (SString) StackUtils.pop(frame);
-
-        SSymbol value = universe.symbolFor(self.getEmbeddedString());
-
-        StackUtils.push(frame, value);
+        SSymbol result = universe.symbolFor(self.getEmbeddedString());
+        StackUtils.push(frame, result);
       }
     });
 
@@ -80,12 +74,9 @@ public class StringPrimitives extends Primitives {
       @Override
       public void invoke(final VirtualFrame frame,
           final Interpreter interpreter) {
-
         SString self = (SString) StackUtils.pop(frame);
-
-        SInteger value = universe.newInteger(self.getEmbeddedString().length());
-
-        StackUtils.push(frame, value);
+        SInteger result = universe.newInteger(self.getEmbeddedString().length());
+        StackUtils.push(frame, result);
       }
     });
 
@@ -94,14 +85,11 @@ public class StringPrimitives extends Primitives {
       @Override
       public void invoke(final VirtualFrame frame,
           final Interpreter interpreter) {
-
         SAbstractObject op1 = StackUtils.pop(frame);
         SString op2 = (SString) StackUtils.pop(frame); // self
-
         if (op1.getSOMClass(universe) == universe.stringClass) {
           SString s = (SString) op1;
           if (s.getEmbeddedString().equals(op2.getEmbeddedString())) {
-
             StackUtils.push(frame, universe.trueObject);
             return;
           }
@@ -116,7 +104,6 @@ public class StringPrimitives extends Primitives {
       @Override
       public void invoke(final VirtualFrame frame,
           final Interpreter interpreter) {
-
         SInteger end = (SInteger) StackUtils.pop(frame);
         SInteger start = (SInteger) StackUtils.pop(frame);
 
@@ -126,12 +113,10 @@ public class StringPrimitives extends Primitives {
           SString value = universe.newString(self.getEmbeddedString().substring(
               (int) start.getEmbeddedInteger() - 1,
               (int) end.getEmbeddedInteger()));
-
           StackUtils.push(frame, value);
         } catch (IndexOutOfBoundsException e) {
           SString error = universe.newString(new java.lang.String(
               "Error - index out of bounds"));
-
           StackUtils.push(frame, error);
         }
       }
@@ -143,9 +128,7 @@ public class StringPrimitives extends Primitives {
       public void invoke(final VirtualFrame frame,
           final Interpreter interpreter) {
         SString self = (SString) StackUtils.pop(frame);
-
         SInteger value = universe.newInteger(self.getEmbeddedString().hashCode());
-
         StackUtils.push(frame, value);
       }
     });
@@ -155,23 +138,19 @@ public class StringPrimitives extends Primitives {
       @Override
       public void invoke(final VirtualFrame frame,
           final Interpreter interpreter) {
-
         SString self = (SString) StackUtils.pop(frame);
         String embedded = self.getEmbeddedString();
 
         for (int i = 0; i < embedded.length(); i++) {
           if (!Character.isWhitespace(embedded.charAt(i))) {
-
             StackUtils.push(frame, universe.falseObject);
             return;
           }
         }
 
         if (embedded.length() > 0) {
-
           StackUtils.push(frame, universe.trueObject);
         } else {
-
           StackUtils.push(frame, universe.falseObject);
         }
       }
@@ -182,23 +161,19 @@ public class StringPrimitives extends Primitives {
       @Override
       public void invoke(final VirtualFrame frame,
           final Interpreter interpreter) {
-
         SString self = (SString) StackUtils.pop(frame);
         String embedded = self.getEmbeddedString();
 
         for (int i = 0; i < embedded.length(); i++) {
           if (!Character.isLetter(embedded.charAt(i))) {
-
             StackUtils.push(frame, universe.falseObject);
             return;
           }
         }
 
         if (embedded.length() > 0) {
-
           StackUtils.push(frame, universe.trueObject);
         } else {
-
           StackUtils.push(frame, universe.falseObject);
         }
       }
@@ -209,23 +184,19 @@ public class StringPrimitives extends Primitives {
       @Override
       public void invoke(final VirtualFrame frame,
           final Interpreter interpreter) {
-
         SString self = (SString) StackUtils.pop(frame);
         String embedded = self.getEmbeddedString();
 
         for (int i = 0; i < embedded.length(); i++) {
           if (!Character.isDigit(embedded.charAt(i))) {
-
             StackUtils.push(frame, universe.falseObject);
             return;
           }
         }
 
         if (embedded.length() > 0) {
-
           StackUtils.push(frame, universe.trueObject);
         } else {
-
           StackUtils.push(frame, universe.falseObject);
         }
       }

@@ -5,10 +5,8 @@ import com.oracle.truffle.api.frame.VirtualFrame;
 import som.interpreter.Interpreter;
 import som.interpreter.StackUtils;
 import som.vm.Universe;
-import som.vmobjects.SClass;
 import som.vmobjects.SMethod;
 import som.vmobjects.SPrimitive;
-import som.vmobjects.SSymbol;
 
 
 public class MethodPrimitives extends Primitives {
@@ -24,10 +22,7 @@ public class MethodPrimitives extends Primitives {
       public void invoke(final VirtualFrame frame,
           final Interpreter interpreter) {
         SMethod self = (SMethod) StackUtils.pop(frame);
-
-        SClass sclass = self.getHolder();
-
-        StackUtils.push(frame, sclass);
+        StackUtils.push(frame, self.getHolder());
       }
     });
 
@@ -37,10 +32,7 @@ public class MethodPrimitives extends Primitives {
       public void invoke(final VirtualFrame frame,
           final Interpreter interpreter) {
         SMethod self = (SMethod) StackUtils.pop(frame);
-
-        SSymbol signature = self.getSignature();
-
-        StackUtils.push(frame, signature);
+        StackUtils.push(frame, self.getSignature());
       }
     });
   }

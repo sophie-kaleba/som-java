@@ -20,11 +20,8 @@ public class PrimitivePrimitives extends Primitives {
       @Override
       public void invoke(final VirtualFrame frame,
           final Interpreter interpreter) {
-
         SPrimitive self = (SPrimitive) StackUtils.pop(frame);
-
         StackUtils.push(frame, self.getHolder());
-
       }
     });
 
@@ -33,11 +30,8 @@ public class PrimitivePrimitives extends Primitives {
       @Override
       public void invoke(final VirtualFrame frame,
           final Interpreter interpreter) {
-
         SPrimitive self = (SPrimitive) StackUtils.pop(frame);
-
         StackUtils.push(frame, self.getSignature());
-
       }
     });
   }

@@ -46,15 +46,10 @@ public class ArrayPrimitives extends Primitives {
 
       public void invoke(VirtualFrame frame,
           final Interpreter interpreter) {
-
         SInteger index = (SInteger) StackUtils.pop(frame);
-
         SArray self = (SArray) StackUtils.pop(frame);
-
         SAbstractObject fields = self.getIndexableField(index.getEmbeddedInteger() - 1);
-
         StackUtils.push(frame, fields);
-
       }
     });
 
@@ -62,12 +57,10 @@ public class ArrayPrimitives extends Primitives {
 
       public void invoke(VirtualFrame frame,
           final Interpreter interpreter) {
-
         SAbstractObject value = StackUtils.pop(frame);
         SInteger index = (SInteger) StackUtils.pop(frame);
         SArray self = (SArray) StackUtils.getRelativeStackElement(frame, 0);
         self.setIndexableField(index.getEmbeddedInteger() - 1, value);
-
       }
     });
 
@@ -75,12 +68,8 @@ public class ArrayPrimitives extends Primitives {
 
       public void invoke(VirtualFrame frame,
           final Interpreter interpreter) {
-
         SArray self = (SArray) StackUtils.pop(frame);
-
-        SInteger fields = universe.newInteger(self.getNumberOfIndexableFields());
-
-        StackUtils.push(frame, fields);
+        StackUtils.push(frame, universe.newInteger(self.getNumberOfIndexableFields()));
 
       }
     });
@@ -89,15 +78,9 @@ public class ArrayPrimitives extends Primitives {
 
       public void invoke(VirtualFrame frame,
           final Interpreter interpreter) {
-
         SInteger length = (SInteger) StackUtils.pop(frame);
-
         StackUtils.pop(frame);
-
-        SArray array = universe.newArray(length.getEmbeddedInteger());
-
-        StackUtils.push(frame, array);
-
+        StackUtils.push(frame, universe.newArray(length.getEmbeddedInteger()));
       }
     });
   }
