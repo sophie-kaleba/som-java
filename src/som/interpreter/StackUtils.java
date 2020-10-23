@@ -52,7 +52,6 @@ import som.vmobjects.SMethod;
  */
 public class StackUtils {
   private enum FrameArguments {
-    INVOKABLE,
     ARGUMENTS
   }
 
@@ -72,12 +71,6 @@ public class StackUtils {
     int stackLength = (int) method.getMaximumLengthOfStack();
     SAbstractObject[] stack = new SAbstractObject[stackLength];
     Arrays.fill(stack, Universe.current().nilObject);
-
-    // TODO - getting the arguments from the frame to put them on stack...
-    // could likely do both when putting them in the stack in the first place
-    // or just don't put them in the frame's arguments, is is useful anyway?
-    final SAbstractObject[] arguments = getCurrentArguments(frame);
-    System.arraycopy(arguments, 0, stack, 0, arguments.length);
 
     frame.setObject(STACK_SLOT, stack);
     resetStackPointer(frame, method);
@@ -105,12 +98,8 @@ public class StackUtils {
     return (FrameOnStackMarker) FrameUtil.getObjectSafe(frame, ON_STACK_MARKER_SLOT);
   }
 
-  public static SMethod getMethod(final VirtualFrame frame) {
-    return (SMethod) frame.getArguments()[FrameArguments.INVOKABLE.ordinal()];
-  }
-
   public static SAbstractObject[] getCurrentArguments(VirtualFrame frame) {
-    return (SAbstractObject[]) frame.getArguments()[FrameArguments.ARGUMENTS.ordinal()];
+    return (SAbstractObject[]) frame.getArguments();
   }
 
   public static SAbstractObject[] getArguments(VirtualFrame frame, SMethod method) {
@@ -133,12 +122,8 @@ public class StackUtils {
 
   public static void resetStackPointer(VirtualFrame frame,
       SMethod method) {
-    // arguments are stored in front of local variables
-    int localOffset = method.getNumberOfArguments();
-
     // Set the stack pointer to its initial value thereby clearing the stack
-    setStackPointer(frame,
-        localOffset + (int) method.getNumberOfLocals().getEmbeddedInteger() - 1);
+    setStackPointer(frame, (int) method.getNumberOfLocals().getEmbeddedInteger() - 1);
   }
 
   /**
@@ -153,13 +138,9 @@ public class StackUtils {
     return getStack(frame)[index];
   }
 
-  // TODO - modify the value on the spot rather than setting the whole stack again
   private static void setStackElement(VirtualFrame frame,
       int index, SAbstractObject value) {
-
-    SAbstractObject[] stack = getStack(frame);
-    stack[index] = value;
-    frame.setObject(STACK_SLOT, stack);
+    getStack(frame)[index] = value;
   }
 
   public static SAbstractObject pop(VirtualFrame frame) {
@@ -194,7 +175,7 @@ public class StackUtils {
       final int index,
       final int contextLevel) {
     VirtualFrame context = getContext(frame, contextLevel);
-    return getStackElement(context, index);
+    return getCurrentArguments(context)[index];
   }
 
   public static void setArgument(final VirtualFrame frame,
@@ -203,10 +184,7 @@ public class StackUtils {
     CompilerAsserts.partialEvaluationConstant(contextLevel);
 
     VirtualFrame context = getContext(frame, contextLevel);
-
-    // TODO - add a test for this commented case
-    // FrameSlot currentStackSlot = getCurrentMethod(frame).getStackSlot();
-    setStackElement(context, index, value);
+    getCurrentArguments(context)[index] = value;
   }
 
   @ExplodeLoop
@@ -224,19 +202,14 @@ public class StackUtils {
   public static SAbstractObject getLocal(final VirtualFrame frame,
       final int index, final int contextLevel) {
     VirtualFrame context = getContext(frame, contextLevel);
-    SMethod contextMethod = getMethod(context);
-    int localOffset = contextMethod.getNumberOfArguments();
-
-    return getStackElement(context, localOffset + index);
+    return getStackElement(context, index);
   }
 
   public static void setLocal(final VirtualFrame frame,
       final int index,
       final int contextLevel, SAbstractObject value) {
     VirtualFrame context = getContext(frame, contextLevel);
-    int localOffset = getMethod(context).getNumberOfArguments();
-
-    setStackElement(context, localOffset + index, value);
+    setStackElement(context, index, value);
   }
 
 }
