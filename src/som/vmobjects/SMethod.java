@@ -94,10 +94,11 @@ public class SMethod extends SAbstractObject implements SInvokable {
     return maximumNumberOfStackElements;
   }
 
-  // TODO = disambiguate with above method
-  public long getMaximumLengthOfStack() {
-    return this.getNumberOfLocals().getEmbeddedInteger()
-        + this.getMaximumNumberOfStackElements().getEmbeddedInteger() + 2;
+  // TODO - find a better name, or rename above method
+  public int getMaximumLengthOfStack() {
+    // + 2 (receiver, argumentArray) in case of dnu
+    return (int) this.getNumberOfLocals().getEmbeddedInteger()
+        + (int) this.getMaximumNumberOfStackElements().getEmbeddedInteger() + 2;
   }
 
   @Override
@@ -157,7 +158,7 @@ public class SMethod extends SAbstractObject implements SInvokable {
     IndirectCallNode indirectCallNode = interpreter.getIndirectCallNode();
     SAbstractObject result =
         (SAbstractObject) indirectCallNode.call(callTarget,
-            arguments);
+            (Object[]) arguments);
 
     StackUtils.popArgumentsAndPushResult(frame, result, this);
   }
@@ -170,7 +171,7 @@ public class SMethod extends SAbstractObject implements SInvokable {
     SAbstractObject[] arguments = StackUtils.getArguments(frame, this);
 
     SAbstractObject result = (SAbstractObject) directCallNode.call(
-        arguments);
+        (Object[]) arguments);
 
     StackUtils.popArgumentsAndPushResult(frame, result, this);
   }
