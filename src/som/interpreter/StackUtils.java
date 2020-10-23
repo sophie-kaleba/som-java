@@ -41,19 +41,12 @@ import som.vmobjects.SMethod;
 
 
 /**
- * Frame arguments indexes.
- * 0) Invokable
- * 1) Arguments
- *
- * Frame slots indexes:
+ * Frame slots indexes.
  * 0) Execution stack
  * 1) Stack pointer
  * 2) onStack marker
  */
 public class StackUtils {
-  private enum FrameArguments {
-    ARGUMENTS
-  }
 
   public static final FrameDescriptor FRAME_DESCRIPTOR =
       GraalSOMLanguage.getCurrentContext().newFrameDescriptor();
@@ -68,7 +61,7 @@ public class StackUtils {
   public static void initializeStackSlots(final VirtualFrame frame,
       final SMethod method) {
 
-    int stackLength = (int) method.getMaximumLengthOfStack();
+    int stackLength = method.getMaximumLengthOfStack();
     SAbstractObject[] stack = new SAbstractObject[stackLength];
     Arrays.fill(stack, Universe.current().nilObject);
 
