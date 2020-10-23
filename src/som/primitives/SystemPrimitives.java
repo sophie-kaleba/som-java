@@ -51,7 +51,7 @@ public class SystemPrimitives extends Primitives {
           final Interpreter interpreter) {
 
         SSymbol argument = (SSymbol) StackUtils.pop(frame);
-        StackUtils.pop(frame); // TODO - not required? why?
+        StackUtils.pop(frame);
 
         SClass result = null;
 
@@ -80,7 +80,7 @@ public class SystemPrimitives extends Primitives {
           final Interpreter interpreter) {
 
         SSymbol argument = (SSymbol) StackUtils.pop(frame);
-        StackUtils.pop(frame); // TODO - not required? why?
+        StackUtils.pop(frame);
 
         SAbstractObject result = universe.getGlobal(argument);
         StackUtils.push(frame, result != null ? result : universe.nilObject);
@@ -124,7 +124,7 @@ public class SystemPrimitives extends Primitives {
       public void invoke(final VirtualFrame frame,
           final Interpreter interpreter) {
 
-        StackUtils.pop(frame); // ignore TODO- why?
+        StackUtils.pop(frame);
 
         int time = (int) (System.currentTimeMillis() - startTime);
         SInteger value = universe.newInteger(time);
