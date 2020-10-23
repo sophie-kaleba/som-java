@@ -331,7 +331,7 @@ public final class Universe {
     if (arguments.length == 0) {
       Shell shell = new Shell(this, interpreter);
       SMethod bootstrapMethod = createBootstrapMethod();
-      VirtualFrame bootstrapFrame = createBootstrapFrame(null, bootstrapMethod);
+      VirtualFrame bootstrapFrame = createBootstrapFrame(null, null, bootstrapMethod, null);
       return shell.start(bootstrapFrame);
     }
 
@@ -354,12 +354,14 @@ public final class Universe {
     return bootstrapMethod;
   }
 
-  public static VirtualFrame createBootstrapFrame(String[] args,
-      SMethod bootstrapMethod) {
-    Object[] frameArguments = new Object[] {null, bootstrapMethod, args};
+  // TODO - fix
+  public static VirtualFrame createBootstrapFrame(SAbstractObject receiver, String[] args,
+      SMethod bootstrapMethod, SArray somArgs) {
+
+    SAbstractObject[] arguments = new SAbstractObject[] {receiver, somArgs};
 
     VirtualFrame bootstrapFrame =
-        Truffle.getRuntime().createVirtualFrame(frameArguments, StackUtils.FRAME_DESCRIPTOR);
+        Truffle.getRuntime().createVirtualFrame(arguments, StackUtils.FRAME_DESCRIPTOR);
 
     int stackLength = (int) bootstrapMethod.getMaximumLengthOfStack();
     SAbstractObject[] stack = new SAbstractObject[stackLength];
@@ -379,7 +381,8 @@ public final class Universe {
     SMethod bootstrapMethod = createBootstrapMethod();
 
     // Create a fake bootstrap frame with the system object on the stack
-    VirtualFrame bootstrapFrame = createBootstrapFrame(args, bootstrapMethod);
+    VirtualFrame bootstrapFrame =
+        createBootstrapFrame(receiver, args, bootstrapMethod, arguments);
     StackUtils.push(bootstrapFrame, receiver);
 
     if (arguments != null) {
