@@ -91,8 +91,8 @@ public class StackUtils {
     return (FrameOnStackMarker) FrameUtil.getObjectSafe(frame, ON_STACK_MARKER_SLOT);
   }
 
-  public static SAbstractObject[] getCurrentArguments(VirtualFrame frame) {
-    return (SAbstractObject[]) frame.getArguments();
+  public static Object[] getCurrentArguments(VirtualFrame frame) {
+    return frame.getArguments();
   }
 
   public static SAbstractObject[] getArguments(VirtualFrame frame, SMethod method) {
@@ -168,7 +168,7 @@ public class StackUtils {
       final int index,
       final int contextLevel) {
     VirtualFrame context = getContext(frame, contextLevel);
-    return getCurrentArguments(context)[index];
+    return (SAbstractObject) getCurrentArguments(context)[index];
   }
 
   public static void setArgument(final VirtualFrame frame,

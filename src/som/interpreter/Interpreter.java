@@ -218,7 +218,7 @@ public class Interpreter {
       // the "sender" will be the surrounding block and not the object
       // that actually sent the 'value' message.
       SBlock blockT = (SBlock) StackUtils.getCurrentArguments(frame)[0];
-      SAbstractObject receiver = StackUtils.getCurrentArguments(context)[0];
+      SAbstractObject receiver = (SAbstractObject) StackUtils.getCurrentArguments(context)[0];
 
       receiver.sendEscapedBlock(blockT, universe, this, frame);
       return StackUtils.pop(frame);
