@@ -48,8 +48,8 @@ public class DoublePrimitives extends Primitives {
       @CompilerDirectives.TruffleBoundary
       public void invoke(final VirtualFrame frame,
           final Interpreter interpreter) {
-        SDouble selfT = (SDouble) StackUtils.pop(frame);
-        StackUtils.push(frame, selfT.primAsString(universe));
+        SDouble self = (SDouble) StackUtils.pop(frame);
+        StackUtils.push(frame, self.primAsString(universe));
       }
     });
 
@@ -57,8 +57,8 @@ public class DoublePrimitives extends Primitives {
       @Override
       public void invoke(final VirtualFrame frame,
           final Interpreter interpreter) {
-        SDouble selfT = (SDouble) StackUtils.pop(frame);
-        StackUtils.push(frame, selfT.primAsInteger(universe));
+        SDouble self = (SDouble) StackUtils.pop(frame);
+        StackUtils.push(frame, self.primAsInteger(universe));
       }
     });
 
@@ -66,8 +66,8 @@ public class DoublePrimitives extends Primitives {
       @Override
       public void invoke(final VirtualFrame frame,
           final Interpreter interpreter) {
-        SDouble selfT = (SDouble) StackUtils.pop(frame);
-        StackUtils.push(frame, selfT.primSqrt(universe));
+        SDouble self = (SDouble) StackUtils.pop(frame);
+        StackUtils.push(frame, self.primSqrt(universe));
       }
     });
 

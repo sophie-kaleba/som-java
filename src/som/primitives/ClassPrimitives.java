@@ -46,8 +46,8 @@ public class ClassPrimitives extends Primitives {
       @Override
       public void invoke(VirtualFrame frame,
           final Interpreter interpreter) {
-        SClass selfT = (SClass) StackUtils.pop(frame);
-        StackUtils.push(frame, universe.newInstance(selfT));
+        SClass self = (SClass) StackUtils.pop(frame);
+        StackUtils.push(frame, universe.newInstance(self));
       }
     });
 
@@ -56,8 +56,8 @@ public class ClassPrimitives extends Primitives {
       @Override
       public void invoke(VirtualFrame frame,
           final Interpreter interpreter) {
-        SClass selfT = (SClass) StackUtils.pop(frame);
-        StackUtils.push(frame, selfT.getName());
+        SClass self = (SClass) StackUtils.pop(frame);
+        StackUtils.push(frame, self.getName());
       }
     });
 
@@ -66,8 +66,8 @@ public class ClassPrimitives extends Primitives {
       @Override
       public void invoke(VirtualFrame frame,
           final Interpreter interpreter) {
-        SClass selfT = (SClass) StackUtils.pop(frame);
-        StackUtils.push(frame, selfT.getSuperClass());
+        SClass self = (SClass) StackUtils.pop(frame);
+        StackUtils.push(frame, self.getSuperClass());
       }
     });
 
@@ -76,8 +76,8 @@ public class ClassPrimitives extends Primitives {
       @Override
       public void invoke(VirtualFrame frame,
           final Interpreter interpreter) {
-        SClass selfT = (SClass) StackUtils.pop(frame);
-        StackUtils.push(frame, selfT.getInstanceFields());
+        SClass self = (SClass) StackUtils.pop(frame);
+        StackUtils.push(frame, self.getInstanceFields());
       }
     });
 
@@ -86,8 +86,8 @@ public class ClassPrimitives extends Primitives {
       @Override
       public void invoke(VirtualFrame frame,
           final Interpreter interpreter) {
-        SClass selfT = (SClass) StackUtils.pop(frame);
-        StackUtils.push(frame, selfT.getInstanceInvokables());
+        SClass self = (SClass) StackUtils.pop(frame);
+        StackUtils.push(frame, self.getInstanceInvokables());
       }
     });
   }

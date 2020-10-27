@@ -84,20 +84,19 @@ public class SBlock extends SAbstractObject {
 
       // TODO - see whether I can get the method considered as PE constant
       // Get the block (the receiver) from the stack
-      SBlock selfT =
+      SBlock self =
           (SBlock) StackUtils.getRelativeStackElement(frame, numberOfArguments - 1);
 
       // Push a new frame and set its context to be the one specified in
       // the block
       IndirectCallNode indirectCallNode = interpreter.getIndirectCallNode();
-      SAbstractObject[] arguments = StackUtils.getArguments(frame, selfT.method);
+      SAbstractObject[] arguments = StackUtils.getArguments(frame, self.method);
 
       SAbstractObject result =
-          (SAbstractObject) indirectCallNode.call(selfT.getMethod().getCallTarget(),
+          (SAbstractObject) indirectCallNode.call(self.getMethod().getCallTarget(),
               (Object[]) arguments);
 
-      StackUtils.popArgumentsAndPushResult(frame, result, selfT.method);
-
+      StackUtils.popArgumentsAndPushResult(frame, result, self.method);
     }
 
     private static java.lang.String computeSignatureString(int numberOfArguments) {
@@ -115,6 +114,5 @@ public class SBlock extends SAbstractObject {
       // Return the signature string
       return signatureString;
     }
-
   }
 }
