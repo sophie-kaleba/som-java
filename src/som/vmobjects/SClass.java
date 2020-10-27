@@ -233,6 +233,7 @@ public class SClass extends SObject {
         + getNumberOfSuperInstanceFields();
   }
 
+  @TruffleBoundary
   private int getNumberOfSuperInstanceFields() {
     // Get the total number of instance fields defined in super classes
     if (hasSuperClass()) {
