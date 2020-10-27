@@ -183,17 +183,7 @@ public class Interpreter {
     SClass holderSuper = (SClass) method.getHolder().getSuperClass();
     SInvokable invokable = holderSuper.lookupInvokable(signature);
 
-    if (invokable != null) {
-      invokable.indirectInvoke(frame, this);
-    } else {
-      CompilerDirectives.transferToInterpreterAndInvalidate();
-      int numberOfArguments = signature.getNumberOfSignatureArguments();
-
-      SAbstractObject receiver =
-          StackUtils.getRelativeStackElement(frame, numberOfArguments - 1);
-
-      receiver.sendDoesNotUnderstand(signature, universe, this, frame);
-    }
+    this.invokeWithoutCacheHit(signature, frame, invokable);
   }
 
   private SAbstractObject doReturnLocal(final VirtualFrame frame) {
