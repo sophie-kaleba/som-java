@@ -91,11 +91,11 @@ public class StackUtils {
     return (FrameOnStackMarker) FrameUtil.getObjectSafe(frame, ON_STACK_MARKER_SLOT);
   }
 
-  public static Object[] getCurrentArguments(VirtualFrame frame) {
-    return frame.getArguments();
+  public static SAbstractObject getCurrentArgument(VirtualFrame frame, int index) {
+    return (SAbstractObject) frame.getArguments()[index];
   }
 
-  public static SAbstractObject[] getArguments(VirtualFrame frame, SMethod method) {
+  public static SAbstractObject[] getArgumentsFromStack(VirtualFrame frame, SMethod method) {
     int numArgs = method.getNumberOfArguments();
     SAbstractObject[] arguments = new SAbstractObject[numArgs];
     for (int i = 0; i < numArgs; ++i) {
@@ -168,23 +168,22 @@ public class StackUtils {
       final int index,
       final int contextLevel) {
     VirtualFrame context = getContext(frame, contextLevel);
-    return (SAbstractObject) getCurrentArguments(context)[index];
+    return getCurrentArgument(context, index);
   }
 
   public static void setArgument(final VirtualFrame frame,
       final int index, final int contextLevel,
       final SAbstractObject value) {
-    CompilerAsserts.partialEvaluationConstant(contextLevel);
-
     VirtualFrame context = getContext(frame, contextLevel);
-    getCurrentArguments(context)[index] = value;
+    context.getArguments()[index] = value;
   }
 
   @ExplodeLoop
   public static VirtualFrame getContext(VirtualFrame frame, int contextLevel) {
+    CompilerAsserts.partialEvaluationConstant(contextLevel);
 
     while (contextLevel > 0) {
-      SBlock receiver = (SBlock) getCurrentArguments(frame)[0];
+      SBlock receiver = (SBlock) getCurrentArgument(frame, 0);
       frame = receiver.getMaterializedContext();
       contextLevel--;
     }

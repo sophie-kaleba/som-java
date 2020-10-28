@@ -82,7 +82,6 @@ public class SBlock extends SAbstractObject {
     public void invoke(final VirtualFrame frame,
         final Interpreter interpreter) {
 
-      // TODO - see whether I can get the method considered as PE constant
       // Get the block (the receiver) from the stack
       SBlock self =
           (SBlock) StackUtils.getRelativeStackElement(frame, numberOfArguments - 1);
@@ -90,7 +89,8 @@ public class SBlock extends SAbstractObject {
       // Push a new frame and set its context to be the one specified in
       // the block
       IndirectCallNode indirectCallNode = interpreter.getIndirectCallNode();
-      SAbstractObject[] arguments = StackUtils.getArguments(frame, self.method);
+      // TODO - see whether I can get the method considered as PE constant
+      SAbstractObject[] arguments = StackUtils.getArgumentsFromStack(frame, self.method);
 
       SAbstractObject result =
           (SAbstractObject) indirectCallNode.call(self.getMethod().getCallTarget(),

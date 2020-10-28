@@ -153,7 +153,7 @@ public class SMethod extends SAbstractObject implements SInvokable {
   public void indirectInvoke(VirtualFrame frame,
       final Interpreter interpreter) {
 
-    SAbstractObject[] arguments = StackUtils.getArguments(frame, this);
+    SAbstractObject[] arguments = StackUtils.getArgumentsFromStack(frame, this);
 
     IndirectCallNode indirectCallNode = interpreter.getIndirectCallNode();
     SAbstractObject result =
@@ -168,7 +168,7 @@ public class SMethod extends SAbstractObject implements SInvokable {
 
     CompilerAsserts.partialEvaluationConstant(directCallNode);
 
-    SAbstractObject[] arguments = StackUtils.getArguments(frame, this);
+    SAbstractObject[] arguments = StackUtils.getArgumentsFromStack(frame, this);
 
     SAbstractObject result = (SAbstractObject) directCallNode.call(
         (Object[]) arguments);

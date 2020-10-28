@@ -207,8 +207,8 @@ public class Interpreter {
       // this can get a bit nasty when using nested blocks. In this case
       // the "sender" will be the surrounding block and not the object
       // that actually sent the 'value' message.
-      SBlock blockT = (SBlock) StackUtils.getCurrentArguments(frame)[0];
-      SAbstractObject receiver = (SAbstractObject) StackUtils.getCurrentArguments(context)[0];
+      SBlock blockT = (SBlock) StackUtils.getCurrentArgument(frame, 0);
+      SAbstractObject receiver = StackUtils.getCurrentArgument(context, 0);
 
       receiver.sendEscapedBlock(blockT, universe, this, frame);
       return StackUtils.pop(frame);
@@ -368,7 +368,7 @@ public class Interpreter {
   public SAbstractObject getSelf(final VirtualFrame frame, final SMethod method) {
     // Get the self object from the interpreter
     VirtualFrame outerContext = StackUtils.getContext(frame, method.getContextLevel());
-    return StackUtils.getArgument(outerContext, 0, 0);
+    return StackUtils.getCurrentArgument(outerContext, 0);
   }
 
   private void send(final SSymbol selector, final SClass receiverClass,
