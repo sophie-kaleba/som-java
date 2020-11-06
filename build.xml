@@ -70,18 +70,17 @@
     <path id="boot.cp">
         <pathelement location="${sdk.build}/graal-sdk.jar"/>
         <pathelement location="${truffle.build}/truffle-api.jar"/>
+        <pathelement location="${lib.dir}/affinity.jar"/>
+        <pathelement location="${lib.dir}/slf4j-api.jar"/>
+        <pathelement location="${lib.dir}/slf4j-simple.jar"/>
+        <pathelement location="${lib.dir}/jna-platform.jar"/>
+        <pathelement location="${lib.dir}/jna.jar"/>
     </path>
 
     <path id="common.cp">
         <pathelement location="${classes.dir}"/>
         <pathelement location="${svm.build}/svm-core.jar"/>
         <pathelement location="${tools.build}/truffle-profiler.jar"/>
-        <pathelement location="${lib.dir}/affinity.jar"/>
-
-        <pathelement location="${lib.dir}/slf4j-api.jar"/>
-        <pathelement location="${lib.dir}/slf4j-simple.jar"/>
-        <pathelement location="${lib.dir}/jna-platform.jar"/>
-        <pathelement location="${lib.dir}/jna.jar"/>
     </path>
 
     <path id="project.classpath">

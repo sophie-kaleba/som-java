@@ -171,15 +171,16 @@ if args.use_libgraal:
 CLASSPATH = (BASE_DIR + '/build/classes:'
            + TRUFFLE_DIR + '/truffle/mxbuild/dists/jdk1.8/truffle-debug.jar:'
            + BASE_DIR + '/build/som.jar'
-           + BASE_DIR + '/libs/affinity.jar:'
-           + BASE_DIR + '/libs/slf4j-api.jar:'
-           + BASE_DIR + '/libs/slf4j-simple.jar:'
-           + BASE_DIR + '/libs/jna-platform.jar:'
-           + BASE_DIR + '/libs/jna.jar')
+)
 
 BOOT_CLASSPATH = ('-Xbootclasspath/a:'
              + TRUFFLE_DIR + '/sdk/mxbuild/dists/jdk1.8/graal-sdk.jar:'
-             + TRUFFLE_DIR + '/truffle/mxbuild/dists/jdk1.8/truffle-api.jar')
+             + TRUFFLE_DIR + '/truffle/mxbuild/dists/jdk1.8/truffle-api.jar:'
+             + BASE_DIR + '/libs/affinity.jar:'
+            + BASE_DIR + '/libs/slf4j-api.jar:'
+            + BASE_DIR + '/libs/slf4j-simple.jar:'
+            + BASE_DIR + '/libs/jna-platform.jar:'
+            + BASE_DIR + '/libs/jna.jar')
 
 if args.use_libgraal:
   GRAAL_JAVA_8_FLAGS = ['-XX:+UseJVMCICompiler', '-XX:+UseJVMCINativeLibrary',
