@@ -43,6 +43,7 @@ import com.oracle.truffle.api.frame.FrameSlotKind;
 import com.oracle.truffle.api.frame.MaterializedFrame;
 import com.oracle.truffle.api.frame.VirtualFrame;
 
+import net.openhft.affinity.AffinityLock;
 import som.GraalSOMLanguage;
 import som.compiler.Disassembler;
 import som.compiler.ProgramDefinitionError;
@@ -119,7 +120,13 @@ public final class Universe {
     arguments = handleArguments(arguments);
 
     // Initialize the known universe
-    return initialize(arguments);
+    Object affinity = AffinityLock.acquireLock();
+    try {
+      return initialize(arguments);
+    } finally {
+      ((AffinityLock) affinity).release();
+    }
+
   }
 
   static { /* static initializer */

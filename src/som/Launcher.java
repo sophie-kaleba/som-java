@@ -7,8 +7,6 @@ import org.graalvm.polyglot.Context;
 import org.graalvm.polyglot.PolyglotException;
 import org.graalvm.polyglot.Source;
 
-import net.openhft.affinity.AffinityLock;
-
 
 public class Launcher {
 
@@ -22,7 +20,6 @@ public class Launcher {
   private static int executeSource(final Source source, final String[] arguments)
       throws IOException {
     Context context;
-    Object affinity = null;
     PrintStream err = System.err;
 
     Context.Builder builder = Context.newBuilder().allowExperimentalOptions(true);
@@ -31,7 +28,6 @@ public class Launcher {
 
     // Try to evaluate the source code
     try {
-      affinity = AffinityLock.acquireLock();
       context.eval(source);
       return 0;
     } catch (PolyglotException ex) {
@@ -44,7 +40,6 @@ public class Launcher {
       return 1;
     } finally {
       context.close();
-      ((AffinityLock) affinity).release();
     }
   }
 
