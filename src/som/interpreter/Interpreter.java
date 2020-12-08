@@ -47,12 +47,12 @@ import com.oracle.truffle.api.CompilerAsserts;
 import com.oracle.truffle.api.CompilerDirectives;
 import com.oracle.truffle.api.Truffle;
 import com.oracle.truffle.api.frame.VirtualFrame;
-import com.oracle.truffle.api.nodes.DirectCallNode;
 import com.oracle.truffle.api.nodes.ExplodeLoop;
 import com.oracle.truffle.api.nodes.IndirectCallNode;
 import com.oracle.truffle.api.profiles.ValueProfile;
 
 import som.compiler.ProgramDefinitionError;
+import som.interpreter.dispatch.GenericDispatchNode;
 import som.vm.Universe;
 import som.vmobjects.SAbstractObject;
 import som.vmobjects.SBlock;
@@ -243,9 +243,15 @@ public class Interpreter {
       method.getMethod().setReceiverProfile(bytecodeIndex, receiverClassValueProfile);
     }
 
-    send(signature,
+    GenericDispatchNode dispatchNode = method.getMethod().getDispatchNode(bytecodeIndex);
+    if (dispatchNode == null) {
+      dispatchNode = new GenericDispatchNode(universe);
+      method.getMethod().setDispatchNodes(bytecodeIndex, dispatchNode);
+    }
+
+    dispatchNode.send(signature,
         receiverClassValueProfile.profile(receiver).getSOMClass(universe),
-        bytecodeIndex, frame, method);
+        frame, method);
   }
 
   @ExplodeLoop(kind = ExplodeLoop.LoopExplosionKind.MERGE_EXPLODE)
@@ -369,56 +375,6 @@ public class Interpreter {
     // Get the self object from the interpreter
     VirtualFrame outerContext = StackUtils.getContext(frame, method.getContextLevel());
     return StackUtils.getCurrentArgument(outerContext, 0);
-  }
-
-  private void send(final SSymbol selector, final SClass receiverClass,
-      final int bytecodeIndex, final VirtualFrame frame,
-      final SMethod method) {
-    // First try the inline cache
-    SInvokable invokableWithoutCacheHit = null;
-
-    SClass cachedClass = method.getMethod().getInlineCacheClass(bytecodeIndex);
-    if (cachedClass == receiverClass) {
-      SInvokable invokable = method.getMethod().getInlineCacheInvokable(bytecodeIndex);
-      if (invokable != null) {
-        DirectCallNode invokableDirectCallNode =
-            method.getMethod().getInlineCacheDirectCallNode(bytecodeIndex);
-        CompilerAsserts.partialEvaluationConstant(invokableDirectCallNode);
-        invokable.directInvoke(frame, this, invokableDirectCallNode);
-        return;
-      }
-    } else {
-      if (cachedClass == null) {
-        CompilerDirectives.transferToInterpreterAndInvalidate();
-        // Lookup the invokable with the given signature
-        invokableWithoutCacheHit = receiverClass.lookupInvokable(selector);
-        method.getMethod().setInlineCache(bytecodeIndex, receiverClass,
-            invokableWithoutCacheHit);
-      } else {
-        // the bytecode index after the send is used by the selector constant, and can be used
-        // safely as another cache item
-        cachedClass = method.getMethod().getInlineCacheClass(bytecodeIndex + 1);
-        if (cachedClass == receiverClass) {
-          SInvokable invokable = method.getMethod().getInlineCacheInvokable(bytecodeIndex + 1);
-          if (invokable != null) {
-            DirectCallNode invokableDirectCallNode =
-                method.getMethod().getInlineCacheDirectCallNode(bytecodeIndex + 1);
-            CompilerAsserts.partialEvaluationConstant(invokableDirectCallNode);
-            invokable.directInvoke(frame, this, invokableDirectCallNode);
-            return;
-          }
-        } else {
-          CompilerDirectives.transferToInterpreterAndInvalidate();
-          invokableWithoutCacheHit = receiverClass.lookupInvokable(selector);
-          if (cachedClass == null) {
-            method.getMethod().setInlineCache(bytecodeIndex + 1, receiverClass,
-                invokableWithoutCacheHit);
-          }
-        }
-      }
-    }
-    CompilerDirectives.transferToInterpreterAndInvalidate();
-    invokeWithoutCacheHit(selector, frame, invokableWithoutCacheHit);
   }
 
   private void invokeWithoutCacheHit(SSymbol selector, VirtualFrame frame,

@@ -1,18 +1,15 @@
 package som.interpreter;
 
-import com.oracle.truffle.api.CompilerAsserts;
 import com.oracle.truffle.api.CompilerDirectives;
 import com.oracle.truffle.api.CompilerDirectives.CompilationFinal;
 import com.oracle.truffle.api.TruffleLanguage;
 import com.oracle.truffle.api.frame.VirtualFrame;
-import com.oracle.truffle.api.nodes.DirectCallNode;
 import com.oracle.truffle.api.profiles.ValueProfile;
 
 import som.GraalSOMLanguage;
 import som.compiler.ProgramDefinitionError;
+import som.interpreter.dispatch.GenericDispatchNode;
 import som.vmobjects.SAbstractObject;
-import som.vmobjects.SClass;
-import som.vmobjects.SInvokable;
 import som.vmobjects.SMethod;
 
 
@@ -21,21 +18,16 @@ public final class Method extends Invokable {
   @CompilationFinal(dimensions = 1) final byte[] bytecodes;
   private final SMethod                          method;
 
-  private final @Children DirectCallNode[] inlineCacheDirectCallNodes;
-
-  private final @CompilationFinal(dimensions = 1) SClass[]       inlineCacheClass;
-  private final @CompilationFinal(dimensions = 1) SInvokable[]   inlineCacheInvokable;
-  private final @CompilationFinal(dimensions = 1) ValueProfile[] receiverProfiles;
+  private final @CompilationFinal(dimensions = 1) ValueProfile[]        receiverProfiles;
+  private final @CompilationFinal(dimensions = 1) GenericDispatchNode[] dispatchNodes;
 
   public Method(final TruffleLanguage<?> language, final int numberOfBytecodes,
       final SMethod method) {
     super(language, StackUtils.FRAME_DESCRIPTOR);
     this.bytecodes = new byte[numberOfBytecodes];
     this.method = method;
-    inlineCacheClass = new SClass[numberOfBytecodes];
-    inlineCacheInvokable = new SInvokable[numberOfBytecodes];
-    inlineCacheDirectCallNodes = new DirectCallNode[numberOfBytecodes];
     receiverProfiles = new ValueProfile[numberOfBytecodes];
+    dispatchNodes = new GenericDispatchNode[numberOfBytecodes];
   }
 
   @Override
@@ -67,17 +59,8 @@ public final class Method extends Invokable {
     }
   }
 
-  public SClass getInlineCacheClass(final int bytecodeIndex) {
-    return inlineCacheClass[bytecodeIndex];
-  }
-
-  public SInvokable getInlineCacheInvokable(final int bytecodeIndex) {
-    return inlineCacheInvokable[bytecodeIndex];
-  }
-
-  public DirectCallNode getInlineCacheDirectCallNode(final int bytecodeIndex) {
-    CompilerAsserts.partialEvaluationConstant(bytecodeIndex);
-    return inlineCacheDirectCallNodes[bytecodeIndex];
+  public GenericDispatchNode[] getDispatchNodes() {
+    return this.dispatchNodes;
   }
 
   public void setReceiverProfile(final int bytecodeIndex,
@@ -85,23 +68,17 @@ public final class Method extends Invokable {
     receiverProfiles[bytecodeIndex] = valueProfile;
   }
 
-  public ValueProfile getReceiverProfile(final int bytecodeIndex) {
-    return receiverProfiles[bytecodeIndex];
+  public GenericDispatchNode getDispatchNode(final int bytecodeIndex) {
+    return dispatchNodes[bytecodeIndex];
   }
 
-  public void setInlineCache(final int bytecodeIndex, final SClass receiverClass,
-      final SInvokable invokable) {
-    CompilerDirectives.transferToInterpreterAndInvalidate();
-    inlineCacheClass[bytecodeIndex] = receiverClass;
-    inlineCacheInvokable[bytecodeIndex] = invokable;
-    if (invokable != null) {
-      if (invokable.isPrimitive()) {
-        inlineCacheDirectCallNodes[bytecodeIndex] = null;
-      } else {
-        inlineCacheDirectCallNodes[bytecodeIndex] =
-            DirectCallNode.create(((SMethod) invokable).getCallTarget());
-      }
-    }
+  public void setDispatchNodes(final int bytecodeIndex,
+      final GenericDispatchNode dispatchNode) {
+    dispatchNodes[bytecodeIndex] = dispatchNode;
+  }
+
+  public ValueProfile getReceiverProfile(final int bytecodeIndex) {
+    return receiverProfiles[bytecodeIndex];
   }
 
   public int getNumberOfBytecodes() {
